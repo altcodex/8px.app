@@ -67,19 +67,17 @@ export function Slider ({
           height: 20px;
           border-radius: 50%;
           background: ${thumbBg};
-          border: 2px solid rgb(59, 130, 246);
+          border: 2px solid rgb(0, 166, 244);
           cursor: pointer;
-          box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
         }
 
         input[type="range"]::-moz-range-thumb {
           width: 20px;
           height: 20px;
-          border: 2px solid rgb(59, 130, 246);
+          border: 2px solid rgb(0, 166, 244);
           border-radius: 50%;
           background: ${thumbBg};
           cursor: pointer;
-          box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.25);
         }
       `}
       </style>
@@ -109,7 +107,7 @@ export function Slider ({
           value={value}
           onChange={handleChange}
           style={{
-            background: `linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) ${percentage}%, ${trackColor} ${percentage}%, ${trackColor} 100%)`
+            background: `linear-gradient(to right, rgb(0, 166, 244) 0%, rgb(0, 166, 244) ${percentage}%, ${trackColor} ${percentage}%, ${trackColor} 100%)`
           }}
           className='h-2 w-full cursor-pointer appearance-none rounded-full'
         />

@@ -221,11 +221,11 @@ export default function FaviconGeneratorPage () {
       <div className='mx-auto max-w-screen-lg'>
         <h1 className='mb-4 text-3xl font-bold'>Faviconジェネレーター</h1>
         <p className='mb-8 text-gray-600 dark:text-gray-400'>
-          画像からfaviconファイルを生成します。すべての処理はブラウザ内で完結します。
+          画像からfaviconファイルを生成します。Apple Touch IconやAndroidアイコンもサポート。すべての処理はブラウザで安全に行われます。
         </p>
 
         {/* Privacy Notice */}
-        <div className='mb-8 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-900 dark:border-gray-700 dark:bg-atom-one-dark-light dark:text-gray-300'>
+        <div className='mb-8 flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sky-900 dark:border-gray-700 dark:bg-atom-one-dark-light dark:text-gray-300'>
           <LockClosedIcon className='size-5' />
           <div className='text-sm'>
             すべての画像処理はブラウザ内で安全に実行されます。サーバーにデータは一切送信されません。
@@ -234,9 +234,9 @@ export default function FaviconGeneratorPage () {
 
         {/* File Upload */}
         <div className='mb-8'>
-          <label className='mb-2 block text-sm font-semibold'>
+          <h6 className='mb-2 block text-sm font-semibold'>
             画像をアップロード
-          </label>
+          </h6>
           <FileUpload
             accept='image/*'
             selectedFiles={selectedFiles}
@@ -252,12 +252,12 @@ export default function FaviconGeneratorPage () {
         <div className='mb-8 grid gap-12 lg:grid-cols-2 lg:items-start'>
           {/* Preview */}
           <div className='order-2 flex flex-col lg:order-1'>
-            <label className='mb-2 block text-sm font-semibold'>
+            <h6 className='mb-2 block text-sm font-semibold'>
               プレビュー
-            </label>
+            </h6>
             <div className='flex w-full items-center justify-center'>
               <div
-                className={`flex items-center justify-center rounded-sm bg-gray-100 dark:bg-atom-one-dark-light ${previewUrl ? 'size-fit' : 'aspect-square h-full max-h-64 w-full'}`}
+                className={`flex items-center justify-center bg-gray-100 dark:bg-atom-one-dark-light ${previewUrl ? 'size-fit rounded' : 'aspect-square h-full max-h-64 w-full rounded-lg'}`}
                 style={previewUrl
                   ? {
                       backgroundImage: `
@@ -276,7 +276,6 @@ export default function FaviconGeneratorPage () {
                     <img
                       src={previewUrl}
                       alt='プレビュー'
-                      className='max-h-full max-w-full rounded'
                     />
                     )
                   : (
@@ -294,7 +293,7 @@ export default function FaviconGeneratorPage () {
               <button
                 onClick={handleGenerate}
                 disabled={!image || selectedSets.size === 0 || isGenerating}
-                className='rounded-full bg-blue-600 px-8 py-3 font-medium text-white focus:outline-none enabled:hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 enabled:dark:hover:bg-blue-600'
+                className='rounded-full bg-sky-500 px-8 py-3 font-medium text-white transition-colors focus:outline-none enabled:hover:bg-sky-600 disabled:opacity-50 dark:bg-sky-600 enabled:dark:hover:bg-sky-500'
               >
                 {isGenerating ? '生成中...' : 'ダウンロード'}
               </button>
@@ -307,7 +306,7 @@ export default function FaviconGeneratorPage () {
               {({ open }) => (
                 <div className={`overflow-hidden rounded-lg ${isDesktop ? '' : 'bg-gray-100 dark:bg-atom-one-dark-light'}`}>
                   <DisclosureButton className='flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700'>
-                    <span className='text-sm font-semibold'>設定オプション</span>
+                    <h6 className='text-sm font-semibold'>設定オプション</h6>
                     <ChevronDownIcon
                       className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''
                         }`}
@@ -317,9 +316,9 @@ export default function FaviconGeneratorPage () {
                     {/* Format Selection */}
                     <div>
                       <div className='mb-3'>
-                        <label className='block text-sm font-semibold'>
+                        <span className='block text-sm font-semibold'>
                           出力ファイル形式
-                        </label>
+                        </span>
                       </div>
                       <div className='flex flex-wrap gap-2'>
                         {OUTPUT_SETS.map((outputSet) => (
@@ -327,8 +326,8 @@ export default function FaviconGeneratorPage () {
                             key={outputSet.id}
                             onClick={() => handleSetToggle(outputSet.id)}
                             className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSets.has(outputSet.id)
-                                ? 'bg-blue-500 text-white dark:bg-blue-600'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                              ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
+                              : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
                               }`}
                           >
                             {outputSet.label}
@@ -351,9 +350,9 @@ export default function FaviconGeneratorPage () {
                       <>
                         <div>
                           <div className='mb-3'>
-                            <label className='block text-sm font-semibold'>
+                            <span className='block text-sm font-semibold'>
                               favicon.icoに含めるサイズ
-                            </label>
+                            </span>
                           </div>
 
                           <div className='space-y-4'>
@@ -368,9 +367,9 @@ export default function FaviconGeneratorPage () {
                                     key={size}
                                     onClick={() => handleSizeToggle(size)}
                                     className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSizes.has(size)
-                                      ? 'bg-blue-500 text-white dark:bg-blue-600'
-                                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                                    }`}
+                                      ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
+                                      : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+                                      }`}
                                   >
                                     {size}×{size}
                                   </button>
@@ -389,9 +388,9 @@ export default function FaviconGeneratorPage () {
                                     key={size}
                                     onClick={() => handleSizeToggle(size)}
                                     className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSizes.has(size)
-                                      ? 'bg-blue-500 text-white dark:bg-blue-600'
+                                      ? 'bg-sky-500 text-white dark:bg-sky-600'
                                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                                    }`}
+                                      }`}
                                   >
                                     {size}×{size}
                                   </button>
@@ -408,9 +407,9 @@ export default function FaviconGeneratorPage () {
                     {/* Border Radius */}
                     <div>
                       <div className='mb-3'>
-                        <label className='block text-sm font-semibold'>
+                        <span className='block text-sm font-semibold'>
                           角丸の調整
-                        </label>
+                        </span>
                         <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
                           アイコンの角を丸くします。Apple Touch IconはiOSが自動的に角丸にします。
                         </p>
@@ -431,9 +430,9 @@ export default function FaviconGeneratorPage () {
                     {/* Background Color */}
                     <div>
                       <div className='mb-3'>
-                        <label className='block text-sm font-semibold'>
+                        <span className='block text-sm font-semibold'>
                           背景色の設定
-                        </label>
+                        </span>
                         <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
                           透過PNGに背景色を追加します。Apple Touch Iconは常に背景色が適用されます。
                         </p>
@@ -445,7 +444,7 @@ export default function FaviconGeneratorPage () {
                             id='use-background'
                             checked={useBackground}
                             onChange={(e) => setUseBackground(e.target.checked)}
-                            className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:outline-none dark:border-gray-600 dark:bg-gray-700'
+                            className='size-4 accent-sky-600 focus:outline-none'
                           />
                           <label htmlFor='use-background' className='text-sm font-medium'>
                             背景色を追加する
@@ -457,14 +456,14 @@ export default function FaviconGeneratorPage () {
                               type='color'
                               value={backgroundColor}
                               onChange={(e) => setBackgroundColor(e.target.value)}
-                              className='h-10 w-20 cursor-pointer rounded border border-gray-300 focus:outline-none dark:border-gray-600'
+                              className='h-10 w-20 cursor-pointer rounded bg-transparent focus:outline-none'
                             />
                             <input
                               type='text'
                               value={backgroundColor}
                               onChange={(e) => setBackgroundColor(e.target.value)}
                               placeholder='#ffffff'
-                              className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
+                              className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none dark:border-gray-600 dark:bg-atom-one-dark-light'
                             />
                           </div>
                         )}
