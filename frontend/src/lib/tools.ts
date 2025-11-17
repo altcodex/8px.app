@@ -6,8 +6,8 @@ type CategoryDefinition = {
 
 // カテゴリ定義
 const categoryDefinitions = [
-  { id: 'image', name: 'Image' },
-  { id: 'color', name: 'Color' }
+  { id: 'color', name: 'Color' },
+  { id: 'image', name: 'Image' }
 ] as const satisfies readonly CategoryDefinition[]
 
 // カテゴリIDの型を自動抽出
@@ -31,6 +31,22 @@ export type Category = {
 // Mock data - 実際のツール実装時に更新
 export const tools: Tool[] = [
   {
+    id: 'color-palette',
+    name: 'カラーパレットジェネレーター',
+    description: '知覚的な明度制御を用いてカラーパレットを作成・調整します。',
+    shortDescription: 'カラーパレットを作成・調整',
+    category: 'color',
+    href: '/color-palette'
+  },
+  {
+    id: 'image-to-palette',
+    name: '画像カラーパレット',
+    description: '画像から配色を抽出します。',
+    shortDescription: '画像から配色を抽出',
+    category: 'color',
+    href: '/image-to-palette'
+  },
+  {
     id: 'favicon-generator',
     name: 'Faviconジェネレーター',
     description: '画像からfaviconファイルを生成します。Apple Touch IconやAndroidアイコンもサポート。すべての処理はブラウザで安全に行われます。',
@@ -39,53 +55,29 @@ export const tools: Tool[] = [
     href: '/favicon-generator'
   },
   {
-    id: 'image-corner-rounder',
-    name: 'Image Corner Rounder',
-    description: 'Round the corners of your images with customizable radius.',
-    shortDescription: '画像の角を丸くする',
-    category: 'image',
-    href: '/image-corner-rounder'
-  },
-  {
-    id: 'avatar-generator',
-    name: 'Avatar Generator',
-    description: 'Generate geometric avatars from seed values. Deterministic and unique.',
-    shortDescription: '幾何学的なアバターを生成',
-    category: 'image',
-    href: '/avatar-generator'
-  },
-  {
     id: 'svg-optimizer',
-    name: 'SVG Optimizer',
-    description: 'Optimize and minify SVG files to reduce file size.',
+    name: 'SVG圧縮ツール',
+    description: 'SVGファイルを最適化・圧縮して、ファイルサイズを削減します。',
     shortDescription: 'SVGファイルを最適化・圧縮',
     category: 'image',
     href: '/svg-optimizer'
   },
   {
-    id: 'color-palette',
-    name: 'Color Palette Tool',
-    description: 'Create and adjust color palettes with perceptual lightness control.',
-    shortDescription: 'カラーパレットを作成・調整',
-    category: 'color',
-    href: '/color-palette'
+    id: 'image-corner-rounder',
+    name: '画像角丸ツール',
+    description: '画像の角をカスタマイズ可能な半径で丸くします。',
+    shortDescription: '画像の角を丸くする',
+    category: 'image',
+    href: '/image-corner-rounder'
   },
   {
-    id: 'image-to-palette',
-    name: 'Image to Palette',
-    description: 'Extract color palettes from images using k-means++ clustering.',
-    shortDescription: '画像から配色を抽出',
-    category: 'color',
-    href: '/image-to-palette'
+    id: 'image-converter',
+    name: '画像変換ツール',
+    description: '画像を異なるフォーマットに変換します。JPEG、PNG、WEBPなどをサポート。',
+    shortDescription: '画像フォーマットを変換',
+    category: 'image',
+    href: '/image-converter'
   },
-  {
-    id: 'accessibility-checker',
-    name: 'Accessibility Checker',
-    description: 'Check color contrast and accessibility of your designs.',
-    shortDescription: '色のコントラストをチェック',
-    category: 'color',
-    href: '/accessibility-checker'
-  }
 ]
 
 // カテゴリ一覧を自動生成
