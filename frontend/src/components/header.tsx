@@ -35,46 +35,44 @@ export function Header () {
 
         {/* Desktop Navigation */}
         <div className='hidden items-center gap-6 sm:flex'>
-          {/* Tools Dropdown */}
-          <Popover className='relative'>
-            {({ open }) => (
-              <>
-                <PopoverButton className='flex items-center gap-1 text-sm font-medium outline-none'>
-                  Tools
-                  <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-                </PopoverButton>
-                <Transition
-                  enter='transition duration-100 ease-out'
-                  enterFrom='transform scale-95 opacity-0'
-                  enterTo='transform scale-100 opacity-100'
-                  leave='transition duration-100 ease-out'
-                  leaveFrom='transform scale-100 opacity-100'
-                  leaveTo='transform scale-95 opacity-0'
-                >
-                  <PopoverPanel className='absolute right-0 z-50 mt-1'>
-                    <div className='w-48 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
-                      <Link
-                        href='/'
-                        className='block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                      >
-                        All Tools
-                      </Link>
-                      <div className='my-1 border-t border-gray-200 dark:border-gray-700' />
-                      {categories.map((category) => (
-                        <a
-                          key={category.id}
-                          href={`#${category.id}`}
-                          className='block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                        >
-                          {category.name}
-                        </a>
-                      ))}
-                    </div>
-                  </PopoverPanel>
-                </Transition>
-              </>
-            )}
-          </Popover>
+          {/* Category Popovers */}
+          {categories.map((category) => (
+            <Popover key={category.id} className='relative'>
+              {({ open }) => (
+                <>
+                  <PopoverButton className='flex items-center gap-1 text-sm font-medium outline-none'>
+                    {category.name}
+                    <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+                  </PopoverButton>
+                  <Transition
+                    enter='transition duration-100 ease-out'
+                    enterFrom='transform scale-95 opacity-0'
+                    enterTo='transform scale-100 opacity-100'
+                    leave='transition duration-100 ease-out'
+                    leaveFrom='transform scale-100 opacity-100'
+                    leaveTo='transform scale-95 opacity-0'
+                  >
+                    <PopoverPanel className='absolute left-0 z-50 mt-1'>
+                      <div className='w-64 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
+                        {category.tools.map((tool) => (
+                          <Link
+                            key={tool.id}
+                            href={tool.href}
+                            className='block rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
+                          >
+                            <div className='text-sm font-medium'>{tool.name}</div>
+                            <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>
+                              {tool.shortDescription || tool.description}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </PopoverPanel>
+                  </Transition>
+                </>
+              )}
+            </Popover>
+          ))}
 
           {/* GitHub Link */}
           <a
@@ -148,14 +146,24 @@ export function Header () {
                     </Link>
                     <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     {categories.map((category) => (
-                      <a
-                        key={category.id}
-                        href={`#${category.id}`}
-                        className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {category.name}
-                      </a>
+                      <div key={category.id} className='space-y-1'>
+                        <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400'>
+                          {category.name}
+                        </div>
+                        {category.tools.map((tool) => (
+                          <Link
+                            key={tool.id}
+                            href={tool.href}
+                            className='block rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <div className='text-sm font-medium'>{tool.name}</div>
+                            <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>
+                              {tool.shortDescription || tool.description}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                     <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     <a
