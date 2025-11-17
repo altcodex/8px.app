@@ -2,9 +2,9 @@
 
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { LockClosedIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { ExclamationTriangleIcon, LockClosedIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import type { ChangeEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Breadcrumb } from '@/components/breadcrumb'
 import { FullPageDropZone } from '@/components/full-page-drop-zone'
@@ -36,7 +36,7 @@ export default function FaviconGeneratorPage () {
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const validateImageFile = (file: File): string | null => {
+  const validateImageFile = useCallback((file: File): string | null => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       return '有効な画像ファイルを選択してください'
@@ -49,9 +49,9 @@ export default function FaviconGeneratorPage () {
     }
 
     return null
-  }
+  }, [])
 
-  const handleFileSelect = async (file: File) => {
+  const handleFileSelect = useCallback(async (file: File) => {
     setError(null)
 
     // Load image
@@ -70,14 +70,14 @@ export default function FaviconGeneratorPage () {
       setError('画像の読み込みに失敗しました')
       console.error(err)
     }
-  }
+  }, [])
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       handleFileSelect(file)
     }
-  }
+  }, [handleFileSelect])
 
   // Update preview when settings change
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function FaviconGeneratorPage () {
     }
   }, [image, borderRadius, backgroundColor, useBackground])
 
-  const handleSetToggle = (setId: OutputSetId) => {
+  const handleSetToggle = useCallback((setId: OutputSetId) => {
     setSelectedSets((prev) => {
       const newSets = new Set(prev)
       if (newSets.has(setId)) {
@@ -125,9 +125,9 @@ export default function FaviconGeneratorPage () {
       }
       return newSets
     })
-  }
+  }, [])
 
-  const handleSizeToggle = (size: FaviconSize) => {
+  const handleSizeToggle = useCallback((size: FaviconSize) => {
     setSelectedSizes((prev) => {
       const newSizes = new Set(prev)
       if (newSizes.has(size)) {
@@ -137,9 +137,9 @@ export default function FaviconGeneratorPage () {
       }
       return newSizes
     })
-  }
+  }, [])
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!image) {
       setError('画像ファイルを選択してください')
       return
@@ -191,7 +191,7 @@ export default function FaviconGeneratorPage () {
     } finally {
       setIsGenerating(false)
     }
-  }
+  }, [image, selectedSets, selectedSizes, borderRadius, backgroundColor, useBackground])
 
   return (
     <FullPageDropZone
@@ -210,7 +210,7 @@ export default function FaviconGeneratorPage () {
       <div className='mx-auto max-w-screen-lg'>
         <h1 className='mb-4 text-3xl font-bold'>Faviconジェネレーター</h1>
         <p className='mb-8 text-gray-600 dark:text-gray-400'>
-          画像からfaviconファイルを生成します。Apple Touch IconやAndroidアイコンもサポート。すべての処理はブラウザで安全に行われます。
+          画像からfaviconファイルを生成します。Apple Touch IconやAndroidアイコンもサポート。
         </p>
 
         {/* Privacy Notice */}
@@ -221,6 +221,14 @@ export default function FaviconGeneratorPage () {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className='mb-8 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-950 dark:bg-red-900 dark:text-red-200'>
+            <ExclamationTriangleIcon className='size-5' />
+            {error ?? 'エラーテスト'}
+          </div>
+        )}
+
         {/* Main Content Layout */}
         <div className='mb-8 flex flex-col gap-8 lg:flex-row'>
           {/* Left Column */}
@@ -228,7 +236,7 @@ export default function FaviconGeneratorPage () {
             {/* File Upload */}
             <div>
               <h6 className='mb-2 block text-sm font-semibold'>
-                画像をアップロード
+                画像を選択
               </h6>
               <input
                 ref={fileInputRef}
@@ -239,13 +247,13 @@ export default function FaviconGeneratorPage () {
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className='flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+                className='flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-sky-600 focus:outline-none dark:bg-sky-600 dark:hover:bg-sky-500'
               >
-                <PhotoIcon className='h-5 w-5' />
+                <PhotoIcon className='size-5' />
                 画像を選択
               </button>
-              <p className='mt-2 text-xs text-gray-500 dark:text-gray-400'>
-                PNG, JPG, SVGなどの画像ファイルをアップロードできます (最大10MB)
+              <p className='mt-2 text-xs text-gray-600 dark:text-gray-400'>
+                PNG, JPG, WEBP, SVGなど画像ファイルをアップロードできます (最大10MB)
                 <br />
                 または画面のどこにでもドラッグ&ドロップ
               </p>
@@ -256,7 +264,7 @@ export default function FaviconGeneratorPage () {
               {({ open }) => (
                 <div className='overflow-hidden rounded-lg bg-gray-100 dark:bg-atom-one-dark-light'>
                   <DisclosureButton className='flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100 focus:outline-none dark:hover:bg-gray-700'>
-                    <h6 className='text-sm font-semibold'>設定オプション</h6>
+                    <h6 className='text-sm font-semibold'>オプション</h6>
                     <ChevronDownIcon
                       className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''
                         }`}
@@ -288,7 +296,7 @@ export default function FaviconGeneratorPage () {
               </h6>
               <div className='flex w-full items-center justify-center'>
                 <div
-                  className={`flex items-center justify-center bg-gray-100 dark:bg-atom-one-dark-light ${previewUrl ? 'size-fit rounded' : 'aspect-square h-full max-h-64 w-full rounded-lg'}`}
+                  className={`flex items-center justify-center bg-gray-50 dark:bg-atom-one-dark-light ${previewUrl ? 'size-fit rounded' : 'aspect-square h-full max-h-64 w-full rounded-lg'}`}
                   style={previewUrl
                     ? {
                         backgroundImage: `
@@ -327,14 +335,14 @@ export default function FaviconGeneratorPage () {
                 disabled={!image || selectedSets.size === 0 || isGenerating}
                 className='rounded-full bg-sky-500 px-8 py-3 font-medium text-white transition-colors focus:outline-none enabled:hover:bg-sky-600 disabled:opacity-50 dark:bg-sky-600 enabled:dark:hover:bg-sky-500'
               >
-                {isGenerating ? '生成中...' : 'ダウンロード'}
+                ダウンロード
               </button>
             </div>
           </div>
 
           {/* Right Column - Settings Panel (Desktop Only) */}
           <div className='hidden lg:block lg:flex-1'>
-            <h6 className='mb-6 text-sm font-semibold'>設定オプション</h6>
+            <h6 className='mb-6 text-sm font-semibold'>オプション</h6>
             <FaviconOptionsPanel
               selectedSets={selectedSets}
               selectedSizes={selectedSizes}
@@ -350,13 +358,6 @@ export default function FaviconGeneratorPage () {
             />
           </div>
         </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className='mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200'>
-            {error}
-          </div>
-        )}
 
       </div>
     </FullPageDropZone>

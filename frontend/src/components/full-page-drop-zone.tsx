@@ -1,8 +1,8 @@
 'use client'
 
-import { CloudArrowUpIcon } from '@heroicons/react/24/outline'
+import { DocumentPlusIcon } from '@heroicons/react/24/outline'
 import type { DragEvent, ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface FullPageDropZoneProps {
   onFileDrop: (file: File) => void
@@ -20,28 +20,28 @@ export function FullPageDropZone ({
   const [isDragging, setIsDragging] = useState(false)
   const dragCounterRef = useRef(0)
 
-  useEffect(() => {
-    const handleDragEnter = () => {
-      dragCounterRef.current++
-      setIsDragging(true)
-    }
+  const handleDragEnter = useCallback(() => {
+    dragCounterRef.current++
+    setIsDragging(true)
+  }, [])
 
-    const handleDragLeave = () => {
-      dragCounterRef.current--
-      if (dragCounterRef.current === 0) {
-        setIsDragging(false)
-      }
-    }
-
-    const handleDrop = () => {
-      dragCounterRef.current = 0
+  const handleDragLeave = useCallback(() => {
+    dragCounterRef.current--
+    if (dragCounterRef.current === 0) {
       setIsDragging(false)
     }
+  }, [])
 
-    const handleDragOver = (e: globalThis.DragEvent) => {
-      e.preventDefault()
-    }
+  const handleDrop = useCallback(() => {
+    dragCounterRef.current = 0
+    setIsDragging(false)
+  }, [])
 
+  const handleDragOver = useCallback((e: globalThis.DragEvent) => {
+    e.preventDefault()
+  }, [])
+
+  useEffect(() => {
     window.addEventListener('dragenter', handleDragEnter)
     window.addEventListener('dragleave', handleDragLeave)
     window.addEventListener('drop', handleDrop)
@@ -53,9 +53,9 @@ export function FullPageDropZone ({
       window.removeEventListener('drop', handleDrop)
       window.removeEventListener('dragover', handleDragOver)
     }
-  }, [])
+  }, [handleDragEnter, handleDragLeave, handleDrop, handleDragOver])
 
-  const handleDropOnDiv = (e: DragEvent<HTMLDivElement>) => {
+  const handleDropOnDiv = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
 
@@ -80,7 +80,7 @@ export function FullPageDropZone ({
     }
 
     onFileDrop(file)
-  }
+  }, [accept, validateFile, onFileDrop])
 
   return (
     <div onDrop={handleDropOnDiv} className='relative'>
@@ -88,10 +88,10 @@ export function FullPageDropZone ({
 
       {/* Drag Overlay */}
       {isDragging && (
-        <div className='fixed inset-0 z-50 flex items-center justify-center bg-blue-500/20 backdrop-blur-sm'>
-          <div className='flex flex-col items-center gap-4 rounded-2xl border-4 border-dashed border-blue-500 bg-white/90 px-12 py-16 dark:bg-gray-800/90'>
-            <CloudArrowUpIcon className='size-16 text-blue-500' />
-            <p className='text-xl font-semibold text-gray-700 dark:text-gray-200'>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-blue-500/10 p-8 backdrop-blur'>
+          <div className='flex size-full flex-col items-center justify-center gap-4 rounded-2xl border-4 border-dashed border-blue-500'>
+            <DocumentPlusIcon className='size-12' />
+            <p className='text-xl font-semibold'>
               ドロップして画像をアップロード
             </p>
           </div>

@@ -36,10 +36,10 @@ export function ToolCard ({ tool }: ToolCardProps) {
 
       {/* Tool Info */}
       <div className='flex min-w-0 flex-1 flex-col gap-1'>
-        <h3 className='text-sm font-semibold'>
+        <h3 className='font-semibold'>
           {tool.name}
         </h3>
-        <p className='line-clamp-2 text-xs text-gray-600 dark:text-gray-400'>
+        <p className='line-clamp-3 text-sm text-gray-600 dark:text-gray-400'>
           {tool.description}
         </p>
       </div>
