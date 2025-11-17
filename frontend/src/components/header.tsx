@@ -137,14 +137,6 @@ export function Header () {
                 </div>
                 <div className='mt-6 flow-root'>
                   <div className='space-y-1'>
-                    <Link
-                      href='/'
-                      className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      All Tools
-                    </Link>
-                    <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     {categories.map((category) => (
                       <div key={category.id} className='space-y-1'>
                         <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400'>
