@@ -1,6 +1,6 @@
 'use client'
 
-import { Disclosure } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { LightBulbIcon, LockClosedIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
@@ -8,18 +8,24 @@ import { useEffect, useState } from 'react'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { FileUpload } from '@/components/file-upload'
 import { Slider } from '@/components/slider'
-import type { FaviconSize } from '@/lib/favicon-generator'
+import type { FaviconSize, OutputSetId } from '@/lib/favicon-generator'
 import {
   AVAILABLE_SIZES,
+  DEFAULT_OUTPUT_SETS,
   DEFAULT_SIZES,
-  generateFavicon
+  generateOutputSet,
+  OUTPUT_SETS
 } from '@/lib/favicon-generator'
 import { downloadBlob, loadImageFromFile, processImage } from '@/lib/image-processing'
+import { createZip } from '@/lib/zip-utils'
 
 export default function FaviconGeneratorPage () {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [selectedSets, setSelectedSets] = useState<Set<OutputSetId>>(
+    new Set(DEFAULT_OUTPUT_SETS)
+  )
   const [selectedSizes, setSelectedSizes] = useState<Set<FaviconSize>>(
     new Set(DEFAULT_SIZES)
   )
@@ -123,6 +129,18 @@ export default function FaviconGeneratorPage () {
     }
   }, [image, borderRadius, backgroundColor, useBackground])
 
+  const handleSetToggle = (setId: OutputSetId) => {
+    setSelectedSets((prev) => {
+      const newSets = new Set(prev)
+      if (newSets.has(setId)) {
+        newSets.delete(setId)
+      } else {
+        newSets.add(setId)
+      }
+      return newSets
+    })
+  }
+
   const handleSizeToggle = (size: FaviconSize) => {
     setSelectedSizes((prev) => {
       const newSizes = new Set(prev)
@@ -141,8 +159,13 @@ export default function FaviconGeneratorPage () {
       return
     }
 
-    if (selectedSizes.size === 0) {
-      setError('少なくとも1つのサイズを選択してください')
+    if (selectedSets.size === 0) {
+      setError('少なくとも1つの出力形式を選択してください')
+      return
+    }
+
+    if (selectedSets.has('favicon') && selectedSizes.size === 0) {
+      setError('favicon.icoを選択した場合、少なくとも1つのサイズを選択してください')
       return
     }
 
@@ -151,11 +174,31 @@ export default function FaviconGeneratorPage () {
 
     try {
       const sizes = Array.from(selectedSizes).sort((a, b) => a - b)
-      const icoBlob = await generateFavicon(image, sizes, {
-        borderRadiusPercent: borderRadius,
-        backgroundColor: useBackground ? backgroundColor : undefined
-      })
-      downloadBlob(icoBlob, 'favicon.ico')
+      const effectiveBackgroundColor = useBackground ? backgroundColor : undefined
+
+      // Generate files for all selected output sets
+      const allFiles: Array<{ name: string, blob: Blob }> = []
+
+      for (const setId of selectedSets) {
+        const outputSet = OUTPUT_SETS.find(s => s.id === setId)
+        if (!outputSet) continue
+
+        const files = await generateOutputSet(image, outputSet, {
+          sizes,
+          borderRadiusPercent: borderRadius,
+          backgroundColor: effectiveBackgroundColor
+        })
+
+        allFiles.push(...files)
+      }
+
+      // Download single file or create ZIP
+      if (allFiles.length === 1) {
+        downloadBlob(allFiles[0].blob, allFiles[0].name)
+      } else {
+        const zipBlob = await createZip(allFiles)
+        downloadBlob(zipBlob, 'favicons.zip')
+      }
     } catch (err) {
       setError('ファビコンの生成に失敗しました')
       console.error(err)
@@ -252,37 +295,87 @@ export default function FaviconGeneratorPage () {
             <Disclosure key={String(isDesktop)} defaultOpen={isDesktop}>
               {({ open }) => (
                 <div className='space-y-4'>
-                  <Disclosure.Button className='flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'>
+                  <DisclosureButton className='flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700'>
                     <span className='text-sm font-semibold'>設定オプション</span>
                     <ChevronDownIcon
                       className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''
                         }`}
                     />
-                  </Disclosure.Button>
-                  <Disclosure.Panel className='space-y-6'>
-                    {/* Size Selection */}
+                  </DisclosureButton>
+                  <DisclosurePanel className='space-y-6'>
+                    {/* Format Selection */}
                     <div>
                       <label className='mb-2 block text-sm font-medium'>
-                        含めるサイズを選択
+                        出力形式を選択
                       </label>
-                      <div className='grid grid-cols-4 gap-2'>
-                        {AVAILABLE_SIZES.map((size) => (
+                      <div className='flex flex-wrap gap-2'>
+                        {OUTPUT_SETS.map((outputSet) => (
                           <button
-                            key={size}
-                            onClick={() => handleSizeToggle(size)}
-                            className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${selectedSizes.has(size)
-                                ? 'border-blue-500 bg-blue-500 text-white dark:border-blue-600 dark:bg-blue-600'
-                                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+                            key={outputSet.id}
+                            onClick={() => handleSetToggle(outputSet.id)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSets.has(outputSet.id)
+                                ? 'bg-blue-500 text-white dark:bg-blue-600'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                               }`}
                           >
-                            {size}×{size}
+                            {outputSet.label}
                           </button>
                         ))}
                       </div>
-                      <p className='mt-2 text-xs text-gray-500 dark:text-gray-400'>
-                        推奨：16×16、32×32、48×48
-                      </p>
                     </div>
+
+                    {/* Size Selection - Only show if favicon is selected */}
+                    {selectedSets.has('favicon') && (
+                      <div>
+                        <label className='mb-2 block text-sm font-medium'>
+                          favicon.icoのサイズを選択
+                        </label>
+
+                        <div className='space-y-4'>
+                          {/* 推奨サイズ */}
+                          <div>
+                            <div className='mb-2 text-sm font-medium text-gray-700 dark:text-gray-300'>
+                              推奨サイズ
+                            </div>
+                            <div className='flex flex-wrap gap-2'>
+                              {DEFAULT_SIZES.map((size) => (
+                                <button
+                                  key={size}
+                                  onClick={() => handleSizeToggle(size)}
+                                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSizes.has(size)
+                                    ? 'bg-blue-500 text-white dark:bg-blue-600'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                  }`}
+                                >
+                                  {size}×{size}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 追加サイズ */}
+                          <div>
+                            <div className='mb-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
+                              その他サイズ
+                            </div>
+                            <div className='flex flex-wrap gap-2'>
+                              {AVAILABLE_SIZES.filter(s => !DEFAULT_SIZES.includes(s)).map((size) => (
+                                <button
+                                  key={size}
+                                  onClick={() => handleSizeToggle(size)}
+                                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all focus:outline-none ${selectedSizes.has(size)
+                                    ? 'bg-blue-500 text-white dark:bg-blue-600'
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                                  }`}
+                                >
+                                  {size}×{size}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Border Radius */}
                     <div>
@@ -293,7 +386,7 @@ export default function FaviconGeneratorPage () {
                         max={100}
                         unit='%'
                         onChange={setBorderRadius}
-                        description='画像の角を丸くします（100%で円になります）'
+                        description='画像の角を丸くします'
                       />
                     </div>
 
@@ -332,7 +425,7 @@ export default function FaviconGeneratorPage () {
                         透過画像に背景色を追加します
                       </p>
                     </div>
-                  </Disclosure.Panel>
+                  </DisclosurePanel>
                 </div>
               )}
             </Disclosure>
@@ -349,7 +442,7 @@ export default function FaviconGeneratorPage () {
         {/* Generate Button */}
         <button
           onClick={handleGenerate}
-          disabled={!image || selectedSizes.size === 0 || isGenerating}
+          disabled={!image || selectedSets.size === 0 || isGenerating}
           className='rounded-full bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600'
         >
           {isGenerating ? '生成中...' : 'ダウンロード'}
@@ -359,16 +452,27 @@ export default function FaviconGeneratorPage () {
         <div className='mt-12 rounded-lg border border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800'>
           <div className='mb-3 flex items-center gap-2'>
             <LightBulbIcon className='size-5' />
-            <h2 className='text-lg font-semibold'>faviconファイルについて</h2>
+            <h2 className='text-lg font-semibold'>推奨のファビコン構成</h2>
           </div>
           <div className='space-y-2 text-sm text-gray-600 dark:text-gray-300'>
             <p>
-              <strong>推奨サイズ：</strong> 16×16と32×32が最も一般的に使用されるサイズです。
-              48×48はデスクトップショートカットやタスクマネージャーのアイコンに使用されます。
+              <strong>favicon.ico：</strong> 従来のブラウザやツール用。16×16と32×32を含めることで、
+              標準ディスプレイとRetina/高DPIディスプレイの両方に対応できます。
             </p>
             <p>
-              <strong>使用方法：</strong> 生成されたfavicon.icoファイルをウェブサイトのルートディレクトリに配置するか、
-              HTMLで参照してください：<code className='rounded bg-gray-200 px-1 dark:bg-gray-700'>&lt;link rel=&quot;icon&quot; href=&quot;/favicon.ico&quot;&gt;</code>
+              <strong>apple-touch-icon.png (180×180)：</strong> iOSでホーム画面に追加したときのアイコン。
+              透過は推奨されないため、常に背景色が適用されます（未指定時は白）。
+            </p>
+            <p>
+              <strong>icon-192.png / icon-512.png：</strong> Android・PWA用のアイコン。
+              manifest.jsonから参照されます。
+            </p>
+            <p>
+              <strong>使用方法：</strong> 生成されたファイルをウェブサイトのルートディレクトリに配置し、
+              HTMLで参照してください：
+              <code className='mt-2 block rounded bg-gray-200 p-2 dark:bg-gray-700'>
+                {'<link rel="icon" href="/favicon.ico" sizes="any">'}
+              </code>
             </p>
           </div>
         </div>

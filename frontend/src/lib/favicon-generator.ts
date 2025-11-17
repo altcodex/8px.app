@@ -1,6 +1,7 @@
 /**
  * Favicon generator utility
  * Generates ICO files from images using PNG embedding (modern approach)
+ * Also supports generating modern favicon formats (2025 best practices)
  */
 
 import type { ImageProcessingOptions } from './image-processing'
@@ -9,7 +10,48 @@ import { processImage } from './image-processing'
 export type FaviconSize = 16 | 24 | 32 | 48 | 64 | 128 | 256
 
 export const AVAILABLE_SIZES: FaviconSize[] = [16, 24, 32, 48, 64, 128, 256]
-export const DEFAULT_SIZES: FaviconSize[] = [16, 32, 48]
+export const DEFAULT_SIZES: FaviconSize[] = [16, 32]
+
+// Output Set - represents what user selects in UI
+export type OutputSetId = 'favicon' | 'apple-touch-icon' | 'android-icon'
+
+export interface OutputFile {
+  name: string
+  size: number | 'custom'
+}
+
+export interface OutputSet {
+  id: OutputSetId
+  label: string
+  description: string
+  files: OutputFile[]
+}
+
+export const OUTPUT_SETS: OutputSet[] = [
+  {
+    id: 'favicon',
+    label: 'favicon.ico',
+    description: '従来のブラウザ用',
+    files: [{ name: 'favicon.ico', size: 'custom' }]
+  },
+  {
+    id: 'apple-touch-icon',
+    label: 'Apple Touch Icon',
+    description: 'iOS用 (180×180)',
+    files: [{ name: 'apple-touch-icon.png', size: 180 }]
+  },
+  {
+    id: 'android-icon',
+    label: 'Android Icon',
+    description: 'Android/PWA用 (192×192, 512×512)',
+    files: [
+      { name: 'icon-192.png', size: 192 },
+      { name: 'icon-512.png', size: 512 }
+    ]
+  }
+]
+
+export const DEFAULT_OUTPUT_SETS: OutputSetId[] = ['favicon']
 
 /**
  * Generate ICO file from PNG blobs
@@ -102,4 +144,50 @@ export async function generateFavicon (
 
   // Generate ICO file
   return generateICO(pngBlobs)
+}
+
+/**
+ * Generate files for a single output set
+ */
+export async function generateOutputSet (
+  image: HTMLImageElement,
+  outputSet: OutputSet,
+  options: {
+    sizes?: FaviconSize[] // Only for favicon.ico
+    borderRadiusPercent?: number
+    backgroundColor?: string
+  } = {}
+): Promise<Array<{ name: string, blob: Blob }>> {
+  const { sizes = DEFAULT_SIZES, borderRadiusPercent = 0, backgroundColor } = options
+
+  const results: Array<{ name: string, blob: Blob }> = []
+
+  for (const file of outputSet.files) {
+    let blob: Blob
+
+    if (file.name === 'favicon.ico') {
+      // Generate ICO with selected sizes
+      blob = await generateFavicon(image, sizes, {
+        borderRadiusPercent,
+        backgroundColor
+      })
+    } else {
+      // For PNG formats
+      const size = file.size as number
+
+      // apple-touch-icon always needs background color (default: white)
+      const effectiveBackgroundColor = file.name === 'apple-touch-icon.png'
+        ? (backgroundColor || '#ffffff')
+        : backgroundColor
+
+      blob = await processImage(image, size, {
+        borderRadiusPercent,
+        backgroundColor: effectiveBackgroundColor
+      })
+    }
+
+    results.push({ name: file.name, blob })
+  }
+
+  return results
 }

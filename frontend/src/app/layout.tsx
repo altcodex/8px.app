@@ -31,7 +31,15 @@ const fontMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: '8px.app - Web Development Toolkit',
-  description: 'A collection of useful tools for web developers'
+  description: 'A collection of useful tools for web developers',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: '/apple-touch-icon.png'
+  },
+  manifest: '/manifest.json'
 }
 
 export default function RootLayout ({
