@@ -211,7 +211,7 @@ export default function FaviconGeneratorPage () {
         </div>
 
         {/* Main Content Layout */}
-        <div className='mb-8 flex flex-col gap-8 lg:flex-row'>
+        <div className='mb-8 flex flex-col gap-12 lg:flex-row'>
           {/* Left Column */}
           <div className='flex-1 space-y-8'>
             {/* File Upload */}
@@ -323,7 +323,7 @@ export default function FaviconGeneratorPage () {
 
           {/* Right Column - Settings Panel (Desktop Only) */}
           <div className='hidden lg:block lg:flex-1'>
-            <h6 className='mb-6 text-sm font-semibold'>出力オプション</h6>
+            <h6 className='mb-4 text-sm font-semibold'>出力オプション</h6>
             <FaviconOptionsPanel
               selectedSets={selectedSets}
               selectedSizes={selectedSizes}
