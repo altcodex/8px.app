@@ -28,7 +28,7 @@ export function ThemeToggle () {
   return (
     <button
       onClick={toggleTheme}
-      className='flex items-center justify-center rounded-full p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10'
+      className='flex items-center justify-center rounded-full p-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
       aria-label='Toggle theme'
     >
       {theme === 'light' ? <SunIcon className='size-5' /> : <MoonIcon className='size-5' />}

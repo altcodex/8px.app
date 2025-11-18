@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
+import { siteConfig } from '@/config/site'
 import { Providers } from '@/lib/providers'
 
 const fontASCII = Roboto_Flex({
@@ -30,8 +31,44 @@ const fontMono = Roboto_Mono({
 })
 
 export const metadata: Metadata = {
-  title: '8px.app - Web Development Toolkit',
-  description: 'A collection of useful tools for web developers'
+  title: siteConfig.title,
+  description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
+  alternates: {
+    canonical: '/'
+  },
+  openGraph: {
+    type: 'website',
+    locale: siteConfig.locale,
+    url: '/',
+    title: siteConfig.title.default,
+    description: siteConfig.description,
+    siteName: siteConfig.name
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteConfig.title.default,
+    description: siteConfig.description
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1
+    }
+  },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: '/apple-touch-icon.png'
+  },
+  manifest: '/manifest.json'
 }
 
 export default function RootLayout ({
@@ -43,11 +80,11 @@ export default function RootLayout ({
 
   return (
     <html lang='ja' className={`${fontASCII.variable} ${fontJP.variable} ${fontMono.variable}`} suppressHydrationWarning>
-      <body className='bg-white text-gray-700 antialiased dark:bg-atom-one-dark dark:text-gray-300'>
+      <body className='overflow-x-hidden bg-white text-gray-700 antialiased dark:bg-atom-one-dark dark:text-gray-300'>
         <Providers>
           <div className='flex min-h-screen flex-col'>
             <Header />
-            <main className='flex-1'>
+            <main className='mx-auto w-full max-w-screen-xl flex-1 px-4 pb-12 pt-6 sm:px-6 lg:px-8'>
               {children}
             </main>
             <Footer />

@@ -1,11 +1,12 @@
 'use client'
 
-import { Dialog, DialogPanel, Popover, PopoverButton, PopoverPanel, Transition, TransitionChild } from '@headlessui/react'
+import { CloseButton, Dialog, DialogPanel, Popover, PopoverButton, PopoverPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { categories } from '@/lib/tools'
+import { siteConfig } from '@/config/site'
+import { categories } from '@/config/tools'
 
 import { GitHubIcon } from './icons/github-icon'
 import { LogoIcon } from './icons/logo-icon'
@@ -28,60 +29,73 @@ export function Header () {
         </button>
 
         {/* Logo */}
-        <Link href='/' className='flex items-center gap-2'>
+        <Link href='/' className='flex items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500'>
           <LogoIcon className='size-6' />
-          <h1 className='font-[Outfit] text-xl font-semibold'>8px.app</h1>
+          <h1 className='font-[Outfit] text-xl font-semibold'>{siteConfig.name}</h1>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className='hidden items-center gap-6 sm:flex'>
-          {/* Tools Dropdown */}
-          <Popover className='relative'>
-            {({ open }) => (
-              <>
-                <PopoverButton className='flex items-center gap-1 text-sm font-medium outline-none'>
-                  Tools
-                  <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-                </PopoverButton>
-                <Transition
-                  enter='transition duration-100 ease-out'
-                  enterFrom='transform scale-95 opacity-0'
-                  enterTo='transform scale-100 opacity-100'
-                  leave='transition duration-100 ease-out'
-                  leaveFrom='transform scale-100 opacity-100'
-                  leaveTo='transform scale-95 opacity-0'
-                >
-                  <PopoverPanel className='absolute right-0 z-50 mt-1'>
-                    <div className='w-48 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
-                      <Link
-                        href='/'
-                        className='block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
+        <div className='hidden items-center gap-4 sm:flex'>
+          {/* Category Popovers */}
+          <div className='flex items-center gap-2'>
+            {categories.map((category) => (
+              <Popover key={category.id} className='relative'>
+                {({ open }) => {
+                  const buttonRef = useRef<HTMLButtonElement>(null)
+
+                  useEffect(() => {
+                    if (!open && buttonRef.current) {
+                      buttonRef.current.blur()
+                    }
+                  }, [open])
+                  return (
+                    <>
+                      <PopoverButton
+                        ref={buttonRef}
+                        className='flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
                       >
-                        All Tools
-                      </Link>
-                      <div className='my-1 border-t border-gray-200 dark:border-gray-700' />
-                      {categories.map((category) => (
-                        <a
-                          key={category.id}
-                          href={`#${category.id}`}
-                          className='block rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                        >
-                          {category.name}
-                        </a>
-                      ))}
-                    </div>
-                  </PopoverPanel>
-                </Transition>
-              </>
-            )}
-          </Popover>
+                        {category.name}
+                        <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+                      </PopoverButton>
+                      <Transition
+                        enter='transition duration-100 ease-out'
+                        enterFrom='transform scale-95 opacity-0'
+                        enterTo='transform scale-100 opacity-100'
+                        leave='transition duration-100 ease-out'
+                        leaveFrom='transform scale-100 opacity-100'
+                        leaveTo='transform scale-95 opacity-0'
+                      >
+                        <PopoverPanel className='absolute left-0 z-50 mt-2'>
+                          <div className='w-60 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
+                            {category.tools.map((tool) => (
+                              <CloseButton
+                                as={Link}
+                                key={tool.id}
+                                href={`/${tool.id}`}
+                                className='block rounded-lg px-3 py-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
+                              >
+                                <div className='text-sm font-medium'>{tool.name}</div>
+                                <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>
+                                  {tool.shortDescription || tool.description}
+                                </div>
+                              </CloseButton>
+                            ))}
+                          </div>
+                        </PopoverPanel>
+                      </Transition>
+                    </>
+                  )
+                }}
+              </Popover>
+            ))}
+          </div>
 
           {/* GitHub Link */}
           <a
-            href={process.env.NEXT_PUBLIC_GITHUB_URL}
+            href={siteConfig.links.github}
             target='_blank'
             rel='noopener noreferrer'
-            className='flex items-center justify-center rounded-full p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10'
+            className='flex items-center justify-center rounded-full p-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
             aria-label='GitHub'
           >
             <GitHubIcon className='size-5' />
@@ -126,7 +140,7 @@ export function Header () {
                 <div className='flex items-center justify-between'>
                   <Link href='/' className='flex items-center gap-2 font-[Outfit] text-xl font-semibold' onClick={() => setMobileMenuOpen(false)}>
                     <LogoIcon className='size-6' />
-                    8px.app
+                    {siteConfig.name}
                   </Link>
                   <button
                     type='button'
@@ -139,27 +153,29 @@ export function Header () {
                 </div>
                 <div className='mt-6 flow-root'>
                   <div className='space-y-1'>
-                    <Link
-                      href='/'
-                      className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      All Tools
-                    </Link>
-                    <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     {categories.map((category) => (
-                      <a
-                        key={category.id}
-                        href={`#${category.id}`}
-                        className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {category.name}
-                      </a>
+                      <div key={category.id} className='space-y-1'>
+                        <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400'>
+                          {category.name}
+                        </div>
+                        {category.tools.map((tool) => (
+                          <Link
+                            key={tool.id}
+                            href={`/${tool.id}`}
+                            className='block rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <div className='text-sm font-medium'>{tool.name}</div>
+                            <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>
+                              {tool.shortDescription || tool.description}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                     <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     <a
-                      href={process.env.NEXT_PUBLIC_GITHUB_URL}
+                      href={siteConfig.links.github}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
