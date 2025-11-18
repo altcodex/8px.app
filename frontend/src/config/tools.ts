@@ -59,7 +59,7 @@ export const tools: Tool[] = [
   {
     id: 'svg-optimizer',
     name: 'SVG圧縮ツール',
-    description: 'SVGファイルを最適化・圧縮して、ファイルサイズを削減します。',
+    description: 'SVGファイルを最適化・圧縮して、ファイルサイズを削減します。ブラウザ上で完結するため安全です。',
     shortDescription: 'SVGファイルを最適化・圧縮',
     icon: '/icons/tools/svg-optimizer.svg',
     category: 'image'
