@@ -1,6 +1,8 @@
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 
+import { siteConfig } from '@/config/site'
+
 interface BreadcrumbItem {
   label: string
   href?: string
@@ -19,7 +21,7 @@ export function Breadcrumb ({ items }: BreadcrumbProps) {
       '@type': 'ListItem',
       position: index + 1,
       name: item.label,
-      ...(item.href && { item: `https://8px.app${item.href}` })
+      ...(item.href && { item: `${siteConfig.url}${item.href}` })
     }))
   }
 

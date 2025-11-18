@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
-import { getToolById } from '@/lib/tools'
+import { siteConfig } from '@/config/site'
+import { getToolById } from '@/config/tools'
 
 const tool = getToolById('favicon-generator')
 
@@ -15,13 +16,13 @@ export const metadata: Metadata = tool
       openGraph: {
         type: 'website',
         url: tool.href,
-        title: `${tool.name} - 8px.app`,
+        title: `${tool.name} - ${siteConfig.name}`,
         description: tool.description,
-        siteName: '8px.app'
+        siteName: siteConfig.name
       },
       twitter: {
         card: 'summary',
-        title: `${tool.name} - 8px.app`,
+        title: `${tool.name} - ${siteConfig.name}`,
         description: tool.description
       }
     }

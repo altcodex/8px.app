@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next'
 
-import { categories } from '@/lib/tools'
+import { siteConfig } from '@/config/site'
+import { categories } from '@/config/tools'
 
 export const dynamic = 'force-static'
 
 export default function sitemap (): MetadataRoute.Sitemap {
-  const baseUrl = 'https://8px.app'
+  const baseUrl = siteConfig.url
 
   // ホームページ
   const routes: MetadataRoute.Sitemap = [

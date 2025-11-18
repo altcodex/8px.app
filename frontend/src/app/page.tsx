@@ -1,15 +1,16 @@
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { ToolCard } from '@/components/tool-card'
-import { categories } from '@/lib/tools'
+import { siteConfig } from '@/config/site'
+import { categories } from '@/config/tools'
 
 export default function Home () {
   // JSON-LD構造化データ
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: '8px.app',
-    description: 'Web開発に必要なすべてを、シンプルに。コードとデザインの境界を越え、クリエイターの想像力を刺激する便利な機能を集めました。',
-    url: 'https://8px.app'
+    name: siteConfig.name,
+    description: siteConfig.description,
+    url: siteConfig.url
   }
 
   return (
@@ -28,11 +29,9 @@ export default function Home () {
         <h1 className='mb-6 font-[Outfit] text-4xl font-semibold'>
           8px.app
         </h1>
-        <p className='font-medium text-gray-600 dark:text-gray-400'>
-          Web開発に必要なすべてを、シンプルに。
-        </p>
-        <p className='font-medium text-gray-600 dark:text-gray-400'>
-          コードとデザインの境界を越え、クリエイターの想像力を刺激する便利な機能を集めました。
+        <p className='whitespace-pre-line font-medium text-gray-600 dark:text-gray-400'>
+          {`Web開発に必要なすべてを、シンプルに。
+コードとデザインの境界を越え、クリエイターの想像力を刺激する便利な機能を集めました。`}
         </p>
       </div>
 

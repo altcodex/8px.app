@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import type { Tool } from '@/lib/tools'
+import type { Tool } from '@/config/tools'
 
 type ToolCardProps = {
   tool: Tool

@@ -5,7 +5,8 @@ import { Bars3Icon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outli
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
-import { categories } from '@/lib/tools'
+import { siteConfig } from '@/config/site'
+import { categories } from '@/config/tools'
 
 import { GitHubIcon } from './icons/github-icon'
 import { LogoIcon } from './icons/logo-icon'
@@ -30,7 +31,7 @@ export function Header () {
         {/* Logo */}
         <Link href='/' className='flex items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500'>
           <LogoIcon className='size-6' />
-          <h1 className='font-[Outfit] text-xl font-semibold'>8px.app</h1>
+          <h1 className='font-[Outfit] text-xl font-semibold'>{siteConfig.name}</h1>
         </Link>
 
         {/* Desktop Navigation */}
@@ -89,7 +90,7 @@ export function Header () {
 
           {/* GitHub Link */}
           <a
-            href={process.env.NEXT_PUBLIC_GITHUB_URL}
+            href={siteConfig.links.github}
             target='_blank'
             rel='noopener noreferrer'
             className='flex items-center justify-center rounded-full p-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
@@ -137,7 +138,7 @@ export function Header () {
                 <div className='flex items-center justify-between'>
                   <Link href='/' className='flex items-center gap-2 font-[Outfit] text-xl font-semibold' onClick={() => setMobileMenuOpen(false)}>
                     <LogoIcon className='size-6' />
-                    8px.app
+                    {siteConfig.name}
                   </Link>
                   <button
                     type='button'
@@ -172,7 +173,7 @@ export function Header () {
                     ))}
                     <div className='my-2 border-t border-gray-200 dark:border-gray-700' />
                     <a
-                      href={process.env.NEXT_PUBLIC_GITHUB_URL}
+                      href={siteConfig.links.github}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='block rounded-lg px-3 py-2 text-base font-medium transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'

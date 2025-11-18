@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 
 import { Footer } from '@/components/footer'
 import { Header } from '@/components/header'
+import { siteConfig } from '@/config/site'
 import { Providers } from '@/lib/providers'
 
 const fontASCII = Roboto_Flex({
@@ -30,27 +31,24 @@ const fontMono = Roboto_Mono({
 })
 
 export const metadata: Metadata = {
-  title: {
-    default: '8px.app | Web Developer Toolkit',
-    template: '%s | 8px.app'
-  },
-  description: 'Web開発に必要なすべてを、シンプルに。コードとデザインの境界を越え、クリエイターの想像力を刺激する便利な機能を集めました。',
-  metadataBase: new URL('https://8px.app'),
+  title: siteConfig.title,
+  description: siteConfig.description,
+  metadataBase: new URL(siteConfig.url),
   alternates: {
     canonical: '/'
   },
   openGraph: {
     type: 'website',
-    locale: 'ja_JP',
+    locale: siteConfig.locale,
     url: '/',
-    title: '8px.app | Web Developer Toolkit',
-    description: 'Web開発に必要なすべてを、シンプルに。コードとデザインの境界を越え、クリエイターの想像力を刺激する便利な機能を集めました。',
-    siteName: '8px.app'
+    title: siteConfig.title.default,
+    description: siteConfig.description,
+    siteName: siteConfig.name
   },
   twitter: {
     card: 'summary_large_image',
-    title: '8px.app | Web Developer Toolkit',
-    description: 'Web開発に必要なすべてを、シンプルに。'
+    title: siteConfig.title.default,
+    description: siteConfig.description
   },
   robots: {
     index: true,
