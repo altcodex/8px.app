@@ -8,7 +8,7 @@ import { HueSlider } from '@/components/ui/hue-slider'
 import { CircleSpinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
-import { hexToCmyk, hexToHsl, hexToLch, hexToRgb, lchToHex, normalizeHue } from '@/lib/color/color-utils'
+import { hexToCmyk, hexToHsl, hexToOklch, hexToRgb, normalizeHue, oklchToHex } from '@/lib/color/color-utils'
 import type { ColorPalette } from '@/lib/color/palette-generator'
 import { adjustPaletteHue, generatePalette, getShadeLabels } from '@/lib/color/palette-generator'
 import type { TailwindColorName, TailwindShade } from '@/lib/color/tailwind-colors'
@@ -225,26 +225,26 @@ export default function TailwindPaletteGeneratorPage () {
                       <div className='flex items-center gap-3'>
                         <button
                           onClick={() => {
-                            const lch = hexToLch(inputColor)
-                            if (!lch) return
+                            const oklch = hexToOklch(inputColor)
+                            if (!oklch) return
                             const adjustedHex = hueShift === 0
                               ? inputColor
-                              : lchToHex({
-                                l: lch.l,
-                                c: lch.c,
-                                h: normalizeHue(lch.h + hueShift)
+                              : oklchToHex({
+                                l: oklch.l,
+                                c: oklch.c,
+                                h: normalizeHue(oklch.h + hueShift)
                               })
                             handleCopyColor(adjustedHex)
                           }}
                           className='h-12 w-12 flex-shrink-0 cursor-pointer rounded shadow-sm transition-transform hover:scale-110'
                           style={{
                             backgroundColor: (() => {
-                              const lch = hexToLch(inputColor)
-                              if (!lch || hueShift === 0) return inputColor
-                              return lchToHex({
-                                l: lch.l,
-                                c: lch.c,
-                                h: normalizeHue(lch.h + hueShift)
+                              const oklch = hexToOklch(inputColor)
+                              if (!oklch || hueShift === 0) return inputColor
+                              return oklchToHex({
+                                l: oklch.l,
+                                c: oklch.c,
+                                h: normalizeHue(oklch.h + hueShift)
                               })
                             })()
                           }}
@@ -252,14 +252,14 @@ export default function TailwindPaletteGeneratorPage () {
                         />
                         <div className='flex flex-1 items-center gap-4'>
                           {(() => {
-                            const lch = hexToLch(inputColor)
-                            if (!lch) return null
+                            const oklch = hexToOklch(inputColor)
+                            if (!oklch) return null
                             const adjustedHex = hueShift === 0
                               ? inputColor
-                              : lchToHex({
-                                l: lch.l,
-                                c: lch.c,
-                                h: normalizeHue(lch.h + hueShift)
+                              : oklchToHex({
+                                l: oklch.l,
+                                c: oklch.c,
+                                h: normalizeHue(oklch.h + hueShift)
                               })
                             const rgb = hexToRgb(adjustedHex)
                             const hsl = hexToHsl(adjustedHex)

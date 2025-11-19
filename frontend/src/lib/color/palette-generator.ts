@@ -3,8 +3,8 @@
  * Generates 50-950 color scales in the style of Tailwind CSS
  */
 
-import type { LCh } from './color-utils'
-import { hexToLch, lchToHex, normalizeHue } from './color-utils'
+import type { OKLCh } from './color-utils'
+import { hexToOklch, normalizeHue, oklchToHex } from './color-utils'
 import type { TailwindShade } from './tailwind-colors'
 
 /**
@@ -395,65 +395,49 @@ function lerp (a: number, b: number, t: number): number {
 /**
  * Find the maximum chroma that stays within sRGB gamut for a given L and H
  * Uses binary search to find the gamut boundary
- * This matches the logic in lchToRgbWithGamutMapping to ensure consistency
+ * OKLCh version - simpler and more accurate than LCh
  */
 function findMaxChromaInGamut (l: number, h: number): number {
-  // Helper to convert LCh to Lab
-  const lchToLab = (lch: LCh) => {
-    const hRad = lch.h * (Math.PI / 180)
+  // Helper to convert OKLCh to Oklab
+  const oklchToOklab = (oklch: OKLCh) => {
+    const hRad = oklch.h * (Math.PI / 180)
     return {
-      l: lch.l,
-      a: lch.c * Math.cos(hRad),
-      b: lch.c * Math.sin(hRad)
+      l: oklch.l / 100,
+      a: (oklch.c / 130) * Math.cos(hRad),
+      b: (oklch.c / 130) * Math.sin(hRad)
     }
   }
 
-  // Helper to convert Lab to XYZ (simplified, matches color-utils.ts)
-  const labToXyz = (lab: { l: number, a: number, b: number }) => {
-    const D65 = { x: 95.047, y: 100.0, z: 108.883 }
+  // Helper to convert Oklab to linear RGB
+  const oklabToLinearRgb = (oklab: { l: number, a: number, b: number }) => {
+    const l_ = oklab.l + 0.3963377774 * oklab.a + 0.2158037573 * oklab.b
+    const m_ = oklab.l - 0.1055613458 * oklab.a - 0.0638541728 * oklab.b
+    const s_ = oklab.l - 0.0894841775 * oklab.a - 1.2914855480 * oklab.b
 
-    const labToXyzF = (t: number): number => {
-      const delta = 6 / 29
-      if (t > delta) {
-        return Math.pow(t, 3)
-      }
-      return 3 * delta * delta * (t - 4 / 29)
-    }
-
-    const fy = (lab.l + 16) / 116
-    const fx = lab.a / 500 + fy
-    const fz = fy - lab.b / 200
+    const l = l_ * l_ * l_
+    const m = m_ * m_ * m_
+    const s = s_ * s_ * s_
 
     return {
-      x: D65.x * labToXyzF(fx),
-      y: D65.y * labToXyzF(fy),
-      z: D65.z * labToXyzF(fz)
+      r: +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      g: -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      b: -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
     }
   }
 
-  // Test if a color is within gamut (check linear RGB values)
+  // Test if a color is within gamut
   const isInGamut = (c: number): boolean => {
-    const lab = lchToLab({ l, c, h })
-    const xyz = labToXyz(lab)
+    const oklab = oklchToOklab({ l, c, h })
+    const linear = oklabToLinearRgb(oklab)
 
-    // Normalize and apply inverse sRGB matrix to get linear RGB
-    const x = xyz.x / 100
-    const y = xyz.y / 100
-    const z = xyz.z / 100
-
-    const rLinear = x * 3.2404542 + y * -1.5371385 + z * -0.4985314
-    const gLinear = x * -0.9692660 + y * 1.8760108 + z * 0.0415560
-    const bLinear = x * 0.0556434 + y * -0.2040259 + z * 1.0572252
-
-    // Check if linear RGB values are in valid range
-    return rLinear >= -0.001 && rLinear <= 1.001 &&
-           gLinear >= -0.001 && gLinear <= 1.001 &&
-           bLinear >= -0.001 && bLinear <= 1.001
+    return linear.r >= -0.001 && linear.r <= 1.001 &&
+           linear.g >= -0.001 && linear.g <= 1.001 &&
+           linear.b >= -0.001 && linear.b <= 1.001
   }
 
   // Binary search for maximum chroma
   let low = 0
-  let high = 150 // Maximum theoretical chroma
+  let high = 150 // Maximum theoretical chroma (in our scaled units)
   let maxChroma = 0
 
   while (high - low > 0.1) {
@@ -484,22 +468,22 @@ export function generatePalette (
 ): ColorPalette | null {
   const { hueShift = 0 } = options
 
-  // Convert input to LCh
-  const inputLch = hexToLch(inputHex)
-  if (!inputLch) return null
+  // Convert input to OKLCh
+  const inputOklch = hexToOklch(inputHex)
+  if (!inputOklch) return null
 
   // Find the shade that best matches the input lightness for more accurate chroma scaling
   const closestShade = SHADES.reduce((prev, curr) => {
-    const prevL = getBlendedValue(inputLch.h, prev, 'lightness')
-    const currL = getBlendedValue(inputLch.h, curr, 'lightness')
-    return Math.abs(currL - inputLch.l) < Math.abs(prevL - inputLch.l) ? curr : prev
+    const prevL = getBlendedValue(inputOklch.h, prev, 'lightness')
+    const currL = getBlendedValue(inputOklch.h, curr, 'lightness')
+    return Math.abs(currL - inputOklch.l) < Math.abs(prevL - inputOklch.l) ? curr : prev
   })
 
   // Use the closest shade as reference for chroma scaling
-  const referenceChroma = getBlendedValue(inputLch.h, closestShade, 'chroma')
+  const referenceChroma = getBlendedValue(inputOklch.h, closestShade, 'chroma')
 
   // Calculate base chroma scale
-  const baseScale = referenceChroma > 0 ? inputLch.c / referenceChroma : 1.0
+  const baseScale = referenceChroma > 0 ? inputOklch.c / referenceChroma : 1.0
 
   // Clamp chromaScale to reasonable range:
   // - Lower bound (0.85): Prevents very low-chroma inputs from producing gray palettes
@@ -507,16 +491,16 @@ export function generatePalette (
   const chromaScale = Math.max(0.85, Math.min(1.2, baseScale))
 
   // Use input hue directly as base (input-preserving approach)
-  const baseHue = normalizeHue(inputLch.h + hueShift)
+  const baseHue = normalizeHue(inputOklch.h + hueShift)
 
   // Generate all shades
   const palette: Partial<ColorPalette> = {}
 
   for (const shade of SHADES) {
     // Get blended curve values for this shade
-    const targetL = getBlendedValue(inputLch.h, shade, 'lightness')
-    const standardChroma = getBlendedValue(inputLch.h, shade, 'chroma')
-    const hShift = getBlendedValue(inputLch.h, shade, 'hueShift')
+    const targetL = getBlendedValue(inputOklch.h, shade, 'lightness')
+    const standardChroma = getBlendedValue(inputOklch.h, shade, 'chroma')
+    const hShift = getBlendedValue(inputOklch.h, shade, 'hueShift')
 
     // Calculate final values
     const l = targetL
@@ -529,7 +513,7 @@ export function generatePalette (
     const c = Math.min(scaledChroma, maxChroma * 0.99)
 
     // Convert back to HEX
-    const hex = lchToHex({ l, c, h })
+    const hex = oklchToHex({ l, c, h })
     palette[shade] = hex
   }
 
@@ -544,11 +528,11 @@ export function adjustPaletteHue (palette: ColorPalette, hueShift: number): Colo
 
   for (const shade of SHADES) {
     const hex = palette[shade]
-    const lch = hexToLch(hex)
+    const oklch = hexToOklch(hex)
 
-    if (lch) {
-      lch.h = normalizeHue(lch.h + hueShift)
-      adjusted[shade] = lchToHex(lch)
+    if (oklch) {
+      oklch.h = normalizeHue(oklch.h + hueShift)
+      adjusted[shade] = oklchToHex(oklch)
     }
   }
 

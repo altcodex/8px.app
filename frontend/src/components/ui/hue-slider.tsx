@@ -3,7 +3,7 @@
 import type { ChangeEvent } from 'react'
 import { useMemo } from 'react'
 
-import { hexToLch, normalizeHue } from '@/lib/color/color-utils'
+import { hexToOklch, normalizeHue } from '@/lib/color/color-utils'
 import { getColorNames, tailwindColors } from '@/lib/color/tailwind-colors'
 
 export type HueSliderProps = {
@@ -34,8 +34,8 @@ export function HueSlider ({
 
   // Generate gradient using Tailwind colors for visual consistency
   const gradientBackground = useMemo(() => {
-    const lch = hexToLch(inputColor)
-    if (!lch) return 'linear-gradient(to right, #888, #888)'
+    const oklch = hexToOklch(inputColor)
+    if (!oklch) return 'linear-gradient(to right, #888, #888)'
 
     // Get all chromatic Tailwind colors with their hues
     const colorNames = getColorNames().filter(name =>
@@ -44,10 +44,10 @@ export function HueSlider ({
 
     const colorHues = colorNames.map(name => {
       const hex = tailwindColors[name][500]
-      const colorLch = hexToLch(hex)
+      const colorOklch = hexToOklch(hex)
       return {
         name,
-        hue: colorLch?.h ?? 0,
+        hue: colorOklch?.h ?? 0,
         hex
       }
     })
@@ -64,7 +64,7 @@ export function HueSlider ({
       // Position 50% (center) = +180° shift
       // Position 100% (right edge) = +360° shift (full rotation)
       const hueShift = (position / 100) * 360
-      const targetHue = normalizeHue(lch.h + hueShift)
+      const targetHue = normalizeHue(oklch.h + hueShift)
 
       // Find the closest Tailwind color by hue
       let closestColor = colorHues[0]
