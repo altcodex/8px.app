@@ -4,7 +4,8 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import type { ChangeEvent } from 'react'
 import { useMemo } from 'react'
 
-import { hexToLch, lchToHex, normalizeHue } from '@/lib/color/color-utils'
+import { hexToLch, normalizeHue } from '@/lib/color/color-utils'
+import { getColorNames, tailwindColors } from '@/lib/color/tailwind-colors'
 
 export type HueSliderProps = {
   label?: string
@@ -41,11 +42,25 @@ export function HueSlider ({
 
   const thumbBg = '#fff'
 
-  // Generate gradient using actual color adjustment logic
-  // This ensures the gradient matches the actual palette output
+  // Generate gradient using Tailwind colors for visual consistency
   const gradientBackground = useMemo(() => {
     const lch = hexToLch(inputColor)
     if (!lch) return 'linear-gradient(to right, #888, #888)'
+
+    // Get all chromatic Tailwind colors with their hues
+    const colorNames = getColorNames().filter(name =>
+      !['slate', 'gray', 'zinc', 'neutral', 'stone'].includes(name)
+    )
+
+    const colorHues = colorNames.map(name => {
+      const hex = tailwindColors[name][500]
+      const colorLch = hexToLch(hex)
+      return {
+        name,
+        hue: colorLch?.h ?? 0,
+        hex
+      }
+    })
 
     const stops = []
 
@@ -59,16 +74,25 @@ export function HueSlider ({
       // Position 50% (center) = +180° shift
       // Position 100% (right edge) = +360° shift (full rotation)
       const hueShift = (position / 100) * 360
+      const targetHue = normalizeHue(lch.h + hueShift)
 
-      // Apply hue shift to the original color
-      const shiftedLch = {
-        l: lch.l,
-        c: lch.c,
-        h: normalizeHue(lch.h + hueShift)
+      // Find the closest Tailwind color by hue
+      let closestColor = colorHues[0]
+      let minDistance = Math.abs(targetHue - colorHues[0].hue)
+
+      for (const color of colorHues) {
+        // Calculate hue distance (accounting for circular nature of hue)
+        const distance1 = Math.abs(targetHue - color.hue)
+        const distance2 = 360 - distance1
+        const distance = Math.min(distance1, distance2)
+
+        if (distance < minDistance) {
+          minDistance = distance
+          closestColor = color
+        }
       }
 
-      const hexColor = lchToHex(shiftedLch)
-      stops.push(`${hexColor} ${position}%`)
+      stops.push(`${closestColor.hex} ${position}%`)
     }
 
     return `linear-gradient(to right, ${stops.join(', ')})`
