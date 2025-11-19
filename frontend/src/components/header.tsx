@@ -3,7 +3,7 @@
 import { CloseButton, Dialog, DialogPanel, Popover, PopoverButton, PopoverPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
@@ -15,6 +15,14 @@ import { ThemeToggle } from './theme-toggle'
 export function Header () {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const handleOpenMobileMenu = useCallback(() => {
+    setMobileMenuOpen(true)
+  }, [])
+
+  const handleCloseMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false)
+  }, [])
+
   return (
     <header className='border-b border-gray-200 dark:border-gray-700'>
       <nav className='mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 sm:px-6 lg:px-8'>
@@ -22,7 +30,7 @@ export function Header () {
         <button
           type='button'
           className='flex items-center justify-center rounded-lg p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10 sm:hidden'
-          onClick={() => setMobileMenuOpen(true)}
+          onClick={handleOpenMobileMenu}
           aria-label='Open menu'
         >
           <Bars3Icon className='size-5' />
@@ -138,14 +146,14 @@ export function Header () {
             >
               <DialogPanel className='fixed inset-y-0 left-0 w-[85vw] max-w-sm overflow-y-auto bg-white px-4 py-4 shadow-xl dark:bg-atom-one-dark-light'>
                 <div className='flex items-center justify-between'>
-                  <Link href='/' className='flex items-center gap-2 font-[Outfit] text-xl font-semibold' onClick={() => setMobileMenuOpen(false)}>
+                  <Link href='/' className='flex items-center gap-2 font-[Outfit] text-xl font-semibold' onClick={handleCloseMobileMenu}>
                     <LogoIcon className='size-6' />
                     {siteConfig.name}
                   </Link>
                   <button
                     type='button'
                     className='flex items-center justify-center rounded-lg p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10'
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={handleCloseMobileMenu}
                     aria-label='Close menu'
                   >
                     <XMarkIcon className='size-5' />
@@ -163,7 +171,7 @@ export function Header () {
                             key={tool.id}
                             href={`/${tool.id}`}
                             className='block rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={handleCloseMobileMenu}
                           >
                             <div className='text-sm font-medium'>{tool.name}</div>
                             <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>

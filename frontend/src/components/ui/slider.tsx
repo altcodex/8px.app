@@ -1,7 +1,7 @@
 'use client'
 
 import type { ChangeEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export type SliderProps = {
   label?: string
@@ -45,13 +45,13 @@ export function Slider ({
     return () => observer.disconnect()
   }, [])
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     onChange(Number(e.target.value))
-  }
+  }, [onChange])
 
-  const percentage = ((value - min) / (max - min)) * 100
+  const percentage = useMemo(() => ((value - min) / (max - min)) * 100, [value, min, max])
 
-  const trackColor = isDark ? 'rgb(75, 85, 99)' : 'rgb(226, 232, 240)'
+  const trackColor = useMemo(() => isDark ? 'rgb(75, 85, 99)' : 'rgb(226, 232, 240)', [isDark])
   const thumbBg = '#fff'
 
   return (

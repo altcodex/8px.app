@@ -1,4 +1,9 @@
-// SVGO plugin options
+import type { Config } from 'svgo/browser'
+import { optimize } from 'svgo/browser'
+
+/**
+ * SVGO plugin options
+ */
 export type SvgoOptions = {
   // Numeric options
   floatPrecision: number
@@ -42,7 +47,9 @@ export type SvgoOptions = {
   removeScriptElement: boolean
 }
 
-// Preset configurations
+/**
+ * Preset configurations
+ */
 export const PRESET_SAFE: SvgoOptions = {
   // Numeric values
   floatPrecision: 3,
@@ -194,110 +201,80 @@ export const PRESETS = [
   }
 ] as const
 
-// Plugin descriptions for UI
-export const PLUGIN_DESCRIPTIONS: Record<keyof SvgoOptions, string> = {
-  floatPrecision: '小数点以下の桁数',
-  transformPrecision: 'transform属性の精度',
-  removeDoctype: 'DOCTYPE宣言を削除',
-  removeComments: 'コメントを削除',
-  removeMetadata: 'メタデータを削除',
-  removeTitle: 'title要素を削除',
-  removeDesc: 'desc要素を削除',
-  removeUselessDefs: '未使用のdefs要素を削除',
-  removeEditorsNSData: 'エディタの名前空間データを削除',
-  removeEmptyAttrs: '空の属性を削除',
-  removeHiddenElems: '非表示要素を削除',
-  removeEmptyText: '空のテキスト要素を削除',
-  removeEmptyContainers: '空のコンテナを削除',
-  removeViewBox: 'viewBox属性を削除',
-  cleanupEnableBackground: 'enable-backgroundを最適化',
-  minifyStyles: 'スタイルを圧縮',
-  convertStyleToAttrs: 'スタイルを属性に変換',
-  convertColors: '色を短縮形に変換',
-  convertPathData: 'パスデータを最適化',
-  convertTransform: 'transform属性を最適化',
-  removeUnknownsAndDefaults: '不明な要素とデフォルト値を削除',
-  removeNonInheritableGroupAttrs: '継承不可能なグループ属性を削除',
-  removeUselessStrokeAndFill: '不要なstroke/fillを削除',
-  removeUnusedNS: '未使用の名前空間を削除',
-  cleanupIds: 'IDを最適化',
-  cleanupNumericValues: '数値を最適化',
-  cleanupListOfValues: '値のリストを最適化',
-  moveElemsAttrsToGroup: '要素の属性をグループに移動',
-  moveGroupAttrsToElems: 'グループの属性を要素に移動',
-  collapseGroups: 'グループを折りたたみ',
-  removeRasterImages: 'ラスター画像を削除',
-  mergePaths: 'パスをマージ',
-  convertShapeToPath: '図形をパスに変換',
-  sortAttrs: '属性をソート',
-  removeDimensions: 'width/height属性を削除',
-  removeStyleElement: 'style要素を削除',
-  removeScriptElement: 'script要素を削除'
+/**
+ * Convert our custom options format to SVGO config
+ */
+export function buildSvgoConfig (options: SvgoOptions): Config {
+  // Build plugins array with overrides
+  const plugins: any[] = [
+    // Start with preset-default but customize specific plugins
+    {
+      name: 'preset-default',
+      params: {
+        overrides: {
+          // Numeric precision overrides
+          cleanupNumericValues: {
+            floatPrecision: options.floatPrecision
+          },
+          convertTransform: {
+            floatPrecision: options.transformPrecision
+          },
+          // Boolean plugin overrides (false = disable, true = use default params)
+          removeDoctype: options.removeDoctype,
+          removeComments: options.removeComments,
+          removeMetadata: options.removeMetadata,
+          removeTitle: options.removeTitle,
+          removeDesc: options.removeDesc,
+          removeUselessDefs: options.removeUselessDefs,
+          removeEditorsNSData: options.removeEditorsNSData,
+          removeEmptyAttrs: options.removeEmptyAttrs,
+          removeHiddenElems: options.removeHiddenElems,
+          removeEmptyText: options.removeEmptyText,
+          removeEmptyContainers: options.removeEmptyContainers,
+          removeViewBox: options.removeViewBox,
+          cleanupEnableBackground: options.cleanupEnableBackground,
+          minifyStyles: options.minifyStyles,
+          convertStyleToAttrs: options.convertStyleToAttrs,
+          convertColors: options.convertColors,
+          convertPathData: options.convertPathData,
+          removeUnknownsAndDefaults: options.removeUnknownsAndDefaults,
+          removeNonInheritableGroupAttrs: options.removeNonInheritableGroupAttrs,
+          removeUselessStrokeAndFill: options.removeUselessStrokeAndFill,
+          removeUnusedNS: options.removeUnusedNS,
+          cleanupIds: options.cleanupIds,
+          cleanupListOfValues: options.cleanupListOfValues,
+          moveElemsAttrsToGroup: options.moveElemsAttrsToGroup,
+          moveGroupAttrsToElems: options.moveGroupAttrsToElems,
+          collapseGroups: options.collapseGroups,
+          removeRasterImages: options.removeRasterImages,
+          mergePaths: options.mergePaths,
+          convertShapeToPath: options.convertShapeToPath,
+          sortAttrs: options.sortAttrs,
+          removeDimensions: options.removeDimensions,
+          removeStyleElement: options.removeStyleElement,
+          removeScriptElement: options.removeScriptElement
+        }
+      }
+    }
+  ]
+
+  return {
+    plugins,
+    multipass: true
+  }
 }
 
-// Plugin groups for organized UI
-export const PLUGIN_GROUPS = [
-  {
-    id: 'cleanup',
-    label: 'クリーンアップ',
-    description: '不要な要素や属性を削除します。',
-    plugins: [
-      'removeDoctype',
-      'removeComments',
-      'removeMetadata',
-      'removeEditorsNSData',
-      'removeEmptyAttrs',
-      'removeHiddenElems',
-      'removeEmptyText',
-      'removeEmptyContainers',
-      'removeUselessDefs',
-      'removeUnusedNS',
-      'removeRasterImages',
-      'removeScriptElement',
-      'removeStyleElement'
-    ] as Array<keyof SvgoOptions>
-  },
-  {
-    id: 'optimization',
-    label: '最適化',
-    description: 'コードを最適化してファイルサイズを削減します。',
-    plugins: [
-      'cleanupIds',
-      'cleanupNumericValues',
-      'cleanupListOfValues',
-      'cleanupEnableBackground',
-      'minifyStyles',
-      'convertStyleToAttrs',
-      'convertColors',
-      'convertPathData',
-      'convertTransform',
-      'removeUnknownsAndDefaults',
-      'removeNonInheritableGroupAttrs',
-      'removeUselessStrokeAndFill'
-    ] as Array<keyof SvgoOptions>
-  },
-  {
-    id: 'structural',
-    label: '構造変更',
-    description: 'SVGの構造を変更して最適化します。',
-    plugins: [
-      'moveElemsAttrsToGroup',
-      'moveGroupAttrsToElems',
-      'collapseGroups',
-      'mergePaths',
-      'convertShapeToPath',
-      'sortAttrs'
-    ] as Array<keyof SvgoOptions>
-  },
-  {
-    id: 'advanced',
-    label: '高度な設定',
-    description: '特定の属性や要素を削除します。レイアウトに影響する可能性があります。',
-    plugins: [
-      'removeTitle',
-      'removeDesc',
-      'removeViewBox',
-      'removeDimensions'
-    ] as Array<keyof SvgoOptions>
+/**
+ * Optimize SVG using SVGO with the given options
+ */
+export function optimizeSvg (svgString: string, options: SvgoOptions): string {
+  const config = buildSvgoConfig(options)
+
+  try {
+    const result = optimize(svgString, config)
+    return result.data
+  } catch (error) {
+    console.error('SVGO optimization failed:', error)
+    throw new Error('SVGの最適化に失敗しました')
   }
-] as const
+}

@@ -6,17 +6,18 @@ import { LockClosedIcon, PhotoIcon, PlusIcon } from '@heroicons/react/24/outline
 import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { Breadcrumb } from '@/components/breadcrumb'
 import { CheckerboardPreview } from '@/components/checkerboard-preview'
-import { FullPageDropZone } from '@/components/full-page-drop-zone'
-import { useToast } from '@/components/toast'
-import { optimizeSvg } from '@/lib/svgo-optimizer'
+import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
+import { useToast } from '@/components/ui/toast'
+import { getToolById } from '@/config/tools'
+import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
+import { DEFAULT_SVGO_OPTIONS, optimizeSvg, PRESETS } from '@/lib/image/svgo-optimizer'
 
 import { SvgOptionsPanel } from './svg-options-panel'
-import type { PresetId, SvgoOptions } from './svgo-options'
-import { DEFAULT_SVGO_OPTIONS, PRESETS } from './svgo-options'
 
 export default function SvgOptimizerPage () {
+  const tool = getToolById('svg-optimizer')
   const toast = useToast()
   const [originalSvg, setOriginalSvg] = useState<string | null>(null)
   const [previewOptimizedSvg, setPreviewOptimizedSvg] = useState<string | null>(null)
@@ -58,6 +59,10 @@ export default function SvgOptimizerPage () {
       handleFileSelect(file)
     }
   }, [handleFileSelect])
+
+  const handleFileButtonClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
 
   const handlePresetChange = useCallback((presetId: PresetId) => {
     const preset = PRESETS.find(p => p.id === presetId)
@@ -132,12 +137,12 @@ export default function SvgOptimizerPage () {
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
-          { label: 'SVG圧縮ツール' }
+          { label: tool?.name ?? 'SVG圧縮ツール' }
         ]}
       />
 
       <div className='mx-auto max-w-screen-lg'>
-        <h1 className='mb-4 text-3xl font-bold'>SVG圧縮ツール</h1>
+        <h1 className='mb-4 text-2xl font-semibold'>{tool?.name ?? 'SVG圧縮ツール'}</h1>
         <p className='mb-4 text-gray-600 dark:text-gray-400'>
           SVGファイルを最適化・圧縮して、ファイルサイズを削減します。
         </p>
@@ -167,7 +172,7 @@ export default function SvgOptimizerPage () {
                 className='hidden'
               />
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleFileButtonClick}
                 className='flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white outline-none transition-colors hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:bg-sky-600 dark:hover:bg-sky-500'
               >
                 <PlusIcon className='size-5 stroke-2' />

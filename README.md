@@ -108,4 +108,4 @@ Visit: http://localhost:8000
 
 ## License
 
-MIT
+AGPL-3.0

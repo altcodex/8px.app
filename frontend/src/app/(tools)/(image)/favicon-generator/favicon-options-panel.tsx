@@ -1,6 +1,6 @@
-import { Slider } from '@/components/slider'
-import type { FaviconSize, OutputSetId } from '@/lib/favicon-generator'
-import { AVAILABLE_SIZES, DEFAULT_SIZES, OUTPUT_SETS } from '@/lib/favicon-generator'
+import { Slider } from '@/components/ui/slider'
+import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
+import { AVAILABLE_SIZES, DEFAULT_SIZES, OUTPUT_SETS } from '@/lib/image/favicon-generator'
 
 export interface FaviconOptionsPanelProps {
   selectedSets: Set<OutputSetId>

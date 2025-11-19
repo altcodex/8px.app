@@ -89,12 +89,12 @@ function ToastContainer ({ toasts, onRemove }: { toasts: Toast[], onRemove: (id:
 function ToastItem ({ toast, onRemove }: { toast: Toast, onRemove: (id: string) => void }) {
   const [show, setShow] = useState(true)
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShow(false)
     setTimeout(() => {
       onRemove(toast.id)
     }, 300)
-  }
+  }, [onRemove, toast.id])
 
   const getIcon = () => {
     switch (toast.type) {
@@ -109,7 +109,7 @@ function ToastItem ({ toast, onRemove }: { toast: Toast, onRemove: (id: string) 
     }
   }
 
-  const getBgColor = () => {
+  const getBgColor = useCallback(() => {
     switch (toast.type) {
       case 'success':
         return 'bg-green-500'
@@ -120,7 +120,7 @@ function ToastItem ({ toast, onRemove }: { toast: Toast, onRemove: (id: string) 
       case 'info':
         return 'bg-blue-500'
     }
-  }
+  }, [toast.type])
 
   return (
     <Transition show={show} as={Fragment}>
