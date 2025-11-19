@@ -1,6 +1,7 @@
 'use client'
 
-import { ClipboardDocumentIcon } from '@heroicons/react/24/outline'
+import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
+import { ChevronDownIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -25,6 +26,7 @@ export default function TailwindPaletteGeneratorPage () {
   const [palette, setPalette] = useState<ColorPalette | null>(null)
   const [hueShift, setHueShift] = useState(0) // 0 = no shift
   const [basePalette, setBasePalette] = useState<ColorPalette | null>(null)
+  const [selectedFormat, setSelectedFormat] = useState<'hex' | 'rgb' | 'hsl' | 'cmyk'>('hex')
 
   // Normalize color: add # prefix if missing
   const normalizedInputColor = inputColor.startsWith('#') ? inputColor : `#${inputColor}`
@@ -74,6 +76,31 @@ export default function TailwindPaletteGeneratorPage () {
       setPalette(adjusted)
     }
   }, [basePalette])
+
+  // Select format
+  const handleSelectFormat = useCallback((format: 'hex' | 'rgb' | 'hsl' | 'cmyk') => {
+    setSelectedFormat(format)
+  }, [])
+
+  // Get formatted color string
+  const getFormattedColor = useCallback((hex: string) => {
+    switch (selectedFormat) {
+      case 'hex':
+        return hex.toUpperCase()
+      case 'rgb': {
+        const rgb = hexToRgb(hex)
+        return rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : hex.toUpperCase()
+      }
+      case 'hsl': {
+        const hsl = hexToHsl(hex)
+        return hsl ? `hsl(${hsl.h}°, ${hsl.s}%, ${hsl.l}%)` : hex.toUpperCase()
+      }
+      case 'cmyk': {
+        const cmyk = hexToCmyk(hex)
+        return cmyk ? `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)` : hex.toUpperCase()
+      }
+    }
+  }, [selectedFormat])
 
   // Copy color to clipboard
   const handleCopyColor = useCallback(async (hex: string) => {
@@ -173,26 +200,22 @@ export default function TailwindPaletteGeneratorPage () {
               {/* Tailwind Color Picker */}
               <div className='rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-atom-one-dark-light'>
                 <h6 className='mb-4 text-sm font-semibold'>カラーパレットから選択</h6>
-                {/* Header Row */}
-                <div className='mb-3 flex items-center gap-1'>
-                  <div className='w-20 shrink-0 text-xs font-medium text-gray-600 dark:text-gray-400'>
-                    {/* Color name placeholder */}
-                  </div>
+                {/* Shade Header */}
+                <div className='mb-3 flex gap-1 md:ml-20'>
                   {getShades().map((shade) => (
                     <div
                       key={shade}
-                      className='flex size-9 shrink-0 items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400'
+                      className='flex size-6 shrink-0 items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-400 max-sm:-rotate-90 sm:size-10 md:size-12 lg:size-7 xl:size-9'
                     >
                       {shade}
                     </div>
                   ))}
                 </div>
-
                 {/* Chromatic Colors */}
                 <div className='space-y-3'>
                   {getColorNames().filter(name => !isGrayScale(name)).map((colorName) => (
-                    <div key={colorName} className='flex items-center gap-1'>
-                      <div className='w-20 shrink-0 text-xs font-medium text-gray-600 dark:text-gray-400'>
+                    <div key={colorName} className='md:flex md:items-center md:gap-2'>
+                      <div className='mb-1 text-xs font-medium uppercase text-gray-600 dark:text-gray-400 md:mb-0 md:w-[72px] md:shrink-0'>
                         {colorName}
                       </div>
                       <div className='flex gap-1'>
@@ -203,9 +226,9 @@ export default function TailwindPaletteGeneratorPage () {
                             <button
                               key={shade}
                               onClick={() => handleTailwindColorSelect(colorName, shade)}
-                              className='group relative size-9 shrink-0 rounded transition-transform hover:scale-110 focus:outline-none active:scale-95'
+                              className='group relative size-6 shrink-0 rounded transition-transform hover:scale-110 focus:outline-none active:scale-95 sm:size-10 md:size-12 lg:size-7 xl:size-9'
                               style={{ backgroundColor: hex }}
-                              title='クリックで選択'
+                              title={`${colorName}-${shade}`}
                             >
                               <span className='sr-only'>{colorName}-{shade}</span>
                             </button>
@@ -219,8 +242,8 @@ export default function TailwindPaletteGeneratorPage () {
                 {/* Grayscale Colors */}
                 <div className='mt-6 space-y-3 border-t border-gray-200 pt-6 dark:border-gray-700'>
                   {getColorNames().filter(name => isGrayScale(name)).map((colorName) => (
-                    <div key={colorName} className='flex items-center gap-1'>
-                      <div className='w-20 shrink-0 text-xs font-medium text-gray-600 dark:text-gray-400'>
+                    <div key={colorName} className='md:flex md:items-center md:gap-2'>
+                      <div className='mb-1 text-xs font-medium uppercase text-gray-600 dark:text-gray-400 md:mb-0 md:w-16 md:shrink-0'>
                         {colorName}
                       </div>
                       <div className='flex gap-1'>
@@ -231,9 +254,9 @@ export default function TailwindPaletteGeneratorPage () {
                             <button
                               key={shade}
                               onClick={() => handleTailwindColorSelect(colorName, shade)}
-                              className='group relative size-9 shrink-0 rounded transition-transform hover:scale-110 focus:outline-none active:scale-95'
+                              className='group relative size-6 shrink-0 rounded transition-transform hover:scale-110 focus:outline-none active:scale-95 sm:size-10 md:size-12 lg:size-7 xl:size-9'
                               style={{ backgroundColor: hex }}
-                              title='クリックで選択'
+                              title={`${colorName}-${shade}`}
                             >
                               <span className='sr-only'>{colorName}-{shade}</span>
                             </button>
@@ -250,7 +273,43 @@ export default function TailwindPaletteGeneratorPage () {
           {/* Right Column - Output (Always visible) */}
           <div className='lg:w-1/2'>
             <div className='rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-atom-one-dark-light'>
-              <h6 className='mb-4 text-sm font-semibold'>生成されたパレット</h6>
+              <div className='mb-4 flex items-center justify-between'>
+                <h6 className='text-sm font-semibold'>生成されたパレット</h6>
+                <Popover className='relative'>
+                  {({ open }) => (
+                    <>
+                      <PopoverButton className='flex items-center gap-1 rounded px-2 py-1 text-xs font-medium uppercase outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-800'>
+                        {selectedFormat}
+                        <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+                      </PopoverButton>
+                      <Transition
+                        enter='transition duration-100 ease-out'
+                        enterFrom='transform scale-95 opacity-0'
+                        enterTo='transform scale-100 opacity-100'
+                        leave='transition duration-100 ease-out'
+                        leaveFrom='transform scale-100 opacity-100'
+                        leaveTo='transform scale-95 opacity-0'
+                      >
+                        <PopoverPanel className='absolute right-0 z-50 mt-2 w-32'>
+                          <div className='overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
+                            {(['hex', 'rgb', 'hsl', 'cmyk'] as const).map((format) => (
+                              <button
+                                key={format}
+                                onClick={() => handleSelectFormat(format)}
+                                className={`block w-full rounded px-3 py-1.5 text-left text-sm uppercase outline-none transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter ${
+                                  selectedFormat === format ? 'bg-sky-50 font-medium text-sky-600 dark:bg-sky-900/20 dark:text-sky-400' : ''
+                                }`}
+                              >
+                                {format}
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverPanel>
+                      </Transition>
+                    </>
+                  )}
+                </Popover>
+              </div>
 
               {palette
                 ? (
@@ -268,36 +327,9 @@ export default function TailwindPaletteGeneratorPage () {
                           title='クリックでコピー'
                         />
                         <div className='flex flex-1 items-center gap-4'>
-                          {(() => {
-                            const rgb = hexToRgb(adjustedOriginalColor)
-                            const hsl = hexToHsl(adjustedOriginalColor)
-                            const cmyk = hexToCmyk(adjustedOriginalColor)
-
-                            return (
-                              <>
-                                <div className='font-mono text-sm font-semibold text-gray-900 dark:text-gray-100'>
-                                  {adjustedOriginalColor.toUpperCase()}
-                                </div>
-                                <div className='flex-1 space-y-0 text-xs leading-tight text-gray-500 dark:text-gray-500'>
-                                  {rgb && (
-                                    <div className='font-mono'>
-                                      rgb({rgb.r}, {rgb.g}, {rgb.b})
-                                    </div>
-                                  )}
-                                  {hsl && (
-                                    <div className='font-mono'>
-                                      hsl({hsl.h}°, {hsl.s}%, {hsl.l}%)
-                                    </div>
-                                  )}
-                                  {cmyk && (
-                                    <div className='font-mono'>
-                                      cmyk({cmyk.c}%, {cmyk.m}%, {cmyk.y}%, {cmyk.k}%)
-                                    </div>
-                                  )}
-                                </div>
-                              </>
-                            )
-                          })()}
+                          <div className='font-mono text-sm font-semibold text-gray-900 dark:text-gray-100'>
+                            {getFormattedColor(adjustedOriginalColor)}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -306,9 +338,6 @@ export default function TailwindPaletteGeneratorPage () {
                     <div className='mb-4 space-y-1'>
                       {getShadeLabels().map((shade) => {
                         const hex = palette[shade]
-                        const rgb = hexToRgb(hex)
-                        const hsl = hexToHsl(hex)
-                        const cmyk = hexToCmyk(hex)
 
                         return (
                           <div
@@ -328,28 +357,9 @@ export default function TailwindPaletteGeneratorPage () {
                               {shade}
                             </div>
 
-                            {/* HEX Value */}
+                            {/* Formatted Color Value */}
                             <div className='font-mono text-sm font-semibold text-gray-900 dark:text-gray-100'>
-                              {hex.toUpperCase()}
-                            </div>
-
-                            {/* Other Color Spaces */}
-                            <div className='ml-auto space-y-0 text-xs leading-tight text-gray-500 dark:text-gray-500'>
-                              {rgb && (
-                                <div className='font-mono'>
-                                  rgb({rgb.r}, {rgb.g}, {rgb.b})
-                                </div>
-                              )}
-                              {hsl && (
-                                <div className='font-mono'>
-                                  hsl({hsl.h}°, {hsl.s}%, {hsl.l}%)
-                                </div>
-                              )}
-                              {cmyk && (
-                                <div className='font-mono'>
-                                  cmyk({cmyk.c}%, {cmyk.m}%, {cmyk.k}%)
-                                </div>
-                              )}
+                              {getFormattedColor(hex)}
                             </div>
                           </div>
                         )
