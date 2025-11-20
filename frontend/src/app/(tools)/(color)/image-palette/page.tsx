@@ -9,79 +9,37 @@ import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
 import { useColorHistory } from '@/contexts/color-history-context'
 import { validateImageFile } from '@/lib/file/file-validation'
-import { loadImageFromFile } from '@/lib/image/image-processing'
 
 type ExtractedColor = {
   hex: string
   percentage: number
 }
 
-// Mock color extraction using canvas sampling
+// API base URL for color extraction
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+// Extract colors using backend API with k-means++
 async function extractColorsFromImage (
-  image: HTMLImageElement,
+  file: File,
   numColors: number
 ): Promise<ExtractedColor[]> {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    if (!ctx) {
-      resolve([])
-      return
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/colors/extract?num_colors=${numColors}`,
+    {
+      method: 'POST',
+      body: formData
     }
+  )
 
-    // Downsample for performance
-    const maxSize = 100
-    const scale = Math.min(maxSize / image.width, maxSize / image.height, 1)
-    canvas.width = image.width * scale
-    canvas.height = image.height * scale
+  if (!response.ok) {
+    throw new Error('Failed to extract colors')
+  }
 
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-    const pixels = imageData.data
-
-    // Collect pixel colors
-    const colorMap = new Map<string, number>()
-
-    for (let i = 0; i < pixels.length; i += 4) {
-      // Quantize to reduce color space (clamp to 0-255)
-      const r = Math.min(255, Math.round(pixels[i] / 32) * 32)
-      const g = Math.min(255, Math.round(pixels[i + 1] / 32) * 32)
-      const b = Math.min(255, Math.round(pixels[i + 2] / 32) * 32)
-
-      // Skip very dark or very light colors
-      const brightness = (r + g + b) / 3
-      if (brightness < 30 || brightness > 225) continue
-
-      const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-      colorMap.set(hex, (colorMap.get(hex) || 0) + 1)
-    }
-
-    // Fallback if no colors found
-    if (colorMap.size === 0) {
-      resolve([
-        { hex: '#808080', percentage: 25 },
-        { hex: '#a0a0a0', percentage: 25 },
-        { hex: '#c0c0c0', percentage: 25 },
-        { hex: '#e0e0e0', percentage: 25 }
-      ])
-      return
-    }
-
-    // Sort by frequency and take top colors
-    const sortedColors = Array.from(colorMap.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, numColors)
-
-    const totalCount = sortedColors.reduce((sum, [, count]) => sum + count, 0)
-
-    const result: ExtractedColor[] = sortedColors.map(([hex, count]) => ({
-      hex,
-      percentage: (count / totalCount) * 100
-    }))
-
-    // Simulate processing delay
-    setTimeout(() => resolve(result), 800)
-  })
+  const data = await response.json()
+  return data.colors as ExtractedColor[]
 }
 
 export default function ImagePalettePage () {
@@ -96,7 +54,7 @@ export default function ImagePalettePage () {
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Fixed color count for simplicity
-  const colorCount = 4
+  const colorCount = 5
 
   // Cleanup blob URL on unmount or when preview changes
   useEffect(() => {
@@ -125,21 +83,17 @@ export default function ImagePalettePage () {
     setExtractedColors([])
     setIsProcessing(true)
 
-    // Create preview URL (separate from loadImageFromFile which revokes URL)
+    // Create preview URL
     const previewUrl = URL.createObjectURL(file)
     setImagePreview(previewUrl)
 
-    // Load image for processing
+    // Extract colors using backend API
     try {
-      const image = await loadImageFromFile(file)
-
-      // Auto-extract colors (mock implementation using canvas sampling)
-      // TODO: Replace with backend API for k-means++ color extraction
-      const colors = await extractColorsFromImage(image, colorCount)
+      const colors = await extractColorsFromImage(file, colorCount)
       setExtractedColors(colors)
     } catch (err) {
-      toast.error('画像の読み込みに失敗しました')
-      console.error('Failed to load image:', err)
+      toast.error('色の抽出に失敗しました')
+      console.error('Failed to extract colors:', err)
     } finally {
       setIsProcessing(false)
     }
@@ -157,7 +111,7 @@ export default function ImagePalettePage () {
     }
   }, [toast, addColor])
 
-  // Download shareable palette image (2x2 grid)
+  // Download shareable palette image (waffle chart style)
   const handleDownloadPalette = useCallback(() => {
     if (extractedColors.length === 0) return
 
@@ -169,22 +123,52 @@ export default function ImagePalettePage () {
 
     // Canvas size for social media (1:1 ratio)
     const size = 1080
-    const gap = 8
-    const cellSize = (size - gap) / 2
+    const gridSize = 8 // 8x8 grid = 64 cells (8px.app!)
+    const totalCellCount = gridSize * gridSize
+    // gap = cellSize / 8 (8px.app!), solve: size = gridSize * cellSize + (gridSize - 1) * (cellSize / 8)
+    const cellSize = size / (gridSize + (gridSize - 1) / 8)
+    const gap = cellSize / 8
+    const cornerRadius = cellSize / 8 // Same as gap for visual harmony
 
     canvas.width = size
     canvas.height = size
 
-    // Draw 2x2 grid
-    extractedColors.slice(0, 4).forEach((color, i) => {
-      const row = Math.floor(i / 2)
-      const col = i % 2
+    // Calculate cell counts based on percentages (scaled to 64 cells)
+    const cellCounts: number[] = []
+    let totalCells = 0
+
+    extractedColors.forEach((color) => {
+      const cells = Math.round((color.percentage / 100) * totalCellCount)
+      cellCounts.push(cells)
+      totalCells += cells
+    })
+
+    // Adjust to exactly 64 cells
+    const diff = totalCellCount - totalCells
+    if (diff !== 0 && cellCounts.length > 0) {
+      cellCounts[0] += diff
+    }
+
+    // Create array of colors for each cell
+    const cellColors: string[] = []
+    extractedColors.forEach((color, i) => {
+      for (let j = 0; j < cellCounts[i]; j++) {
+        cellColors.push(color.hex)
+      }
+    })
+
+    // Draw waffle chart
+    for (let i = 0; i < gridSize * gridSize; i++) {
+      const row = Math.floor(i / gridSize)
+      const col = i % gridSize
       const x = col * (cellSize + gap)
       const y = row * (cellSize + gap)
 
-      ctx.fillStyle = color.hex
-      ctx.fillRect(x, y, cellSize, cellSize)
-    })
+      ctx.fillStyle = cellColors[i] || '#ffffff'
+      ctx.beginPath()
+      ctx.roundRect(x, y, cellSize, cellSize, cornerRadius)
+      ctx.fill()
+    }
 
     // Download
     canvas.toBlob((blob) => {
