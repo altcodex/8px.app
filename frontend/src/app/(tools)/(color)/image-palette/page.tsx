@@ -1,16 +1,13 @@
 'use client'
 
-import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
-import { ChevronDownIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import { useCallback, useState } from 'react'
+import { PhotoIcon } from '@heroicons/react/24/outline'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
 import { useColorHistory } from '@/contexts/color-history-context'
-import { hexToCmyk, hexToHsl, hexToRgb } from '@/lib/color/color-utils'
 import { validateImageFile } from '@/lib/file/file-validation'
 import { loadImageFromFile } from '@/lib/image/image-processing'
 
@@ -19,26 +16,104 @@ type ExtractedColor = {
   percentage: number
 }
 
+// Mock color extraction using canvas sampling
+async function extractColorsFromImage (
+  image: HTMLImageElement,
+  numColors: number
+): Promise<ExtractedColor[]> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      resolve([])
+      return
+    }
+
+    // Downsample for performance
+    const maxSize = 100
+    const scale = Math.min(maxSize / image.width, maxSize / image.height, 1)
+    canvas.width = image.width * scale
+    canvas.height = image.height * scale
+
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const pixels = imageData.data
+
+    // Collect pixel colors
+    const colorMap = new Map<string, number>()
+
+    for (let i = 0; i < pixels.length; i += 4) {
+      // Quantize to reduce color space (clamp to 0-255)
+      const r = Math.min(255, Math.round(pixels[i] / 32) * 32)
+      const g = Math.min(255, Math.round(pixels[i + 1] / 32) * 32)
+      const b = Math.min(255, Math.round(pixels[i + 2] / 32) * 32)
+
+      // Skip very dark or very light colors
+      const brightness = (r + g + b) / 3
+      if (brightness < 30 || brightness > 225) continue
+
+      const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+      colorMap.set(hex, (colorMap.get(hex) || 0) + 1)
+    }
+
+    // Fallback if no colors found
+    if (colorMap.size === 0) {
+      resolve([
+        { hex: '#808080', percentage: 25 },
+        { hex: '#a0a0a0', percentage: 25 },
+        { hex: '#c0c0c0', percentage: 25 },
+        { hex: '#e0e0e0', percentage: 25 }
+      ])
+      return
+    }
+
+    // Sort by frequency and take top colors
+    const sortedColors = Array.from(colorMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, numColors)
+
+    const totalCount = sortedColors.reduce((sum, [, count]) => sum + count, 0)
+
+    const result: ExtractedColor[] = sortedColors.map(([hex, count]) => ({
+      hex,
+      percentage: (count / totalCount) * 100
+    }))
+
+    // Simulate processing delay
+    setTimeout(() => resolve(result), 800)
+  })
+}
+
 export default function ImagePalettePage () {
   const tool = getToolById('image-palette')
   const toast = useToast()
   const { addColor } = useColorHistory()
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // State
-  const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [colorCount, setColorCount] = useState(6)
-  const [selectedFormat, setSelectedFormat] = useState<'hex' | 'rgb' | 'hsl' | 'cmyk'>('hex')
 
-  // Handle file drop/select
+  // Fixed color count for simplicity
+  const colorCount = 4
+
+  // Cleanup blob URL on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview)
+      }
+    }
+  }, [imagePreview])
+
+  // Handle file drop/select and auto-extract
   const handleFileSelect = useCallback(async (file: File | null) => {
     if (!file) return
 
     // Validate file
     const error = await validateImageFile(file, {
-      maxSize: 10 * 1024 * 1024, // 10MB
+      maxSize: 10 * 1024 * 1024,
       maxDimensions: { width: 4096, height: 4096 }
     })
 
@@ -47,80 +122,85 @@ export default function ImagePalettePage () {
       return
     }
 
-    setImageFile(file)
     setExtractedColors([])
+    setIsProcessing(true)
 
-    // Create preview
+    // Create preview URL (separate from loadImageFromFile which revokes URL)
+    const previewUrl = URL.createObjectURL(file)
+    setImagePreview(previewUrl)
+
+    // Load image for processing
     try {
       const image = await loadImageFromFile(file)
-      setImagePreview(image.src)
+
+      // Auto-extract colors (mock implementation using canvas sampling)
+      // TODO: Replace with backend API for k-means++ color extraction
+      const colors = await extractColorsFromImage(image, colorCount)
+      setExtractedColors(colors)
     } catch (err) {
       toast.error('画像の読み込みに失敗しました')
       console.error('Failed to load image:', err)
-    }
-  }, [toast])
-
-  // Extract colors from image
-  const handleExtractColors = useCallback(async () => {
-    if (!imageFile) return
-
-    setIsProcessing(true)
-
-    try {
-      // TODO: Call backend API for k-means++ color extraction
-      // For now, show placeholder message
-      toast.info('バックエンドAPIは開発中です')
-
-      // Placeholder: will be replaced with actual API call
-      setExtractedColors([])
-    } catch (err) {
-      toast.error('色の抽出に失敗しました')
-      console.error('Failed to extract colors:', err)
     } finally {
       setIsProcessing(false)
     }
-  }, [imageFile, toast])
-
-  // Get formatted color string
-  const getFormattedColor = useCallback((hex: string) => {
-    switch (selectedFormat) {
-      case 'hex':
-        return hex.toUpperCase()
-      case 'rgb': {
-        const rgb = hexToRgb(hex)
-        return rgb ? `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})` : hex.toUpperCase()
-      }
-      case 'hsl': {
-        const hsl = hexToHsl(hex)
-        return hsl ? `hsl(${hsl.h}°, ${hsl.s}%, ${hsl.l}%)` : hex.toUpperCase()
-      }
-      case 'cmyk': {
-        const cmyk = hexToCmyk(hex)
-        return cmyk ? `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)` : hex.toUpperCase()
-      }
-    }
-  }, [selectedFormat])
+  }, [toast, colorCount])
 
   // Copy color to clipboard
   const handleCopyColor = useCallback(async (hex: string) => {
     try {
-      await navigator.clipboard.writeText(getFormattedColor(hex))
+      await navigator.clipboard.writeText(hex.toUpperCase())
       addColor(hex)
-      toast.success('クリップボードにコピーしました')
+      toast.success('コピーしました')
     } catch (err) {
       toast.error('コピーに失敗しました')
       console.error('Failed to copy:', err)
     }
-  }, [toast, addColor, getFormattedColor])
+  }, [toast, addColor])
 
-  // Select format
-  const handleSelectFormat = useCallback((format: 'hex' | 'rgb' | 'hsl' | 'cmyk') => {
-    setSelectedFormat(format)
-  }, [])
+  // Download shareable palette image (2x2 grid)
+  const handleDownloadPalette = useCallback(() => {
+    if (extractedColors.length === 0) return
 
-  // Clear image
-  const handleClear = useCallback(() => {
-    setImageFile(null)
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Canvas size for social media (1:1 ratio)
+    const size = 1080
+    const gap = 8
+    const cellSize = (size - gap) / 2
+
+    canvas.width = size
+    canvas.height = size
+
+    // Draw 2x2 grid
+    extractedColors.slice(0, 4).forEach((color, i) => {
+      const row = Math.floor(i / 2)
+      const col = i % 2
+      const x = col * (cellSize + gap)
+      const y = row * (cellSize + gap)
+
+      ctx.fillStyle = color.hex
+      ctx.fillRect(x, y, cellSize, cellSize)
+    })
+
+    // Download
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'palette.png'
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    }, 'image/png')
+  }, [extractedColors])
+
+  // Reset
+  const handleReset = useCallback(() => {
     setImagePreview(null)
     setExtractedColors([])
   }, [])
@@ -130,198 +210,124 @@ export default function ImagePalettePage () {
       onFileDrop={handleFileSelect}
       accept='image/*'
     >
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'イメージパレット+' }
-        ]}
-      />
+      {/* Hidden canvas for image generation */}
+      <canvas ref={canvasRef} className='hidden' />
 
-      <div className='mx-auto max-w-screen-sm lg:max-w-screen-xl'>
-        <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'イメージパレット+'}</h1>
-          <p className='text-gray-600 dark:text-gray-400'>
-            {tool?.description ?? ''}
-          </p>
+      <div className='mx-auto flex min-h-[calc(100vh-12rem)] max-w-screen-md flex-col px-4'>
+        {/* Header */}
+        <div className='py-8 text-center'>
+          <h1 className='text-3xl font-bold'>{tool?.name ?? 'イメージパレット+'}</h1>
+          {!imagePreview && (
+            <p className='mt-2 text-gray-500 dark:text-gray-400'>
+              画像をドロップするだけでカラーパレットを作成
+            </p>
+          )}
         </div>
 
-        {/* Two Column Layout */}
-        <div className='flex flex-col gap-12 lg:grid lg:grid-cols-2'>
-          {/* Left Column - Input */}
-          <div className='space-y-8'>
-            {/* Image Upload */}
-            <section>
-              <h6 className='mb-4 text-sm font-semibold'>画像アップロード</h6>
-              {!imagePreview
-                ? (
-                  <label className='flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-12 transition-colors hover:border-sky-500 hover:bg-sky-50 dark:border-gray-600 dark:bg-atom-one-dark-light dark:hover:border-sky-500 dark:hover:bg-atom-one-dark-lighter'>
-                    <PhotoIcon className='mb-4 size-12 text-gray-400' />
-                    <span className='mb-2 text-sm font-medium text-gray-600 dark:text-gray-400'>
-                      クリックまたはドラッグ&ドロップで画像をアップロード
-                    </span>
-                    <span className='text-xs text-gray-500 dark:text-gray-500'>
-                      JPEG, PNG, WebP, SVG (最大10MB)
-                    </span>
-                    <input
-                      type='file'
-                      accept='image/*'
-                      onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-                      className='hidden'
+        {/* Main Content */}
+        {!imagePreview && !isProcessing
+          ? (
+            // Upload State
+            <div className='flex flex-1 items-center justify-center pb-12'>
+              <label className='group flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-3xl border-[3px] border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 p-16 transition-all hover:border-sky-400 hover:from-sky-50 hover:to-indigo-50 dark:border-gray-600 dark:from-atom-one-dark dark:to-atom-one-dark-light dark:hover:border-sky-500 dark:hover:from-atom-one-dark-light dark:hover:to-atom-one-dark-lighter'>
+                <div className='mb-6 rounded-full bg-white p-6 shadow-lg transition-transform group-hover:scale-110 dark:bg-atom-one-dark-lighter'>
+                  <PhotoIcon className='size-12 text-gray-400 transition-colors group-hover:text-sky-500' />
+                </div>
+                <span className='mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300'>
+                  画像をドロップ
+                </span>
+                <span className='text-sm text-gray-500 dark:text-gray-400'>
+                  またはクリックして選択
+                </span>
+                <input
+                  type='file'
+                  accept='image/*'
+                  onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                  className='hidden'
+                />
+              </label>
+            </div>
+            )
+          : isProcessing
+            ? (
+              // Processing State
+              <div className='flex flex-1 flex-col items-center justify-center pb-12'>
+                <div className='relative mb-8'>
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt='Processing'
+                      className='max-h-64 rounded-2xl opacity-50'
                     />
-                  </label>
-                  )
-                : (
-                  <div className='space-y-4'>
-                    <div className='relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700'>
-                      <img
-                        src={imagePreview}
-                        alt='Uploaded preview'
-                        className='max-h-80 w-full object-contain'
-                      />
-                    </div>
-                    <div className='flex gap-2'>
-                      <button
-                        onClick={handleClear}
-                        className='rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-atom-one-dark-lighter'
-                      >
-                        クリア
-                      </button>
-                      <label className='cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-atom-one-dark-lighter'>
-                        別の画像を選択
-                        <input
-                          type='file'
-                          accept='image/*'
-                          onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-                          className='hidden'
-                        />
-                      </label>
+                  )}
+                  <div className='absolute inset-0 flex items-center justify-center'>
+                    <div className='rounded-full bg-white/90 p-4 shadow-lg dark:bg-atom-one-dark/90'>
+                      <Spinner size={32} className='text-sky-500' />
                     </div>
                   </div>
-                  )}
-            </section>
+                </div>
+                <p className='text-lg font-medium text-gray-600 dark:text-gray-400'>
+                  色を解析中...
+                </p>
+              </div>
+              )
+            : (
+              // Result State
+              <div className='flex flex-1 flex-col pb-8'>
+                {/* Image Preview - Polaroid/Cheki style */}
+                <div className='mb-8 flex justify-center'>
+                  <div className='rotate-[-2deg] bg-white p-3 pb-12 shadow-xl dark:bg-gray-100'>
+                    <img
+                      src={imagePreview!}
+                      alt='Uploaded'
+                      className='max-h-56 w-auto'
+                    />
+                  </div>
+                </div>
 
-            {/* Settings */}
-            <section>
-              <h6 className='mb-4 text-sm font-semibold'>設定</h6>
-              <div className='space-y-4'>
-                {/* Color Count */}
-                <div>
-                  <label className='mb-2 block text-sm text-gray-600 dark:text-gray-400'>
-                    抽出する色の数: {colorCount}
-                  </label>
-                  <input
-                    type='range'
-                    min={2}
-                    max={12}
-                    value={colorCount}
-                    onChange={(e) => setColorCount(Number(e.target.value))}
-                    className='w-full'
-                  />
+                {/* Color Palette */}
+                <div className='mb-8'>
+                  <div className='flex flex-wrap justify-center gap-4'>
+                    {extractedColors.map((color, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleCopyColor(color.hex)}
+                        className='transition-transform hover:scale-110 active:scale-95'
+                      >
+                        <div
+                          className='size-16 rounded-full shadow-lg ring-4 ring-white dark:ring-gray-800 sm:size-20'
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className='flex flex-col items-center gap-4'>
+                  <div className='flex gap-3'>
+                    <button
+                      onClick={handleDownloadPalette}
+                      className='w-32 rounded-full bg-sky-500 py-3 font-medium text-white transition-colors hover:bg-sky-600'
+                    >
+                      ダウンロード
+                    </button>
+                    <button
+                      onClick={() => toast.info('シェア機能は開発中です')}
+                      className='w-32 rounded-full border border-gray-300 py-3 font-medium transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-atom-one-dark-lighter'
+                    >
+                      シェア
+                    </button>
+                  </div>
+                  <button
+                    onClick={handleReset}
+                    className='text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                  >
+                    別の画像で試す
+                  </button>
                 </div>
               </div>
-            </section>
-
-            {/* Extract Button */}
-            <button
-              onClick={handleExtractColors}
-              disabled={!imageFile || isProcessing}
-              className='w-full rounded-lg bg-sky-500 px-4 py-3 font-medium text-white transition-colors hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700'
-            >
-              {isProcessing
-                ? (
-                  <span className='flex items-center justify-center gap-2'>
-                    <Spinner className='size-5' />
-                    処理中...
-                  </span>
-                  )
-                : (
-                    '色を抽出'
-                  )}
-            </button>
-          </div>
-
-          {/* Right Column - Output */}
-          <div className='space-y-8'>
-            {/* Format Selector */}
-            <section className='flex items-center justify-between'>
-              <h6 className='text-sm font-semibold'>抽出されたカラーパレット</h6>
-              <Popover className='relative'>
-                {({ open }) => (
-                  <>
-                    <PopoverButton className='flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'>
-                      {selectedFormat}
-                      <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-                    </PopoverButton>
-                    <Transition
-                      enter='transition duration-100 ease-out'
-                      enterFrom='transform scale-95 opacity-0'
-                      enterTo='transform scale-100 opacity-100'
-                      leave='transition duration-100 ease-out'
-                      leaveFrom='transform scale-100 opacity-100'
-                      leaveTo='transform scale-95 opacity-0'
-                    >
-                      <PopoverPanel className='absolute right-0 z-50 mt-2 w-32'>
-                        <div className='overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
-                          {(['hex', 'rgb', 'hsl', 'cmyk'] as const).map((format) => (
-                            <button
-                              key={format}
-                              onClick={() => handleSelectFormat(format)}
-                              className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm uppercase outline-none transition-colors ${selectedFormat === format
-                                  ? 'bg-sky-50 font-medium dark:bg-atom-one-dark-lighter'
-                                  : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter dark:focus-visible:bg-atom-one-dark-lighter'
-                                }`}
-                            >
-                              {format}
-                            </button>
-                          ))}
-                        </div>
-                      </PopoverPanel>
-                    </Transition>
-                  </>
-                )}
-              </Popover>
-            </section>
-
-            {/* Extracted Colors */}
-            {extractedColors.length > 0
-              ? (
-                <div className='space-y-2'>
-                  {extractedColors.map((color, index) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-atom-one-dark-lighter'
-                    >
-                      {/* Color Swatch */}
-                      <button
-                        onClick={() => handleCopyColor(color.hex)}
-                        className='size-12 flex-shrink-0 cursor-pointer rounded-lg shadow-sm outline-none transition-transform hover:scale-110 focus-visible:scale-110 active:scale-95'
-                        style={{ backgroundColor: color.hex }}
-                        title='クリックでコピー'
-                      />
-
-                      {/* Color Info */}
-                      <div className='flex-1'>
-                        <div className='font-mono text-sm font-medium'>
-                          {getFormattedColor(color.hex)}
-                        </div>
-                        <div className='text-xs text-gray-500'>
-                          {color.percentage.toFixed(1)}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                )
-              : (
-                <div className='flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 p-12 text-center dark:border-gray-700'>
-                  <PhotoIcon className='mb-4 size-12 text-gray-300 dark:text-gray-600' />
-                  <p className='text-sm text-gray-500 dark:text-gray-400'>
-                    画像をアップロードして「色を抽出」ボタンをクリックしてください
-                  </p>
-                </div>
-                )}
-          </div>
-        </div>
+              )}
       </div>
     </FullPageDropZone>
   )
