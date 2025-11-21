@@ -35,12 +35,14 @@ export async function loadImageFromFile (file: File): Promise<HTMLImageElement> 
 /**
  * 画像をリサイズして処理を適用
  * @param image HTMLImageElement
- * @param size 出力サイズ（preserveAspectRatio=trueの場合は最大幅/高さ）
+ * @param maxWidth 最大幅（preserveAspectRatio=falseの場合は出力幅）
+ * @param maxHeight 最大高さ（preserveAspectRatio=falseの場合は出力高さ、省略時はmaxWidthと同じ）
  * @param options 処理オプション
  */
 export async function processImage (
   image: HTMLImageElement,
-  size: number,
+  maxWidth: number,
+  maxHeight?: number,
   options: ImageProcessingOptions = {}
 ): Promise<Blob> {
   const canvas = document.createElement('canvas')
@@ -50,29 +52,21 @@ export async function processImage (
     throw new Error('Canvasコンテキストの取得に失敗しました')
   }
 
+  // If maxHeight is not specified, use maxWidth (square)
+  const maxH = maxHeight ?? maxWidth
+
   // サイズ計算
-  let width = size
-  let height = size
+  let width = maxWidth
+  let height = maxH
 
   if (options.preserveAspectRatio) {
-    // アスペクト比を保持
-    if (image.width > image.height) {
-      if (image.width > size) {
-        height = Math.round((image.height * size) / image.width)
-        width = size
-      } else {
-        width = image.width
-        height = image.height
-      }
-    } else {
-      if (image.height > size) {
-        width = Math.round((image.width * size) / image.height)
-        height = size
-      } else {
-        width = image.width
-        height = image.height
-      }
-    }
+    // アスペクト比を保持しながら、maxWidth と maxHeight の範囲内に収める
+    const widthRatio = maxWidth / image.width
+    const heightRatio = maxH / image.height
+    const scale = Math.min(widthRatio, heightRatio, 1) // 1を超えないように（拡大しない）
+
+    width = Math.round(image.width * scale)
+    height = Math.round(image.height * scale)
   }
 
   canvas.width = width
@@ -89,19 +83,19 @@ export async function processImage (
   if (!options.preserveAspectRatio) {
     if (options.borderRadius && options.borderRadius > 0) {
       radius = options.borderRadius
-      // px指定で半径がsize/2以上の場合は円として扱う
-      if (radius >= size / 2) {
-        radius = size / 2
+      // px指定で半径がmaxWidth/2以上の場合は円として扱う
+      if (radius >= maxWidth / 2) {
+        radius = maxWidth / 2
         isCircle = true
       }
     } else if (options.borderRadiusPercent && options.borderRadiusPercent > 0) {
       // %指定の場合、100%で完全な円
       if (options.borderRadiusPercent >= 100) {
-        radius = size / 2
+        radius = maxWidth / 2
         isCircle = true
       } else {
         // 100%未満の場合は角丸の半径を計算
-        radius = (size / 2) * (options.borderRadiusPercent / 100)
+        radius = (maxWidth / 2) * (options.borderRadiusPercent / 100)
       }
     }
   }

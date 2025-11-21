@@ -1,7 +1,7 @@
 'use client'
 
 import { PhotoIcon } from '@heroicons/react/24/outline'
-import { toBlob } from 'html-to-image'
+import { domToBlob } from 'modern-screenshot'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { WavingHandIcon } from '@/components/icons/waving-hand-icon'
@@ -18,6 +18,7 @@ import type { ExtractedColor } from '@/lib/api/colors'
 import { extractColorsFromImage, } from '@/lib/api/colors'
 import { generateWaffleChartBlob } from '@/lib/color/waffle-chart'
 import { validateImageFile } from '@/lib/file/file-validation'
+import { loadImageFromFile, processImage } from '@/lib/image/image-processing'
 
 // Sample data for showcase
 const sampleImages = [
@@ -161,22 +162,24 @@ export default function ImagePalettePage () {
     setExtractedColors([])
     setIsProcessing(true)
 
-    // Create preview URL
-    const previewUrl = URL.createObjectURL(file)
-    setImagePreview(previewUrl)
-
-    // Load image to get dimensions
-    const img = new Image()
-    img.onload = () => {
-      setImageDimensions({ width: img.width, height: img.height })
-    }
-    img.src = previewUrl
-
-    // Random rotation for result (-3 to 3)
-    setResultRotation(Math.random() * 6 - 3)
-
-    // Extract colors using backend API
     try {
+      // Load and resize image for preview (max 1200x800)
+      const image = await loadImageFromFile(file)
+      const resizedBlob = await processImage(image, 1200, 800, { preserveAspectRatio: true })
+      const previewUrl = URL.createObjectURL(resizedBlob)
+      setImagePreview(previewUrl)
+
+      // Store resized dimensions for waffle chart generation
+      const resizedImg = new Image()
+      resizedImg.onload = () => {
+        setImageDimensions({ width: resizedImg.width, height: resizedImg.height })
+      }
+      resizedImg.src = previewUrl
+
+      // Random rotation for result (-3 to 3)
+      setResultRotation(Math.random() * 6 - 3)
+
+      // Extract colors using backend API
       const colors = await extractColorsFromImage(file, colorCount)
       setExtractedColors(colors)
     } catch (err) {
@@ -205,11 +208,8 @@ export default function ImagePalettePage () {
 
     try {
       // Capture the hidden element with opacity override
-      const blob = await toBlob(shareTargetRef.current, {
-        pixelRatio: 2, // Higher resolution for better quality
-        style: { opacity: '1' }, // Override opacity for capture
-        cacheBust: true, // Disable cache to ensure fresh image capture
-        preferCanvas: true // Use canvas method for better mobile compatibility
+      const blob = await domToBlob(shareTargetRef.current, {
+        style: { opacity: '1' } // Override opacity for capture
       })
 
       if (!blob) return

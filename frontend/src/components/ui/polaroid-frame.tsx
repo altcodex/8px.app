@@ -22,7 +22,7 @@ export function PolaroidFrame ({
       style={{ transform: `rotate(${rotation}deg)`, ...style }}
     >
       {/* Inner element: handles Polaroid appearance and internal coordinates */}
-      <div className='relative bg-white p-4 shadow-xl dark:bg-gray-100'>
+      <div className='relative bg-white p-6 shadow-xl dark:bg-gray-100'>
 
         {/* Paper texture */}
         <div className='pointer-events-none absolute inset-0 bg-gray-50 opacity-5' />
@@ -33,7 +33,7 @@ export function PolaroidFrame ({
             src={src}
             alt={alt}
             crossOrigin='anonymous'
-            className='max-h-96 w-auto object-cover'
+            className='max-h-[800px] w-auto max-w-[1200px] object-cover'
           />
 
           {/* Film gloss effect */}
@@ -42,7 +42,7 @@ export function PolaroidFrame ({
 
         {/* Bottom margin content */}
         {children && (
-          <div className='mt-4 flex justify-center'>
+          <div className='mt-6 flex justify-center'>
             {children}
           </div>
         )}
