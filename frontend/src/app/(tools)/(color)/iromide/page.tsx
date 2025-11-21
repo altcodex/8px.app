@@ -91,6 +91,7 @@ export default function ImagePalettePage () {
 
   // State
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageDimensions, setImageDimensions] = useState<{ width: number, height: number } | null>(null)
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [wafflePreview, setWafflePreview] = useState<string | null>(null)
@@ -128,18 +129,19 @@ export default function ImagePalettePage () {
 
   // Generate waffle chart preview when colors are extracted
   useEffect(() => {
-    if (extractedColors.length === 0) {
+    if (extractedColors.length === 0 || !imageDimensions) {
       setWafflePreview(null)
       return
     }
 
-    generateWaffleChartBlob(extractedColors, 400).then((blob) => {
+    // Generate waffle chart with the same dimensions as the original image
+    generateWaffleChartBlob(extractedColors, imageDimensions.width, imageDimensions.height).then((blob) => {
       if (blob) {
         const url = URL.createObjectURL(blob)
         setWafflePreview(url)
       }
     })
-  }, [extractedColors])
+  }, [extractedColors, imageDimensions])
 
   // Handle file drop/select and auto-extract
   const handleFileSelect = useCallback(async (file: File | null) => {
@@ -162,6 +164,13 @@ export default function ImagePalettePage () {
     // Create preview URL
     const previewUrl = URL.createObjectURL(file)
     setImagePreview(previewUrl)
+
+    // Load image to get dimensions
+    const img = new Image()
+    img.onload = () => {
+      setImageDimensions({ width: img.width, height: img.height })
+    }
+    img.src = previewUrl
 
     // Random rotation for result (-3 to 3)
     setResultRotation(Math.random() * 6 - 3)
@@ -242,6 +251,7 @@ export default function ImagePalettePage () {
   // Reset
   const handleReset = useCallback(() => {
     setImagePreview(null)
+    setImageDimensions(null)
     setExtractedColors([])
   }, [])
 

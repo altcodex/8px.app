@@ -33,7 +33,7 @@ export function PolaroidFrame ({
             src={src}
             alt={alt}
             crossOrigin='anonymous'
-            className='max-h-96 w-auto object-cover shadow-inner'
+            className='max-h-96 w-auto object-cover'
           />
 
           {/* Film gloss effect */}
