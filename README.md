@@ -1,6 +1,8 @@
 # 8px.app
 
-Everything you need for web development, simplified. A collection of tools that bridge code and design, sparking creativity for modern creators.
+A toolkit for streamlining web and UI development.
+Features Tailwind CSS palette generation, high-precision image color extraction, SVG-compatible favicon generator, and SVG compression.
+Eliminates the hassle between design and implementation.
 
 ## Project Structure
 
@@ -18,10 +20,10 @@ Everything you need for web development, simplified. A collection of tools that 
 
 ## Features
 
-- **TW Palette Generator** - Generate Tailwind-style color palettes from any color
-- **ImagePalette++** - Extract color palettes from images using k-means++ in Oklab color space
-- **Favicon Generator** - Create favicon and Apple Touch Icon from images
-- **SVG Optimizer** - Optimize and compress SVG files
+- **TW Palette Generator** - Automatically generate beautiful palettes that blend seamlessly with TailwindCSS color palettes, based on your specified colors like corporate colors. Smoothly integrates into your design system.
+- **ImagePalette** - Extract color palettes from your favorite images. Uses perceptually accurate image analysis to capture your signature colors.
+- **Favicon Generator** - Simply upload images (JPEG, PNG, WEBP) or SVG to generate all favicons and Apple Touch Icons needed for modern websites. Rounded corners and background color settings in one click.
+- **SVG Optimizer** - Compress bloated SVG files while maintaining quality. A simple and reliable optimization tool for improving website performance.
 
 ## Getting Started
 

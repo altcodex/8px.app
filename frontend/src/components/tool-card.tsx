@@ -16,12 +16,12 @@ export function ToolCard ({ tool, iconBgColor }: ToolCardProps) {
     >
       {/* Icon and Title */}
       <div className='flex items-center gap-3'>
-        <div className={`relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full ${iconBgColor}`}>
+        <div className={`relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full ${iconBgColor}`}>
           <Image
             src={tool.icon}
             alt={tool.name}
-            width={32}
-            height={32}
+            width={40}
+            height={40}
           />
         </div>
         <h3 className='flex items-center gap-2 font-semibold'>

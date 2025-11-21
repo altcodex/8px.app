@@ -140,7 +140,7 @@ function ColorPalette ({
 }
 
 export default function ImagePalettePage () {
-  const tool = getToolById('image-palette')
+  const tool = getToolById('iromide')
   const toast = useToast()
   const { addColor } = useColorHistory()
   const shareTargetRef = useRef<HTMLDivElement>(null)
@@ -310,7 +310,7 @@ export default function ImagePalettePage () {
           {/* Header */}
           {!imagePreview && (
             <div className='py-12 text-center'>
-              <h1 className='text-3xl font-bold'>{tool?.name ?? 'イメージパレット+'}</h1>
+              <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
               <p className='mt-2 text-gray-500 dark:text-gray-400'>
                 {tool?.description ?? ''}
               </p>
