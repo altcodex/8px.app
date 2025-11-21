@@ -5,7 +5,10 @@ import html2canvas from 'html2canvas'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { WavingHandIcon } from '@/components/icons/waving-hand-icon'
+import { CorkBoardBackground } from '@/components/ui/cork-board-background'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
+import { MaskingTape } from '@/components/ui/masking-tape'
+import { PolaroidFrame } from '@/components/ui/polaroid-frame'
 import { Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
@@ -15,87 +18,21 @@ import { extractColorsFromImage, } from '@/lib/api/colors'
 import { generateWaffleChartBlob } from '@/lib/color/waffle-chart'
 import { validateImageFile } from '@/lib/file/file-validation'
 
-// Cork board background with noise texture and vignette
-function CorkBoardBackground ({
-  children,
-  className = ''
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <div className={`relative bg-stone-50 dark:bg-atom-one-dark ${className}`}>
-      {/* Noise texture overlay using SVG filter */}
-      <div
-        className='pointer-events-none absolute inset-0 opacity-5'
-        style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
-        }}
-      />
-
-      {/* Light highlight (top-right) and vignette (bottom-left) for depth */}
-      <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.4)_0%,transparent_50%,rgba(0,0,0,0.05)_100%)] dark:bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.08)_0%,transparent_50%,rgba(0,0,0,0.2)_100%)]' />
-
-      <div className='relative'>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-// Shared Polaroid Frame component with optional content in bottom margin
-function PolaroidFrame ({
-  src,
-  alt,
-  rotation = 0,
-  className = '',
-  style = {},
-  children
-}: {
-  src: string
-  alt: string
-  rotation?: number
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-}) {
-  return (
-    <div
-      // Root element: handles positioning and rotation only
-      className={`${className}`}
-      style={{ transform: `rotate(${rotation}deg)`, ...style }}
-    >
-      {/* Inner element: handles Polaroid appearance and internal coordinates */}
-      <div className='relative bg-white p-4 shadow-xl dark:bg-gray-100'>
-
-        {/* Paper texture */}
-        <div className='pointer-events-none absolute inset-0 bg-gray-50 opacity-5' />
-
-        <div className='relative flex justify-center overflow-hidden'>
-          {/* Photo */}
-          <img
-            src={src}
-            alt={alt}
-            className='max-h-96 w-auto object-cover shadow-inner'
-          />
-
-          {/* Film gloss effect */}
-          <div className='pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-50' />
-        </div>
-
-        {/* Bottom margin content */}
-        {children && (
-          <div className='mt-4 flex justify-center'>
-            {children}
-          </div>
-        )}
-
-        {/* Outer frame thin line */}
-        <div className='pointer-events-none absolute inset-0 rounded-sm ring-1 ring-black/5' />
-      </div>
-    </div>
-  )
-}
+// Sample data for showcase
+const sampleImages = [
+  {
+    src: '/images/samples/iromide/sample-1.jpg',
+    colors: ['#FABE28', '#9B122B', '#2A1E17', '#DF4156', '#AB8828', '#F08E93']
+  },
+  {
+    src: '/images/samples/iromide/sample-2.jpg',
+    colors: ['#DCE5EE', '#878464', '#2C160D', '#544B34']
+  },
+  {
+    src: '/images/samples/iromide/sample-3.jpg',
+    colors: ['#DED0C3', '#4C4735', '#6D7E38', '#111211', '#A72A26']
+  }
+]
 
 // Shared Color Palette component
 function ColorPalette ({
@@ -145,6 +82,12 @@ export default function ImagePalettePage () {
   const { addColor } = useColorHistory()
   const shareTargetRef = useRef<HTMLDivElement>(null)
 
+  // Shuffle samples on mount (useEffect to avoid hydration mismatch)
+  const [shuffledSamples, setShuffledSamples] = useState<typeof sampleImages | null>(null)
+  useEffect(() => {
+    setShuffledSamples([...sampleImages].sort(() => Math.random() - 0.5))
+  }, [])
+
   // State
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([])
@@ -152,6 +95,7 @@ export default function ImagePalettePage () {
   const [wafflePreview, setWafflePreview] = useState<string | null>(null)
   const [isFlipped, setIsFlipped] = useState(false)
   const [isFlipping, setIsFlipping] = useState(false)
+  const [resultRotation, setResultRotation] = useState(0)
 
   // Handle flip with animation tracking
   const handleFlip = useCallback(() => {
@@ -217,6 +161,9 @@ export default function ImagePalettePage () {
     // Create preview URL
     const previewUrl = URL.createObjectURL(file)
     setImagePreview(previewUrl)
+
+    // Random rotation for result (-3 to 3)
+    setResultRotation(Math.random() * 6 - 3)
 
     // Extract colors using backend API
     try {
@@ -305,11 +252,11 @@ export default function ImagePalettePage () {
       onFileDrop={handleFileSelect}
       accept='image/*'
     >
-      <CorkBoardBackground className='left-1/2 -mb-12 -mt-6 w-screen -translate-x-1/2 border-b border-gray-200 px-4 py-12 dark:border-gray-700 sm:px-6 lg:px-8'>
+      <CorkBoardBackground className='left-1/2 -mb-12 -mt-6 w-screen -translate-x-1/2 border-b border-gray-200 px-4 py-12 dark:border-gray-700 sm:px-6 sm:py-20 lg:px-8'>
         <div className='mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-md flex-col px-4'>
           {/* Header */}
           {!imagePreview && (
-            <div className='py-12 text-center'>
+            <div className='mb-16 text-center'>
               <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
               <p className='mt-2 text-gray-500 dark:text-gray-400'>
                 {tool?.description ?? ''}
@@ -320,30 +267,58 @@ export default function ImagePalettePage () {
           {/* Main Content */}
           {!imagePreview && !isProcessing
             ? (
-              // Upload State
-              <div className='flex items-center justify-center'>
-                <label className='group flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white p-16 transition-colors hover:border-gray-400 dark:border-gray-600 dark:bg-atom-one-dark dark:hover:border-gray-500'>
-                  <div className='mb-6 rounded-full bg-gray-100 p-6 transition-colors group-hover:bg-gray-200 dark:bg-atom-one-dark-light dark:group-hover:bg-atom-one-dark-lighter'>
-                    <PhotoIcon className='size-12 text-gray-600 dark:text-gray-400' />
-                  </div>
-                  <span className='mb-2 text-lg font-semibold'>
-                    画像を選択
-                  </span>
-                  <span className='text-sm text-gray-600 dark:text-gray-400'>
-                    またはドラッグ＆ドロップ
-                  </span>
-                  <input
-                    type='file'
-                    accept='image/*'
-                    onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-                    className='hidden'
-                  />
-                </label>
+              // Upload State with Samples
+              <div className='flex flex-1 flex-col items-center justify-center gap-8'>
+                {shuffledSamples && (
+                  <>
+                    {/* Sample Polaroids */}
+                    <div className='mb-12 w-screen animate-fade-in sm:w-[150vw]'>
+                      <div className='flex justify-center gap-6'>
+                        {shuffledSamples.map((sample, index) => (
+                          <div key={index} className={`relative ${index !== 1 ? 'hidden sm:block' : ''}`}>
+                            <MaskingTape className='absolute -top-4 left-1/2 z-10 -translate-x-1/2' />
+                            <PolaroidFrame
+                              src={sample.src}
+                              alt={`Sample ${index + 1}`}
+                              rotation={index === 0 ? -3 : index === 1 ? 2 : -1}
+                            >
+                              <div className='flex gap-2'>
+                                {sample.colors.slice(0, 6).map((color, i) => (
+                                  <div
+                                    key={i}
+                                    className='size-6 rounded-full shadow-sm sm:size-8'
+                                    style={{ backgroundColor: color }}
+                                  />
+                                ))}
+                              </div>
+                            </PolaroidFrame>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Upload Area */}
+                    <label className='group flex w-full max-w-lg animate-fade-in cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white p-12 transition-colors hover:border-gray-400 dark:border-gray-600 dark:bg-atom-one-dark dark:hover:border-gray-500'>
+                      <div className='mb-4 rounded-full bg-gray-100 p-4 transition-colors group-hover:bg-gray-200 dark:bg-atom-one-dark-light dark:group-hover:bg-atom-one-dark-lighter'>
+                        <PhotoIcon className='size-8 text-gray-600 dark:text-gray-400' />
+                      </div>
+                      <span className='mb-1 font-semibold'>
+                        あなたの画像で試す
+                      </span>
+                      <input
+                        type='file'
+                        accept='image/*'
+                        onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                        className='hidden'
+                      />
+                    </label>
+                  </>
+                )}
               </div>
               )
             : isProcessing
               ? (
-            // Processing State
+                // Processing State
                 <div className='flex flex-1 flex-col items-center justify-center gap-4'>
                   <Spinner size={24} />
                   <p className='text-lg font-medium text-gray-600 dark:text-gray-400'>
@@ -352,19 +327,19 @@ export default function ImagePalettePage () {
                 </div>
                 )
               : (
-            // Result State
+                // Result State
                 <div className='flex flex-1 flex-col items-center justify-center gap-4'>
                   {/* Hidden Share Target - for html2canvas capture */}
                   <div ref={shareTargetRef} className='absolute -left-[200vw]'>
                     <CorkBoardBackground className='p-10'>
                       <div className='relative flex justify-center'>
                         {/* Decorative Masking Tape */}
-                        <div className='absolute -top-4 left-1/2 z-10 h-8 w-24 -translate-x-1/2 bg-yellow-200/75 shadow-sm backdrop-blur-sm' />
+                        <MaskingTape className='absolute -top-4 left-1/2 z-10 -translate-x-1/2' />
 
                         <PolaroidFrame
                           src={isFlipped && wafflePreview ? wafflePreview : imagePreview!}
                           alt={isFlipped ? 'Waffle chart' : 'Uploaded'}
-                          rotation={isFlipped ? 2 : -2}
+                          rotation={isFlipped ? -resultRotation : resultRotation}
                         >
                           <div className='flex gap-2'>
                             {extractedColors.map((color, index) => (
@@ -393,7 +368,7 @@ export default function ImagePalettePage () {
                       </button>
 
                       {/* Decorative Masking Tape - hidden during flip animation */}
-                      <div className={`absolute -top-4 left-1/2 z-10 h-8 w-24 -translate-x-1/2 bg-yellow-200/75 shadow-sm backdrop-blur-sm transition-opacity ${isFlipping ? 'opacity-0' : 'opacity-100'}`} />
+                      <MaskingTape className={`absolute -top-4 left-1/2 z-10 -translate-x-1/2 transition-opacity ${isFlipping ? 'opacity-0' : 'opacity-100'}`} />
 
                       {/* Flip Container - clickable to flip */}
                       <button
@@ -409,7 +384,7 @@ export default function ImagePalettePage () {
                         <PolaroidFrame
                           src={imagePreview!}
                           alt='Uploaded'
-                          rotation={-2}
+                          rotation={resultRotation}
                           style={{ backfaceVisibility: 'hidden' }}
                         >
                           <div className='flex gap-2'>
@@ -431,7 +406,7 @@ export default function ImagePalettePage () {
                             className='absolute inset-0'
                             style={{
                               backfaceVisibility: 'hidden',
-                              transform: 'rotateY(180deg) rotate(2deg)'
+                              transform: `rotateY(180deg) rotate(${-resultRotation}deg)`
                             }}
                           >
                             <div className='flex gap-2'>

@@ -43,8 +43,8 @@ export const tools: Tool[] = [
   },
   {
     id: 'iromide',
-    name: '押し色生成 イロマイド',
-    description: 'お気に入りの画像からカラーパレットを抽出。人間の知覚に近い画像解析であなたの「推し色」を取り出せます。',
+    name: '推し色生成 イロマイド',
+    description: 'お気に入りの画像からカラーパレットを抽出。人間の知覚に近い画像解析であなたの「推し色」を取り出せます。推し色をみんなにシェアしましょう！',
     shortDescription: '画像からカラーパレットを生成',
     icon: '/icons/tools/iromide.svg',
     category: 'color',

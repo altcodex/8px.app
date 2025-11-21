@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { siteConfig } from '@/config/site'
 import { getToolById } from '@/config/tools'
 
-const tool = getToolById('image-palette')
+const tool = getToolById('iromide')
 
 export const metadata: Metadata = tool
   ? {
@@ -28,6 +28,6 @@ export const metadata: Metadata = tool
     }
   : {}
 
-export default function ImagePaletteLayout ({ children }: { children: ReactNode }) {
-  return <>{children}</>
+export default function IromideLayout ({ children }: { children: ReactNode }) {
+  return <div className='font-[family-name:var(--font-zen-maru)]'>{children}</div>
 }
