@@ -85,7 +85,7 @@ export default function FaviconGeneratorPage () {
       try {
         // Use original size if smaller than 256px, otherwise cap at 256px
         const previewSize = Math.min(256, image.width, image.height)
-        const blob = await processImage(image, previewSize, {
+        const blob = await processImage(image, previewSize, undefined, {
           borderRadiusPercent: borderRadius,
           backgroundColor: useBackground ? backgroundColor : undefined
         })
