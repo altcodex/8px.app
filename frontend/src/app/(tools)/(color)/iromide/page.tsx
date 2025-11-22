@@ -12,12 +12,13 @@ import { Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { siteConfig } from '@/config/site'
 import { getToolById } from '@/config/tools'
-import { useColorHistory } from '@/contexts/color-history-context'
 import type { ExtractedColor } from '@/lib/api/colors'
 import { extractColorsFromImage, } from '@/lib/api/colors'
 import { generateWaffleChartBlob } from '@/lib/color/waffle-chart'
 import { validateImageFile } from '@/lib/file/file-validation'
-import { loadImageFromFile, processImage } from '@/lib/image/image-processing'
+import type { ChekiPadding } from '@/lib/image/cheki-size'
+import { calculateChekiPadding, determineChekiSize } from '@/lib/image/cheki-size'
+import { loadImageFromFile, processImageForCheki } from '@/lib/image/image-processing'
 
 // Sample data for showcase
 const sampleImages = [
@@ -35,72 +36,21 @@ const sampleImages = [
   }
 ]
 
-// Shared Color Palette component
-function ColorPalette ({
-  colors,
-  onColorClick
-}: {
-  colors: ExtractedColor[]
-  onColorClick?: (hex: string) => void
-}) {
-  return (
-    <div className='mb-6'>
-      <div className='flex flex-wrap justify-center gap-4'>
-        {colors.map((color, index) => {
-          const circle = (
-            <div
-              className='size-8 rounded-full shadow-lg ring-4 ring-white dark:ring-gray-800 sm:size-16'
-              style={{ backgroundColor: color.hex }}
-            />
-          )
-
-          if (onColorClick) {
-            return (
-              <button
-                key={index}
-                onClick={() => onColorClick(color.hex)}
-                className='transition-transform hover:scale-110 active:scale-95'
-              >
-                {circle}
-              </button>
-            )
-          }
-
-          return (
-            <div key={index}>
-              {circle}
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 export default function ImagePalettePage () {
   const tool = getToolById('iromide')
   const toast = useToast()
-  const { addColor } = useColorHistory()
   const shareTargetRef = useRef<HTMLDivElement>(null)
 
   // State
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{ width: number, height: number } | null>(null)
+  const [chekiPadding, setChekiPadding] = useState<ChekiPadding | null>(null)
+  const [thumbnailPadding, setThumbnailPadding] = useState<ChekiPadding | null>(null)
   const [extractedColors, setExtractedColors] = useState<ExtractedColor[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [wafflePreview, setWafflePreview] = useState<string | null>(null)
-  const [isFlipped, setIsFlipped] = useState(false)
-  const [isFlipping, setIsFlipping] = useState(false)
   const [resultRotation, setResultRotation] = useState(0)
   const [message, setMessage] = useState('')
-
-  // Handle flip with animation tracking
-  const handleFlip = useCallback(() => {
-    setIsFlipping(true)
-    setIsFlipped(!isFlipped)
-    // Reset after animation duration (500ms)
-    setTimeout(() => setIsFlipping(false), 500)
-  }, [isFlipped])
 
   // Fixed color count for simplicity
   const colorCount = 6
@@ -155,21 +105,40 @@ export default function ImagePalettePage () {
 
     setExtractedColors([])
     setIsProcessing(true)
-    window.scrollTo({ top: 0 })
 
     try {
-      // Load and resize image for preview (max 1200x800)
+      // Load image
       const image = await loadImageFromFile(file)
-      const resizedBlob = await processImage(image, 1200, 800, { preserveAspectRatio: true })
-      const previewUrl = URL.createObjectURL(resizedBlob)
+
+      // Determine cheki size based on image aspect ratio
+      const chekiSize = determineChekiSize(image.width, image.height)
+
+      // Normalize image to cheki size (object-fit: cover)
+      const normalizedBlob = await processImageForCheki(
+        image,
+        chekiSize.width,
+        chekiSize.height
+      )
+      const previewUrl = URL.createObjectURL(normalizedBlob)
       setImagePreview(previewUrl)
 
-      // Store resized dimensions for waffle chart generation
-      const resizedImg = new Image()
-      resizedImg.onload = () => {
-        setImageDimensions({ width: resizedImg.width, height: resizedImg.height })
-      }
-      resizedImg.src = previewUrl
+      // Store cheki dimensions for waffle chart generation
+      setImageDimensions({ width: chekiSize.width, height: chekiSize.height })
+
+      // Calculate padding based on cheki format
+      const padding = calculateChekiPadding(chekiSize.width, chekiSize.height, chekiSize.aspectRatio)
+      setChekiPadding(padding)
+
+      // Calculate thumbnail padding for display
+      const thumbWidth = Math.min(chekiSize.width, document.body.clientWidth * 0.8)
+      const thumbHeight = Math.round(thumbWidth * (chekiSize.height / chekiSize.width))
+      const maxThumbHeight = window.innerHeight * 0.5
+      const thumbPadding = calculateChekiPadding(
+        thumbHeight > maxThumbHeight ? Math.round(400 * (chekiSize.width / chekiSize.height)) : thumbWidth,
+        thumbHeight > maxThumbHeight ? maxThumbHeight : thumbHeight,
+        chekiSize.aspectRatio
+      )
+      setThumbnailPadding(thumbPadding)
 
       // Random rotation for result (-3 to 3)
       setResultRotation(Math.random() * 6 - 3)
@@ -185,28 +154,13 @@ export default function ImagePalettePage () {
     }
   }, [toast, colorCount])
 
-  // Copy color to clipboard
-  const handleCopyColor = useCallback(async (hex: string) => {
-    try {
-      await navigator.clipboard.writeText(hex.toUpperCase())
-      addColor(hex)
-      toast.success('コピーしました')
-    } catch (err) {
-      toast.error('コピーに失敗しました')
-      console.error('Failed to copy:', err)
-    }
-  }, [toast, addColor])
-
   // Share palette image using Web Share API
   const handleSharePalette = useCallback(async () => {
     if (!shareTargetRef.current) return
 
     try {
-      // Capture the hidden element with high resolution
-      const blob = await domToBlob(shareTargetRef.current, {
-        style: { opacity: '1' }, // Override opacity for capture
-        scale: 2 // Higher resolution for sharper text
-      })
+      // Capture the element
+      const blob = await domToBlob(shareTargetRef.current, {})
 
       if (!blob) return
 
@@ -247,9 +201,15 @@ export default function ImagePalettePage () {
   const handleReset = useCallback(() => {
     setImagePreview(null)
     setImageDimensions(null)
+    setChekiPadding(null)
     setExtractedColors([])
     setMessage('')
+    window.scrollTo({ top: 0 })
   }, [])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [isProcessing])
 
   return (
     <FullPageDropZone
@@ -257,12 +217,12 @@ export default function ImagePalettePage () {
       accept='image/*'
     >
       <CorkBoardBackground className='left-1/2 -mb-12 -mt-6 w-screen -translate-x-1/2 border-b border-gray-200 px-4 py-12 dark:border-gray-700 sm:px-6 sm:py-20 lg:px-8'>
-        <div className='mx-auto flex min-h-[calc(100vh-64px)] max-w-screen-md flex-col px-4'>
+        <div className='mx-auto flex min-h-[calc(100vh-160px)] max-w-screen-md flex-col px-4'>
           {/* Header */}
           {!imagePreview && (
             <div className='mb-16 text-center'>
               <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
-              <p className='mt-2 text-gray-500 dark:text-gray-400'>
+              <p className='mt-2 break-keep text-gray-500 dark:text-gray-400'>
                 {tool?.description ?? ''}
               </p>
             </div>
@@ -275,15 +235,16 @@ export default function ImagePalettePage () {
               <div className='flex flex-1 flex-col items-center justify-center gap-8'>
                 {/* Sample Polaroids */}
                 <div className='mb-12'>
-                  <div className='flex justify-center gap-6'>
+                  <div className='flex justify-center gap-12'>
                     {sampleImages.map((sample, index) => (
                       <div key={index} className='relative'>
-                        <MaskingTape className='absolute -top-4 left-1/2 z-10 -translate-x-1/2' />
+                        <MaskingTape
+                          className='absolute -top-4 left-1/2 z-10 -translate-x-1/2'
+                        />
                         <PolaroidFrame
                           image={{
                             src: sample.src,
-                            alt: `Sample ${index + 1}`,
-                            className: 'max-h-32 sm:max-h-[800px] w-auto max-w-[calc(min(1200px,85vw))]',
+                            alt: `Sample ${index + 1}`
                           }}
                           rotation={index === 0 ? -3 : index === 1 ? 2 : -1}
                         >
@@ -291,8 +252,10 @@ export default function ImagePalettePage () {
                             {sample.colors.slice(0, 6).map((color, i) => (
                               <div
                                 key={i}
-                                className='size-6 rounded-full shadow-sm sm:size-8'
-                                style={{ backgroundColor: color }}
+                                className='size-5 rounded-full shadow-sm sm:size-12'
+                                style={{
+                                  backgroundColor: color
+                                }}
                               />
                             ))}
                           </div>
@@ -331,33 +294,51 @@ export default function ImagePalettePage () {
                 )
               : (
                 // Result State
-                <div className='flex flex-1 flex-col items-center justify-center gap-4'>
-                  {/* Hidden Share Target - for image capture */}
-                  <div ref={shareTargetRef} className='pointer-events-none fixed left-0 top-0 opacity-0'>
-                    <CorkBoardBackground className='p-10'>
+                <div className='flex flex-col items-center gap-4'>
+                  {/* Hidden Share Target - positioned off-screen */}
+                  <div className='pointer-events-none fixed left-0 top-[-9999px]'>
+                    <CorkBoardBackground className='p-10' ref={shareTargetRef}>
                       <div className='relative flex justify-center'>
                         {/* Decorative Masking Tape */}
-                        <MaskingTape className='absolute -top-4 left-1/2 z-10 -translate-x-1/2' />
+                        <MaskingTape
+                          className='absolute -top-4 left-1/2 z-10 -translate-x-1/2'
+                          width={chekiPadding ? Math.round(chekiPadding.top * 2) : undefined}
+                          height={chekiPadding ? Math.round(chekiPadding.top * 0.6) : undefined}
+                        />
 
                         <PolaroidFrame
                           image={{
-                            src: isFlipped && wafflePreview ? wafflePreview : imagePreview!,
-                            alt: isFlipped ? 'Waffle chart' : 'Uploaded'
+                            src: imagePreview!,
+                            alt: 'Uploaded',
+                            className: '' // クロップ済み画像をネイティブサイズで表示
                           }}
-                          rotation={isFlipped ? -resultRotation : resultRotation}
+                          rotation={resultRotation}
+                          chekiPadding={chekiPadding ?? undefined}
+                          style={{
+                            width: imageDimensions ? `${imageDimensions.width}px` : 'auto'
+                          }}
                         >
                           <div className='flex flex-col items-center gap-2'>
                             <div className='flex gap-2'>
                               {extractedColors.map((color, index) => (
                                 <div
                                   key={index}
-                                  className='size-8 rounded-full shadow-sm'
-                                  style={{ backgroundColor: color.hex }}
+                                  className='rounded-full shadow-sm'
+                                  style={{
+                                    backgroundColor: color.hex,
+                                    width: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.3)}px` : '32px',
+                                    height: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.3)}px` : '32px'
+                                  }}
                                 />
                               ))}
                             </div>
                             {message && (
-                              <p className='text-center text-sm font-medium antialiased sm:text-lg'>
+                              <p
+                                className='text-center font-medium antialiased'
+                                style={{
+                                  fontSize: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.15)}px` : '14px'
+                                }}
+                              >
                                 {message}
                               </p>
                             )}
@@ -367,88 +348,44 @@ export default function ImagePalettePage () {
                     </CorkBoardBackground>
                   </div>
 
-                  {/* Visible Flip Card */}
-                  <div className='mb-8 flex justify-center'>
-                    <div className='relative [perspective:1000px]'>
-                      {/* Decorative Masking Tape - hidden during flip animation */}
-                      <MaskingTape className={`absolute -top-4 left-1/2 z-10 -translate-x-1/2 transition-opacity ${isFlipping ? 'opacity-0' : 'opacity-100'}`} />
-
-                      {/* Flip Container - clickable to flip */}
-                      <button
-                        onClick={handleFlip}
-                        className='cursor-pointer transition-transform duration-500 '
-                        style={{
-                          transformStyle: 'preserve-3d',
-                          transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                          transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-                        }}
-                      >
-                        {/* Front - Polaroid Image */}
-                        <PolaroidFrame
-                          image={{
-                            src: imagePreview!,
-                            alt: 'Uploaded'
-                          }}
-                          rotation={resultRotation}
-                          style={{ backfaceVisibility: 'hidden' }}
-                        >
-                          <div className='flex flex-col items-center gap-2'>
-                            <div className='flex gap-2'>
-                              {extractedColors.map((color, index) => (
-                                <div
-                                  key={index}
-                                  className='size-6 rounded-full shadow-sm sm:size-8'
-                                  style={{ backgroundColor: color.hex }}
-                                />
-                              ))}
-                            </div>
-                            {message && (
-                              <p
-                                className='text-center text-sm font-medium antialiased sm:text-lg'
-                              >
-                                {message}
-                              </p>
-                            )}
-                          </div>
-                        </PolaroidFrame>
-
-                        {/* Back - Waffle Chart */}
-                        {wafflePreview && (
-                          <PolaroidFrame
-                            image={{
-                              src: wafflePreview,
-                              alt: 'Waffle chart',
-                            }}
-                            className='absolute inset-0'
-                            style={{
-                              backfaceVisibility: 'hidden',
-                              transform: `rotateY(180deg) rotate(${-resultRotation}deg)`
-                            }}
-                          >
-                            <div className='flex flex-col items-center gap-2'>
-                              <div className='flex gap-2'>
-                                {extractedColors.map((color, index) => (
-                                  <div
-                                    key={index}
-                                    className='size-6 rounded-full shadow-sm sm:size-8'
-                                    style={{ backgroundColor: color.hex }}
-                                  />
-                                ))}
-                              </div>
-                              {message && (
-                                <p className='text-center text-sm font-medium antialiased sm:text-lg'>
-                                  {message}
-                                </p>
-                              )}
-                            </div>
-                          </PolaroidFrame>
+                  {/* Visible Display Polaroid */}
+                  <div className='relative mb-8'>
+                    <MaskingTape
+                      className='absolute -top-4 left-1/2 z-10 -translate-x-1/2'
+                      width={thumbnailPadding ? Math.round(thumbnailPadding.top * 2) : undefined}
+                      height={thumbnailPadding ? Math.round(thumbnailPadding.top * 0.6) : undefined}
+                    />
+                    <PolaroidFrame
+                      image={{
+                        src: imagePreview!,
+                        alt: 'Uploaded',
+                        className: 'max-w-[80vw] max-h-[50vh]',
+                      }}
+                      rotation={resultRotation}
+                      chekiPadding={thumbnailPadding ?? undefined}
+                    >
+                      <div className='flex flex-col items-center gap-2'>
+                        <div className='flex gap-2'>
+                          {extractedColors.map((color, index) => (
+                            <div
+                              key={index}
+                              className='rounded-full shadow-sm'
+                              style={{
+                                backgroundColor: color.hex,
+                                width: thumbnailPadding ? `${Math.round(thumbnailPadding.bottom * 0.3)}px` : '32px',
+                                height: thumbnailPadding ? `${Math.round(thumbnailPadding.bottom * 0.3)}px` : '32px'
+                              }}
+                            />
+                          ))}
+                        </div>
+                        {message && (
+                          <p className='text-center text-sm font-medium antialiased sm:text-lg'>
+                            {message}
+                          </p>
                         )}
-                      </button>
-                    </div>
+                      </div>
+                    </PolaroidFrame>
                   </div>
-
-                  {/* Color Palette */}
-                  <ColorPalette colors={extractedColors} onColorClick={handleCopyColor} />
 
                   {/* Message Input */}
                   <div className='mb-6 w-full max-w-md'>

@@ -162,6 +162,78 @@ export async function processImage (
 }
 
 /**
+ * チェキ用に画像をリサイズ（object-fit: cover方式）
+ * @param image HTMLImageElement
+ * @param targetWidth 目標幅
+ * @param targetHeight 目標高さ
+ * @param backgroundColor 背景色（デフォルト: 白）
+ */
+export async function processImageForCheki (
+  image: HTMLImageElement,
+  targetWidth: number,
+  targetHeight: number,
+  backgroundColor: string = '#ffffff'
+): Promise<Blob> {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) {
+    throw new Error('Canvasコンテキストの取得に失敗しました')
+  }
+
+  canvas.width = targetWidth
+  canvas.height = targetHeight
+
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+
+  // 背景色を塗りつぶす
+  ctx.fillStyle = backgroundColor
+  ctx.fillRect(0, 0, targetWidth, targetHeight)
+
+  // object-fit: cover のような動作
+  // ターゲットのアスペクト比
+  const targetRatio = targetWidth / targetHeight
+  // 元画像のアスペクト比
+  const imageRatio = image.width / image.height
+
+  if (imageRatio > targetRatio) {
+    // 画像の方が横長 → 高さ全体を使い、幅を中央クロップ
+    const sourceWidth = image.height * targetRatio
+    const sourceX = (image.width - sourceWidth) / 2
+    ctx.drawImage(
+      image,
+      sourceX, 0, sourceWidth, image.height, // 元画像の切り取り範囲
+      0, 0, targetWidth, targetHeight // キャンバス上の描画範囲
+    )
+  } else {
+    // 画像の方が縦長 → 幅全体を使い、高さを中央クロップ
+    const sourceHeight = image.width / targetRatio
+    const sourceY = (image.height - sourceHeight) / 2
+    ctx.drawImage(
+      image,
+      0, sourceY, image.width, sourceHeight, // 元画像の切り取り範囲
+      0, 0, targetWidth, targetHeight // キャンバス上の描画範囲
+    )
+  }
+
+  // PNG blobに変換
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob)
+        } else {
+          reject(new Error('Canvasからのblob作成に失敗しました'))
+        }
+      },
+      'image/png',
+      1.0
+    )
+  })
+}
+
+/**
  * Blobをダウンロード
  */
 export function downloadBlob (blob: Blob, filename: string): void {

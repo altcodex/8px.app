@@ -1,3 +1,10 @@
+type ChekiPadding = {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
 type PolaroidFrameProps = {
   rotation?: number
   className?: string
@@ -5,9 +12,11 @@ type PolaroidFrameProps = {
     src: string
     alt: string
     className?: string
+    style?: React.CSSProperties
   }
   style?: React.CSSProperties
   children?: React.ReactNode
+  chekiPadding?: ChekiPadding // チェキの余白（px）
 }
 
 export function PolaroidFrame ({
@@ -15,16 +24,42 @@ export function PolaroidFrame ({
   className = '',
   image,
   style = {},
-  children
+  children,
+  chekiPadding
 }: PolaroidFrameProps) {
+  // チェキ余白が指定されている場合は使用、なければデフォルト
+  const paddingStyle = chekiPadding
+    ? {
+        paddingTop: `${chekiPadding.top}px`,
+        paddingRight: `${chekiPadding.right}px`,
+        paddingBottom: `${chekiPadding.bottom}px`,
+        paddingLeft: `${chekiPadding.left}px`
+      }
+    : undefined
+
+  // カラーパレット領域のスタイル（下余白の領域内に収める）
+  const paletteContainerStyle = chekiPadding
+    ? {
+        height: `${chekiPadding.bottom}px`,
+        paddingTop: `${Math.round(chekiPadding.bottom * 0.2)}px`, // 下余白の20%を上マージン
+        paddingBottom: `${Math.round(chekiPadding.bottom * 0.2)}px` // 下余白の20%を下マージン
+      }
+    : undefined
+
   return (
     <div
       // Root element: handles positioning and rotation only
-      className={`${className}`}
-      style={{ transform: `rotate(${rotation}deg)`, ...style }}
+      className={className}
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        ...style
+      }}
     >
       {/* Inner element: handles Polaroid appearance and internal coordinates */}
-      <div className='relative bg-white p-4 shadow-xl dark:bg-gray-100 sm:p-6'>
+      <div
+        className='relative bg-white px-3 pb-10 pt-5 shadow-xl dark:bg-gray-100 sm:px-12 sm:pb-40 sm:pt-20'
+        style={paddingStyle}
+      >
 
         {/* Paper texture */}
         <div className='pointer-events-none absolute inset-0 bg-gray-50 opacity-5' />
@@ -35,7 +70,8 @@ export function PolaroidFrame ({
             src={image.src}
             alt={image.alt}
             crossOrigin='anonymous'
-            className={image.className ?? 'max-h-[800px] w-auto max-w-[calc(min(1200px,85vw))]'}
+            className={image.className ?? 'max-w-[160px] sm:max-w-[640px]'}
+            style={image.style}
           />
 
           {/* Film gloss effect */}
@@ -44,7 +80,10 @@ export function PolaroidFrame ({
 
         {/* Bottom margin content */}
         {children && (
-          <div className='mt-4 flex justify-center sm:mt-6'>
+          <div
+            className='absolute inset-x-0 bottom-2.5 flex items-center justify-center sm:bottom-14'
+            style={paletteContainerStyle}
+          >
             {children}
           </div>
         )}

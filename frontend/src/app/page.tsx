@@ -27,11 +27,10 @@ export default function Home () {
           <LogoIcon className='size-16' />
         </div>
         <h1 className='mb-6 font-[Outfit] text-4xl font-semibold'>
-          8px.app
+          {siteConfig.name}
         </h1>
-        <p className='whitespace-pre-line font-medium text-gray-600 dark:text-gray-400'>
-          {`その色も、そのアイコンも、思い通りに。
-カラーパレット生成からファビコン作成まで、Web・UI開発者のためのツールセット。`}
+        <p className='whitespace-pre-line break-keep font-medium text-gray-600 dark:text-gray-400'>
+          {siteConfig.description}
         </p>
       </div>
 

@@ -21,7 +21,7 @@ export function Footer () {
               <LogoIcon className='size-6' />
               <span className='font-[Outfit] text-xl font-semibold'>{siteConfig.name}</span>
             </Link>
-            <p className='mt-3 text-sm text-gray-600 dark:text-gray-400'>
+            <p className='mt-3 break-keep text-sm text-gray-600 dark:text-gray-400'>
               {siteConfig.description}
             </p>
             <p className='mt-12 text-sm text-gray-600 dark:text-gray-400'>
