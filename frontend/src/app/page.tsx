@@ -22,7 +22,7 @@ export default function Home () {
       />
 
       {/* Hero Section */}
-      <div className='my-12 text-center'>
+      <div className='mx-auto my-12 max-w-screen-sm text-center'>
         <div className='mb-4 flex justify-center'>
           <LogoIcon className='size-16' />
         </div>
