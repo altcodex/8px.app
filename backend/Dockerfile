@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy source code first (needed for installation)
 COPY . .
 
-# Install dependencies (remove -e flag as source is already copied)
-RUN pip install --no-cache-dir ".[dev]"
+# Install only runtime dependencies (not dev tools like mypy/ruff)
+RUN pip install --no-cache-dir "."
 
 # Expose port
 EXPOSE 8000

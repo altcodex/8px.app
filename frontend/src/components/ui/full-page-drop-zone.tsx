@@ -73,8 +73,14 @@ export function FullPageDropZone ({
 
     // Validate file with custom validator
     if (validateFile) {
-      const error = await validateFile(file)
-      if (error) {
+      try {
+        const error = await validateFile(file)
+        if (error) {
+          return
+        }
+      } catch (err) {
+        // Validator threw an error - treat as validation failure
+        console.error('File validation error:', err)
         return
       }
     }

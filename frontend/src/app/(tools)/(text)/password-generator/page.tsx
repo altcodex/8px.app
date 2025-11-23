@@ -42,28 +42,37 @@ function generatePassword (options: PasswordOptions): string {
   // Remove ambiguous characters if option is enabled
   const cleanCharsets = options.avoidAmbiguous
     ? charsets.map(set => set.split('').filter(c => !AMBIGUOUS.includes(c)).join(''))
+      .filter(set => set.length > 0) // Remove empty sets after filtering
     : charsets
 
-  // Allocate enough random values for: charset selection + filling + shuffling
-  // Need: options.length (for password chars) + options.length (for shuffle)
-  const randomCount = options.length * 2
+  if (cleanCharsets.length === 0) {
+    return '' // All charsets became empty after filtering
+  }
+
+  // Combine all characters
+  const allChars = cleanCharsets.join('')
+
+  // Calculate exact number of random values needed
+  // For guarantee mode: min(cleanCharsets.length, options.length) picks + remaining fills + shuffle
+  const guaranteeCount = Math.min(cleanCharsets.length, options.length)
+  const fillCount = options.length - guaranteeCount
+  const shuffleCount = options.length
+  const randomCount = guaranteeCount + fillCount + shuffleCount
+
   const array = new Uint32Array(randomCount)
   crypto.getRandomValues(array)
   let arrayIndex = 0
 
-  // Ensure at least one character from each selected charset
   const password: string[] = []
 
-  // Add one character from each charset
-  for (const charset of cleanCharsets) {
-    if (charset.length > 0) {
-      password.push(charset[array[arrayIndex++] % charset.length])
-    }
+  // Add one character from each charset (up to password length)
+  for (let i = 0; i < guaranteeCount; i++) {
+    const charset = cleanCharsets[i]
+    password.push(charset[array[arrayIndex++] % charset.length])
   }
 
   // Fill remaining length with random characters from all charsets
-  const allChars = cleanCharsets.join('')
-  while (password.length < options.length) {
+  for (let i = 0; i < fillCount; i++) {
     password.push(allChars[array[arrayIndex++] % allChars.length])
   }
 
