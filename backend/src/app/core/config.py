@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     API_VERSION: str = '1.0.0'
 
     # Environment
-    ENVIRONMENT: str = 'development'
-    DEBUG: bool = True
+    ENVIRONMENT: str = 'production'
+    DEBUG: bool = False
 
     # CORS
     ALLOWED_ORIGINS: str = 'http://localhost:3000'

@@ -403,13 +403,20 @@ async def extract_colors(
     MAX_PIXELS = MAX_DIMENSION * MAX_DIMENSION  # ~16.7M pixels
 
     try:
-        # Read image and check file size
-        contents = await file.read()
-        if len(contents) > MAX_FILE_SIZE:
-            logger.warning("File too large: %d bytes", len(contents))
-            raise HTTPException(
-                status_code=400, detail=f"File size must be less than {MAX_FILE_SIZE // 1024 // 1024}MB"
-            )
+        # Stream read with size limit to prevent memory exhaustion
+        contents = bytearray()
+        chunk_size = 1024 * 1024  # 1MB chunks
+        total_size = 0
+
+        while chunk := await file.read(chunk_size):
+            total_size += len(chunk)
+            if total_size > MAX_FILE_SIZE:
+                logger.warning("File too large: %d bytes (limit: %d)", total_size, MAX_FILE_SIZE)
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File size must be less than {MAX_FILE_SIZE // 1024 // 1024}MB"
+                )
+            contents.extend(chunk)
 
         # Set PIL decompression bomb protection
         Image.MAX_IMAGE_PIXELS = MAX_PIXELS
@@ -421,7 +428,8 @@ async def extract_colors(
         if image.width > MAX_DIMENSION or image.height > MAX_DIMENSION:
             logger.warning("Image dimensions too large: %dx%d", image.width, image.height)
             raise HTTPException(
-                status_code=400, detail=f"Image dimensions must be {MAX_DIMENSION}x{MAX_DIMENSION} or smaller"
+                status_code=400,
+                detail=f"Image dimensions must be {MAX_DIMENSION}x{MAX_DIMENSION} or smaller",
             )
 
         logger.info(
