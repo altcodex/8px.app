@@ -1,7 +1,6 @@
 'use client'
 
 import { PhotoIcon } from '@heroicons/react/24/outline'
-import { domToBlob } from 'modern-screenshot'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -176,6 +175,9 @@ export default function ImagePalettePage () {
             })
         )
       )
+
+      // Lazy-load modern-screenshot only when sharing (~50KB)
+      const { domToBlob } = await import('modern-screenshot')
 
       // Capture the element
       const blob = await domToBlob(shareTargetRef.current, {})

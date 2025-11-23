@@ -86,15 +86,19 @@ export default function SvgOptimizerPage () {
       return
     }
 
-    try {
-      const optimized = optimizeSvg(originalSvg, options)
-      setPreviewOptimizedSvg(optimized)
-      setPreviewOptimizedSize(new Blob([optimized]).size)
-    } catch (err) {
-      console.error('Preview optimization failed:', err)
-      setPreviewOptimizedSvg(null)
-      setPreviewOptimizedSize(0)
+    const optimize = async () => {
+      try {
+        const optimized = await optimizeSvg(originalSvg, options)
+        setPreviewOptimizedSvg(optimized)
+        setPreviewOptimizedSize(new Blob([optimized]).size)
+      } catch (err) {
+        console.error('Preview optimization failed:', err)
+        setPreviewOptimizedSvg(null)
+        setPreviewOptimizedSize(0)
+      }
     }
+
+    optimize()
   }, [originalSvg, options])
 
   const handleDownload = useCallback(async () => {
@@ -106,7 +110,7 @@ export default function SvgOptimizerPage () {
     setIsDownloading(true)
 
     try {
-      const optimized = optimizeSvg(originalSvg, options)
+      const optimized = await optimizeSvg(originalSvg, options)
       const blob = new Blob([optimized], { type: 'image/svg+xml' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')

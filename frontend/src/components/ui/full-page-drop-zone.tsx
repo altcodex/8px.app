@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface FullPageDropZoneProps {
   onFileDrop: (file: File) => void
-  validateFile?: (file: File) => string | null
+  validateFile?: (file: File) => string | null | Promise<string | null>
   accept?: string // e.g., "image/*"
   children: ReactNode
 }
@@ -55,7 +55,7 @@ export function FullPageDropZone ({
     }
   }, [handleDragEnter, handleDragLeave, handleDrop, handleDragOver])
 
-  const handleDropOnDiv = useCallback((e: DragEvent<HTMLDivElement>) => {
+  const handleDropOnDiv = useCallback(async (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
 
@@ -73,7 +73,7 @@ export function FullPageDropZone ({
 
     // Validate file with custom validator
     if (validateFile) {
-      const error = validateFile(file)
+      const error = await validateFile(file)
       if (error) {
         return
       }

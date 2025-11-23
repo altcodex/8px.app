@@ -1,5 +1,4 @@
 import type { Config } from 'svgo/browser'
-import { optimize } from 'svgo/browser'
 
 /**
  * SVGO plugin options
@@ -267,10 +266,12 @@ export function buildSvgoConfig (options: SvgoOptions): Config {
 /**
  * Optimize SVG using SVGO with the given options
  */
-export function optimizeSvg (svgString: string, options: SvgoOptions): string {
+export async function optimizeSvg (svgString: string, options: SvgoOptions): Promise<string> {
   const config = buildSvgoConfig(options)
 
   try {
+    // Lazy-load SVGO only when needed (~200KB)
+    const { optimize } = await import('svgo/browser')
     const result = optimize(svgString, config)
     return result.data
   } catch (error) {
