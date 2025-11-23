@@ -347,10 +347,10 @@ export default function ImagePalettePage () {
                               ))}
                             </div>
                             {message && (
-                              <div className='absolute left-1/2 top-1/2 w-full -translate-x-1/2 p-2'>
+                              <div className='absolute left-1/2 top-1/2 w-full -translate-x-1/2 p-1'>
                                 <p
-                                  className='line-clamp-1 text-center font-medium antialiased' style={{
-                                    fontSize: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.15)}px` : '14px'
+                                  className='line-clamp-1 text-center font-medium text-gray-800 antialiased' style={{
+                                    fontSize: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.25)}px` : '24px'
                                   }}
                                 >
                                   {message}
@@ -394,10 +394,10 @@ export default function ImagePalettePage () {
                           ))}
                         </div>
                         {message && (
-                          <div className='absolute left-1/2 top-1/2 w-full -translate-x-1/2 p-2'>
+                          <div className='absolute left-1/2 top-1/2 w-full -translate-x-1/2 p-1'>
                             <p
-                              className='line-clamp-1 text-center font-medium antialiased' style={{
-                                fontSize: thumbnailPadding ? `${Math.round(thumbnailPadding.bottom * 0.15)}px` : '14px'
+                              className='line-clamp-1 text-center font-medium text-gray-800 antialiased' style={{
+                                fontSize: thumbnailPadding ? `${Math.round(thumbnailPadding.bottom * 0.25)}px` : '24px'
                               }}
                             >
                               {message}
