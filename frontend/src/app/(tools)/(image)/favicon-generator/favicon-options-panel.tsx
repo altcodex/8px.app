@@ -1,4 +1,5 @@
 import { Slider } from '@/components/ui/slider'
+import { TogglePill } from '@/components/ui/toggle-pill'
 import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
 import { AVAILABLE_SIZES, DEFAULT_SIZES, OUTPUT_SETS } from '@/lib/image/favicon-generator'
 
@@ -42,18 +43,14 @@ export function FaviconOptionsPanel ({
         </div>
         <div className='flex flex-wrap gap-2'>
           {OUTPUT_SETS.map((outputSet) => (
-            <button
+            <TogglePill
               key={outputSet.id}
+              pressed={selectedSets.has(outputSet.id)}
               onClick={() => onSetToggle(outputSet.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 ${selectedSets.has(outputSet.id)
-                ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
-                : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                }`}
-              aria-label={`${outputSet.label}を${selectedSets.has(outputSet.id) ? '選択解除' : '選択'}`}
-              aria-pressed={selectedSets.has(outputSet.id)}
+              ariaLabel={`${outputSet.label}を${selectedSets.has(outputSet.id) ? '選択解除' : '選択'}`}
             >
               {outputSet.label}
-            </button>
+            </TogglePill>
           ))}
         </div>
         <div className='mt-4 text-xs text-gray-600 dark:text-gray-400'>
@@ -85,18 +82,14 @@ export function FaviconOptionsPanel ({
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {DEFAULT_SIZES.map((size) => (
-                    <button
+                    <TogglePill
                       key={size}
+                      pressed={selectedSizes.has(size)}
                       onClick={() => onSizeToggle(size)}
-                      className={`rounded-full px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 ${selectedSizes.has(size)
-                        ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
-                        : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                        }`}
-                      aria-label={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
-                      aria-pressed={selectedSizes.has(size)}
+                      ariaLabel={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
                     >
                       {size}×{size}
-                    </button>
+                    </TogglePill>
                   ))}
                 </div>
               </div>
@@ -108,18 +101,14 @@ export function FaviconOptionsPanel ({
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {AVAILABLE_SIZES.filter(s => !DEFAULT_SIZES.includes(s)).map((size) => (
-                    <button
+                    <TogglePill
                       key={size}
+                      pressed={selectedSizes.has(size)}
                       onClick={() => onSizeToggle(size)}
-                      className={`rounded-full px-4 py-2 text-sm font-medium outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 ${selectedSizes.has(size)
-                        ? 'bg-sky-500 text-white dark:bg-sky-600'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                        }`}
-                      aria-label={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
-                      aria-pressed={selectedSizes.has(size)}
+                      ariaLabel={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
                     >
                       {size}×{size}
-                    </button>
+                    </TogglePill>
                   ))}
                 </div>
               </div>
