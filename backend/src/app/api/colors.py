@@ -6,6 +6,7 @@ import numpy as np
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from numpy.typing import NDArray
 from PIL import Image
+from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -362,6 +363,13 @@ def extract_colors_from_image(
             selected.append(ExtractedColor(hex=cluster["hex"], percentage=cluster["percentage"]))
             selected_oklab.append(cluster["oklab"])
 
+    # Re-normalize percentages after filtering
+    if selected:
+        total_percentage = sum(color.percentage for color in selected)
+        if total_percentage > 0:
+            for color in selected:
+                color.percentage = round((color.percentage / total_percentage) * 100, 1)
+
     return selected
 
 
@@ -436,8 +444,8 @@ async def extract_colors(
             "Extracting %d colors from image (%dx%d)", num_colors, image.width, image.height
         )
 
-        # Extract colors
-        colors = extract_colors_from_image(image, num_colors)
+        # Extract colors (run in threadpool to avoid blocking event loop)
+        colors = await run_in_threadpool(extract_colors_from_image, image, num_colors)
 
         return ColorExtractionResponse(colors=colors)
 

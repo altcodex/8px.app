@@ -20,7 +20,8 @@ export function FullPageDropZone ({
   const [isDragging, setIsDragging] = useState(false)
   const dragCounterRef = useRef(0)
 
-  const handleDragEnter = useCallback(() => {
+  const handleDragEnter = useCallback((e: globalThis.DragEvent) => {
+    e.preventDefault()
     dragCounterRef.current++
     setIsDragging(true)
   }, [])
@@ -32,7 +33,8 @@ export function FullPageDropZone ({
     }
   }, [])
 
-  const handleDrop = useCallback(() => {
+  const handleDrop = useCallback((e: globalThis.DragEvent) => {
+    e.preventDefault()
     dragCounterRef.current = 0
     setIsDragging(false)
   }, [])
