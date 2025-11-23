@@ -16,6 +16,13 @@ type SvgOptionsPanelProps = {
 
 export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onPresetChange }: SvgOptionsPanelProps) {
   const handleToggle = useCallback((key: keyof SvgoOptions) => {
+    if (
+      options.sanitize &&
+      (key === 'removeScriptElement' || key === 'removeStyleElement')
+    ) {
+      return
+    }
+
     onOptionsChange({
       ...options,
       [key]: !options[key]
@@ -65,8 +72,6 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
         </div>
       </div>
 
-      <div className='border-t border-gray-200 dark:border-gray-700' />
-
       {/* Numeric Options */}
       <div>
         <div className='mb-3'>
@@ -113,26 +118,36 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
 
             <div className='space-y-3'>
               {group.plugins.map((key) => (
-                <Field key={key} as='div' className='flex items-center justify-between gap-4'>
-                  <Label className='flex-1 cursor-pointer text-sm text-gray-700 dark:text-gray-300'>
-                    {PLUGIN_DESCRIPTIONS[key]}
-                  </Label>
-                  <Switch
-                    checked={options[key] as boolean}
-                    onChange={() => handleToggle(key)}
-                    className={`${
-                      options[key] ? 'bg-sky-500 dark:bg-sky-600' : 'bg-gray-300 dark:bg-gray-600'
-                    } relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-atom-one-dark`}
-                  >
-                    <span
-                      aria-hidden='true'
+                options.sanitize && (key === 'removeScriptElement' || key === 'removeStyleElement'))
+                ? null
+                : (
+                  <Field key={key} as='div' className='flex items-center justify-between gap-4'>
+                    <Label className='flex-1 cursor-pointer text-sm text-gray-700 dark:text-gray-300'>
+                      {PLUGIN_DESCRIPTIONS[key]}
+                    </Label>
+                    <Switch
+                      checked={options[key] as boolean}
+                      onChange={() => handleToggle(key)}
+                      disabled={
+                      options.sanitize && (key === 'removeScriptElement' || key === 'removeStyleElement')
+                    }
                       className={`${
+                      options.sanitize && (key === 'removeScriptElement' || key === 'removeStyleElement')
+                        ? 'bg-gray-300 opacity-70 dark:bg-gray-700'
+                        : options[key]
+                          ? 'bg-sky-500 dark:bg-sky-600'
+                          : 'bg-gray-300 dark:bg-gray-600'
+                    } relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed dark:focus-visible:ring-offset-atom-one-dark`}
+                    >
+                      <span
+                        aria-hidden='true'
+                        className={`${
                         options[key] ? 'translate-x-4' : 'translate-x-0'
                       } pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
-                    />
-                  </Switch>
-                </Field>
-              ))}
+                      />
+                    </Switch>
+                  </Field>
+                  ))}
             </div>
           </div>
         </div>

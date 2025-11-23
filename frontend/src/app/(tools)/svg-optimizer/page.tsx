@@ -20,6 +20,7 @@ export default function SvgOptimizerPage () {
   const toast = useToast()
   const [originalSvg, setOriginalSvg] = useState<string | null>(null)
   const [previewOptimizedSvg, setPreviewOptimizedSvg] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [originalSize, setOriginalSize] = useState<number>(0)
   const [previewOptimizedSize, setPreviewOptimizedSize] = useState<number>(0)
   const [fileName, setFileName] = useState<string>('')
@@ -82,22 +83,36 @@ export default function SvgOptimizerPage () {
     if (!originalSvg) {
       setPreviewOptimizedSvg(null)
       setPreviewOptimizedSize(0)
+      setPreviewUrl(null)
       return
     }
+
+    let objectUrl: string | null = null
 
     const optimize = async () => {
       try {
         const optimized = await optimizeSvg(originalSvg, options)
         setPreviewOptimizedSvg(optimized)
         setPreviewOptimizedSize(new Blob([optimized]).size)
+
+        const blob = new Blob([optimized], { type: 'image/svg+xml' })
+        objectUrl = URL.createObjectURL(blob)
+        setPreviewUrl(objectUrl)
       } catch (err) {
         console.error('Preview optimization failed:', err)
         setPreviewOptimizedSvg(null)
         setPreviewOptimizedSize(0)
+        setPreviewUrl(null)
       }
     }
 
     optimize()
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
   }, [originalSvg, options])
 
   const handleDownload = useCallback(async () => {
@@ -227,11 +242,16 @@ export default function SvgOptimizerPage () {
                     </div>
                   }
                 >
-                  {previewOptimizedSvg && (
+                  {previewUrl && (
                     <div
-                      className='flex size-full items-center justify-center [&>svg]:h-auto [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:max-w-full'
-                      dangerouslySetInnerHTML={{ __html: previewOptimizedSvg }}
-                    />
+                      className='flex size-full items-center justify-center'
+                    >
+                      <img
+                        src={previewUrl}
+                        alt='最適化後プレビュー'
+                        className='h-auto max-h-full w-auto max-w-full'
+                      />
+                    </div>
                   )}
                 </CheckerboardPreview>
 

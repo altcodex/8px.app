@@ -4,6 +4,9 @@ import type { Config } from 'svgo/browser'
  * SVGO plugin options
  */
 export type SvgoOptions = {
+  // Security
+  sanitize: boolean
+
   // Numeric options
   floatPrecision: number
   transformPrecision: number
@@ -50,6 +53,7 @@ export type SvgoOptions = {
  * Preset configurations
  */
 export const PRESET_SAFE: SvgoOptions = {
+  sanitize: true,
   // Numeric values
   floatPrecision: 3,
   transformPrecision: 5,
@@ -88,11 +92,12 @@ export const PRESET_SAFE: SvgoOptions = {
   convertShapeToPath: true,
   sortAttrs: false,
   removeDimensions: false,
-  removeStyleElement: false,
-  removeScriptElement: false
+  removeStyleElement: true,
+  removeScriptElement: true
 }
 
 export const PRESET_SVGO_DEFAULT: SvgoOptions = {
+  sanitize: true,
   // Numeric values
   floatPrecision: 3,
   transformPrecision: 5,
@@ -131,11 +136,12 @@ export const PRESET_SVGO_DEFAULT: SvgoOptions = {
   convertShapeToPath: true,
   sortAttrs: false,
   removeDimensions: false,
-  removeStyleElement: false,
-  removeScriptElement: false
+  removeStyleElement: true,
+  removeScriptElement: true
 }
 
 export const PRESET_MAXIMUM: SvgoOptions = {
+  sanitize: true,
   // Numeric values (lower precision = smaller file)
   floatPrecision: 1,
   transformPrecision: 3,
@@ -204,7 +210,9 @@ export const PRESETS = [
  * Convert our custom options format to SVGO config
  */
 export function buildSvgoConfig (options: SvgoOptions): Config {
-  // Build plugins array with overrides
+  const sanitize = options.sanitize !== false
+
+  // Build plugins array with overrides for preset-default plugins
   const plugins: any[] = [
     // Start with preset-default but customize specific plugins
     {
@@ -222,18 +230,14 @@ export function buildSvgoConfig (options: SvgoOptions): Config {
           removeDoctype: options.removeDoctype,
           removeComments: options.removeComments,
           removeMetadata: options.removeMetadata,
-          removeTitle: options.removeTitle,
-          removeDesc: options.removeDesc,
           removeUselessDefs: options.removeUselessDefs,
           removeEditorsNSData: options.removeEditorsNSData,
           removeEmptyAttrs: options.removeEmptyAttrs,
           removeHiddenElems: options.removeHiddenElems,
           removeEmptyText: options.removeEmptyText,
           removeEmptyContainers: options.removeEmptyContainers,
-          removeViewBox: options.removeViewBox,
           cleanupEnableBackground: options.cleanupEnableBackground,
           minifyStyles: options.minifyStyles,
-          convertStyleToAttrs: options.convertStyleToAttrs,
           convertColors: options.convertColors,
           convertPathData: options.convertPathData,
           removeUnknownsAndDefaults: options.removeUnknownsAndDefaults,
@@ -241,21 +245,43 @@ export function buildSvgoConfig (options: SvgoOptions): Config {
           removeUselessStrokeAndFill: options.removeUselessStrokeAndFill,
           removeUnusedNS: options.removeUnusedNS,
           cleanupIds: options.cleanupIds,
-          cleanupListOfValues: options.cleanupListOfValues,
           moveElemsAttrsToGroup: options.moveElemsAttrsToGroup,
           moveGroupAttrsToElems: options.moveGroupAttrsToElems,
           collapseGroups: options.collapseGroups,
-          removeRasterImages: options.removeRasterImages,
           mergePaths: options.mergePaths,
           convertShapeToPath: options.convertShapeToPath,
-          sortAttrs: options.sortAttrs,
-          removeDimensions: options.removeDimensions,
-          removeStyleElement: options.removeStyleElement,
-          removeScriptElement: options.removeScriptElement
+          sortAttrs: options.sortAttrs
         }
       }
     }
   ]
+
+  // Standalone plugins (not part of preset-default)
+  const standalonePlugins: Array<{ name: string, active: boolean }> = [
+    { name: 'removeViewBox', active: options.removeViewBox },
+    { name: 'convertStyleToAttrs', active: options.convertStyleToAttrs },
+    { name: 'cleanupListOfValues', active: options.cleanupListOfValues },
+    { name: 'removeTitle', active: options.removeTitle },
+    { name: 'removeDesc', active: options.removeDesc },
+    { name: 'removeDimensions', active: options.removeDimensions },
+    { name: 'removeRasterImages', active: options.removeRasterImages },
+    { name: 'removeScripts', active: sanitize || options.removeScriptElement },
+    { name: 'removeStyleElement', active: sanitize || options.removeStyleElement }
+  ]
+
+  standalonePlugins.forEach(plugin => {
+    plugins.push(plugin.active ? { name: plugin.name } : { name: plugin.name, active: false })
+  })
+
+  // Extra hardening: strip inline event handlers when sanitizing
+  if (sanitize) {
+    plugins.push({
+      name: 'removeAttrs',
+      params: {
+        attrs: ['on.*']
+      }
+    })
+  }
 
   return {
     plugins,
