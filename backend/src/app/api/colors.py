@@ -6,7 +6,7 @@ import numpy as np
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from numpy.typing import NDArray
 from PIL import Image
-from pillow_heif import register_heif_opener
+from pillow_heif import register_heif_opener  # type: ignore[import-untyped]
 from starlette.concurrency import run_in_threadpool
 
 from app.core.config import Settings
@@ -353,34 +353,19 @@ async def extract_colors(
         raise HTTPException(status_code=400, detail="File must be an image")
 
     # Security limits (match frontend validation)
-    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    # Note: File size is validated by UploadSizeLimitMiddleware
     MAX_DIMENSION = 4096  # 4096x4096 pixels
     MAX_PIXELS = MAX_DIMENSION * MAX_DIMENSION  # ~16.7M pixels
 
     try:
-        # Stream read with size limit to prevent memory exhaustion
-        contents = bytearray()
-        chunk_size = 1024 * 1024  # 1MB chunks
-        total_size = 0
-        first_chunk = True
+        # Read file contents (size already validated by middleware)
+        contents = await file.read()
 
-        while chunk := await file.read(chunk_size):
-            total_size += len(chunk)
-            if total_size > MAX_FILE_SIZE:
-                logger.warning("File too large: %d bytes (limit: %d)", total_size, MAX_FILE_SIZE)
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"File size must be less than {MAX_FILE_SIZE // 1024 // 1024}MB",
-                )
-            contents.extend(chunk)
-
-            # Validate magic number on first chunk
-            if first_chunk:
-                error = validate_image_magic_number(bytes(contents))
-                if error:
-                    logger.warning("Magic number validation failed: %s", error)
-                    raise HTTPException(status_code=400, detail=error)
-                first_chunk = False
+        # Validate magic number (security: defense in depth)
+        error = validate_image_magic_number(contents)
+        if error:
+            logger.warning("Magic number validation failed: %s", error)
+            raise HTTPException(status_code=400, detail=error)
 
         # Decode and validate image in threadpool to avoid blocking event loop
         # (Pillow decode is CPU-heavy for multi-MB images)

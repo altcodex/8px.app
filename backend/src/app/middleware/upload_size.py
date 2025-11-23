@@ -40,27 +40,49 @@ class UploadSizeLimitMiddleware(BaseHTTPMiddleware):
         """Process request and check upload size."""
         # Only check POST/PUT/PATCH requests (uploads)
         if request.method in ("POST", "PUT", "PATCH"):
-            # Check Content-Length header
+            # Content-Length is required for upload size validation
             content_length = request.headers.get("Content-Length")
-            if content_length:
-                try:
-                    size = int(content_length)
-                    if size > self.max_size:
-                        max_mb = self.max_size / (1024 * 1024)
-                        logger.warning(
-                            "Upload size exceeded: %d bytes (limit: %d bytes)",
-                            size,
-                            self.max_size,
-                        )
-                        return JSONResponse(
-                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                            content={
-                                "error": "Request Entity Too Large",
-                                "message": f"Upload size must be less than {max_mb:.0f}MB",
-                            },
-                        )
-                except ValueError:
-                    # Invalid Content-Length, let it through (will fail later)
-                    pass
+
+            if not content_length:
+                logger.warning(
+                    "Upload rejected: Content-Length header is missing"
+                )
+                return JSONResponse(
+                    status_code=status.HTTP_411_LENGTH_REQUIRED,
+                    content={
+                        "error": "Length Required",
+                        "message": "Content-Length header is required for uploads",
+                    },
+                )
+
+            # Validate Content-Length value and check size limit
+            try:
+                size = int(content_length)
+                if size > self.max_size:
+                    max_mb = self.max_size / (1024 * 1024)
+                    logger.warning(
+                        "Upload size exceeded: %d bytes (limit: %d bytes)",
+                        size,
+                        self.max_size,
+                    )
+                    return JSONResponse(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        content={
+                            "error": "Request Entity Too Large",
+                            "message": f"Upload size must be less than {max_mb:.0f}MB",
+                        },
+                    )
+            except ValueError:
+                logger.warning(
+                    "Upload rejected: Invalid Content-Length header value: %s",
+                    content_length,
+                )
+                return JSONResponse(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    content={
+                        "error": "Bad Request",
+                        "message": "Invalid Content-Length header",
+                    },
+                )
 
         return await call_next(request)
