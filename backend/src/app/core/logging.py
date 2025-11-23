@@ -7,6 +7,11 @@ from contextvars import ContextVar
 request_id_var: ContextVar[str | None] = ContextVar('request_id', default=None)
 
 
+def _has_request_id_filter(filters: list[logging.Filter]) -> bool:
+    """Check if RequestIDFilter is already attached."""
+    return any(isinstance(f, RequestIDFilter) for f in filters)
+
+
 class RequestIDFilter(logging.Filter):
     """
     Logging filter that adds request_id to log records.
@@ -34,7 +39,7 @@ def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
 
     # Add request ID filter if not already added
-    if not any(isinstance(f, RequestIDFilter) for f in logger.filters):
+    if not _has_request_id_filter(logger.filters):
         logger.addFilter(RequestIDFilter())
 
     return logger
@@ -72,3 +77,13 @@ def configure_logging(level: str = 'INFO') -> None:
         format='%(asctime)s - %(name)s - %(levelname)s - [%(request_id)s] - %(message)s',
         force=True,
     )
+
+    # Ensure root logger and its handlers add request_id to all records, including
+    # third-party loggers that don't use get_logger()
+    root_logger = logging.getLogger()
+    if not _has_request_id_filter(root_logger.filters):
+        root_logger.addFilter(RequestIDFilter())
+
+    for handler in root_logger.handlers:
+        if not _has_request_id_filter(handler.filters):
+            handler.addFilter(RequestIDFilter())
