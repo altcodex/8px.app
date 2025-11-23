@@ -14,14 +14,23 @@ class Settings(BaseSettings):
     API_VERSION: str = '1.0.0'
 
     # Environment
-    ENVIRONMENT: str = 'development'
-    DEBUG: bool = True
+    ENVIRONMENT: str = 'production'
+    DEBUG: bool = False
 
     # CORS
     ALLOWED_ORIGINS: str = 'http://localhost:3000'
 
     # Logging
     LOG_LEVEL: str = 'INFO'
+
+    # Rate Limiting (Upstash Redis)
+    UPSTASH_REDIS_REST_URL: str | None = None
+    UPSTASH_REDIS_REST_TOKEN: str | None = None
+
+    # Proxy Settings
+    # Trust proxy headers (X-Real-IP, X-Forwarded-For) for client IP detection
+    # Trusted proxies (Vercel, Cloudflare, Nginx) sanitize these headers
+    TRUST_PROXY_HEADERS: bool = True
 
     model_config = SettingsConfigDict(
         env_file='.env',

@@ -7,95 +7,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Slider } from '@/components/ui/slider'
 import { useToast } from '@/components/ui/toast'
+import { TogglePill } from '@/components/ui/toggle-pill'
 import { getToolById } from '@/config/tools'
-
-// Character sets
-const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz'
-const NUMBERS = '0123456789'
-const SYMBOLS = '!@#$%^&*-_+=?'
-
-// Ambiguous characters to avoid
-const AMBIGUOUS = '0O1lI'
-
-type PasswordOptions = {
-  length: number
-  uppercase: boolean
-  lowercase: boolean
-  numbers: boolean
-  symbols: boolean
-  avoidAmbiguous: boolean
-}
-
-function generatePassword (options: PasswordOptions): string {
-  // Build character sets
-  const charsets: string[] = []
-  if (options.uppercase) charsets.push(UPPERCASE)
-  if (options.lowercase) charsets.push(LOWERCASE)
-  if (options.numbers) charsets.push(NUMBERS)
-  if (options.symbols) charsets.push(SYMBOLS)
-
-  if (charsets.length === 0) {
-    return ''
-  }
-
-  // Remove ambiguous characters if option is enabled
-  const cleanCharsets = options.avoidAmbiguous
-    ? charsets.map(set => set.split('').filter(c => !AMBIGUOUS.includes(c)).join(''))
-    : charsets
-
-  // Ensure at least one character from each selected charset
-  const password: string[] = []
-  const array = new Uint32Array(options.length)
-  crypto.getRandomValues(array)
-  let arrayIndex = 0
-
-  // Add one character from each charset
-  for (const charset of cleanCharsets) {
-    if (charset.length > 0) {
-      password.push(charset[array[arrayIndex++] % charset.length])
-    }
-  }
-
-  // Fill remaining length with random characters from all charsets
-  const allChars = cleanCharsets.join('')
-  while (password.length < options.length) {
-    password.push(allChars[array[arrayIndex++] % allChars.length])
-  }
-
-  // Shuffle the password to avoid predictable patterns
-  for (let i = password.length - 1; i > 0; i--) {
-    const j = array[arrayIndex++ % array.length] % (i + 1);
-    [password[i], password[j]] = [password[j], password[i]]
-  }
-
-  return password.join('')
-}
-
-// Character type toggle button component
-function CharsetButton ({
-  label,
-  enabled,
-  onChange
-}: {
-  label: string
-  enabled: boolean
-  onChange: (enabled: boolean) => void
-}) {
-  return (
-    <button
-      onClick={() => onChange(!enabled)}
-      className={`rounded-full px-6 py-2 text-sm font-medium outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 ${
-        enabled
-          ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
-          : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-      }`}
-      aria-pressed={enabled}
-    >
-      {label}
-    </button>
-  )
-}
+import type { PasswordOptions } from '@/lib/password/generator'
+import { generatePassword } from '@/lib/password/generator'
 
 export default function PasswordGeneratorPage () {
   const tool = getToolById('password-generator')
@@ -222,26 +137,34 @@ export default function PasswordGeneratorPage () {
               選択した文字種は必ず1文字以上含まれます
             </p>
             <div className='flex flex-wrap gap-2'>
-              <CharsetButton
-                label='大文字'
-                enabled={options.uppercase}
-                onChange={(v) => updateOption('uppercase', v)}
-              />
-              <CharsetButton
-                label='小文字'
-                enabled={options.lowercase}
-                onChange={(v) => updateOption('lowercase', v)}
-              />
-              <CharsetButton
-                label='数字'
-                enabled={options.numbers}
-                onChange={(v) => updateOption('numbers', v)}
-              />
-              <CharsetButton
-                label='記号'
-                enabled={options.symbols}
-                onChange={(v) => updateOption('symbols', v)}
-              />
+              <TogglePill
+                pressed={options.uppercase}
+                onClick={() => updateOption('uppercase', !options.uppercase)}
+                ariaLabel='大文字を切り替え'
+              >
+                大文字
+              </TogglePill>
+              <TogglePill
+                pressed={options.lowercase}
+                onClick={() => updateOption('lowercase', !options.lowercase)}
+                ariaLabel='小文字を切り替え'
+              >
+                小文字
+              </TogglePill>
+              <TogglePill
+                pressed={options.numbers}
+                onClick={() => updateOption('numbers', !options.numbers)}
+                ariaLabel='数字を切り替え'
+              >
+                数字
+              </TogglePill>
+              <TogglePill
+                pressed={options.symbols}
+                onClick={() => updateOption('symbols', !options.symbols)}
+                ariaLabel='記号を切り替え'
+              >
+                記号
+              </TogglePill>
             </div>
           </div>
 

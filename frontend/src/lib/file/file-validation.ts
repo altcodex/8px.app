@@ -155,17 +155,30 @@ function detectImageType (bytes: Uint8Array): SupportedImageType | null {
   }
 
   // SVG: Text-based so check beginning
-  // Starts with < (0x3C), or UTF-8 BOM + <
-  if (bytes.length >= 1 && bytes[0] === 0x3C) {
-    return 'svg'
-  }
+  // Starts with < (0x3C), or UTF-8 BOM + <, allowing leading whitespace
+  let offset = 0
 
-  // UTF-8 BOM (EF BB BF) followed by <
-  if (bytes.length >= 4 &&
+  // Skip UTF-8 BOM if present
+  if (bytes.length >= 3 &&
       bytes[0] === 0xEF &&
       bytes[1] === 0xBB &&
-      bytes[2] === 0xBF &&
-      bytes[3] === 0x3C) {
+      bytes[2] === 0xBF) {
+    offset = 3
+  }
+
+  // Skip leading whitespace (space, tab, newline, carriage return)
+  while (offset < bytes.length) {
+    const byte = bytes[offset]
+    // 0x20 = space, 0x09 = tab, 0x0A = newline, 0x0D = carriage return
+    if (byte === 0x20 || byte === 0x09 || byte === 0x0A || byte === 0x0D) {
+      offset++
+    } else {
+      break
+    }
+  }
+
+  // Check if we found '<' after skipping whitespace
+  if (offset < bytes.length && bytes[offset] === 0x3C) {
     return 'svg'
   }
 

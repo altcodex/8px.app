@@ -3,25 +3,22 @@
 import { CloseButton, Dialog, DialogPanel, Popover, PopoverButton, PopoverPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
+import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
 
-import { LogoIcon } from './icons/logo-icon'
 import { ThemeToggle } from './theme-toggle'
 
 function CategoryPopover ({ category }: { category: typeof categories[number] }) {
-  const buttonRef = useRef<HTMLButtonElement>(null)
-
   return (
-    <Popover className='relative'>
+    <Popover className='group relative'>
       <PopoverButton
-        ref={buttonRef}
-        className='flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 data-[open]:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter data-[open]:dark:bg-atom-one-dark-lighter'
+        className='flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 data-[focus]:bg-gray-100 data-[open]:bg-gray-100 dark:hover:bg-atom-one-dark-lighter data-[focus]:dark:bg-atom-one-dark-lighter data-[open]:dark:bg-atom-one-dark-lighter'
       >
         {category.name}
-        <ChevronDownIcon className='size-4 transition-transform data-[open]:rotate-180' />
+        <ChevronDownIcon className='size-4 transition-transform group-data-[open]:rotate-180' />
       </PopoverButton>
       <Transition
         enter='transition duration-100 ease-out'
@@ -30,7 +27,6 @@ function CategoryPopover ({ category }: { category: typeof categories[number] })
         leave='transition duration-100 ease-out'
         leaveFrom='transform scale-100 opacity-100'
         leaveTo='transform scale-95 opacity-0'
-        afterLeave={() => buttonRef.current?.blur()}
       >
         <PopoverPanel className='absolute right-0 z-50 mt-2'>
           <div className='w-60 overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>

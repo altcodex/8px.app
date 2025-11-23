@@ -7,20 +7,21 @@ import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { CheckerboardPreview } from '@/components/checkerboard-preview'
+import { SvgOptionsPanel } from '@/components/svg-optimizer/svg-options-panel'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
+import { validateFileBasic, validateImageFileType } from '@/lib/file/file-validation'
 import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
 import { DEFAULT_SVGO_OPTIONS, optimizeSvg, PRESETS } from '@/lib/image/svgo-optimizer'
-
-import { SvgOptionsPanel } from './svg-options-panel'
 
 export default function SvgOptimizerPage () {
   const tool = getToolById('svg-optimizer')
   const toast = useToast()
   const [originalSvg, setOriginalSvg] = useState<string | null>(null)
   const [previewOptimizedSvg, setPreviewOptimizedSvg] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [originalSize, setOriginalSize] = useState<number>(0)
   const [previewOptimizedSize, setPreviewOptimizedSize] = useState<number>(0)
   const [fileName, setFileName] = useState<string>('')
@@ -30,15 +31,17 @@ export default function SvgOptimizerPage () {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = useCallback(async (file: File) => {
-    // Validate file type
-    if (!file.type.includes('svg')) {
+    // Validate file type using magic number
+    const typeValidation = await validateImageFileType(file)
+    if (!typeValidation.isValid || typeValidation.detectedType !== 'svg') {
       toast.error('SVGファイルのみアップロードできます')
       return
     }
 
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('ファイルサイズが大きすぎます（最大10MB）')
+    // Validate file size
+    const basicError = validateFileBasic(file, { maxSize: 10 * 1024 * 1024 })
+    if (basicError) {
+      toast.error(basicError)
       return
     }
 
@@ -83,17 +86,40 @@ export default function SvgOptimizerPage () {
     if (!originalSvg) {
       setPreviewOptimizedSvg(null)
       setPreviewOptimizedSize(0)
+      setPreviewUrl(null)
       return
     }
 
-    try {
-      const optimized = optimizeSvg(originalSvg, options)
-      setPreviewOptimizedSvg(optimized)
-      setPreviewOptimizedSize(new Blob([optimized]).size)
-    } catch (err) {
-      console.error('Preview optimization failed:', err)
-      setPreviewOptimizedSvg(null)
-      setPreviewOptimizedSize(0)
+    let cancelled = false
+    let objectUrl: string | null = null
+
+    const optimize = async () => {
+      try {
+        const optimized = await optimizeSvg(originalSvg, options)
+        if (cancelled) return
+
+        const blob = new Blob([optimized], { type: 'image/svg+xml' })
+        objectUrl = URL.createObjectURL(blob)
+
+        setPreviewOptimizedSvg(optimized)
+        setPreviewOptimizedSize(blob.size)
+        setPreviewUrl(objectUrl)
+      } catch (err) {
+        if (cancelled) return
+        console.error('Preview optimization failed:', err)
+        setPreviewOptimizedSvg(null)
+        setPreviewOptimizedSize(0)
+        setPreviewUrl(null)
+      }
+    }
+
+    optimize()
+
+    return () => {
+      cancelled = true
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
     }
   }, [originalSvg, options])
 
@@ -106,7 +132,7 @@ export default function SvgOptimizerPage () {
     setIsDownloading(true)
 
     try {
-      const optimized = optimizeSvg(originalSvg, options)
+      const optimized = await optimizeSvg(originalSvg, options)
       const blob = new Blob([optimized], { type: 'image/svg+xml' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -224,11 +250,16 @@ export default function SvgOptimizerPage () {
                     </div>
                   }
                 >
-                  {previewOptimizedSvg && (
+                  {previewUrl && (
                     <div
-                      className='flex size-full items-center justify-center [&>svg]:h-auto [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:max-w-full'
-                      dangerouslySetInnerHTML={{ __html: previewOptimizedSvg }}
-                    />
+                      className='flex size-full items-center justify-center'
+                    >
+                      <img
+                        src={previewUrl}
+                        alt='最適化後プレビュー'
+                        className='h-auto max-h-full w-auto max-w-full'
+                      />
+                    </div>
                   )}
                 </CheckerboardPreview>
 

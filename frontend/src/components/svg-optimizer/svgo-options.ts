@@ -7,6 +7,7 @@ import type { SvgoOptions } from '@/lib/image/svgo-optimizer'
 
 // Plugin descriptions for UI
 export const PLUGIN_DESCRIPTIONS: Record<keyof SvgoOptions, string> = {
+  sanitize: 'サニタイズ',
   floatPrecision: '小数点以下の桁数',
   transformPrecision: 'transform属性の精度',
   removeDoctype: 'DOCTYPE宣言を削除',
@@ -63,9 +64,7 @@ export const PLUGIN_GROUPS = [
       'removeEmptyContainers',
       'removeUselessDefs',
       'removeUnusedNS',
-      'removeRasterImages',
-      'removeScriptElement',
-      'removeStyleElement'
+      'removeRasterImages'
     ] as Array<keyof SvgoOptions>
   },
   {
@@ -108,7 +107,10 @@ export const PLUGIN_GROUPS = [
       'removeTitle',
       'removeDesc',
       'removeViewBox',
-      'removeDimensions'
+      'removeDimensions',
+      'sanitize',
+      'removeStyleElement',
+      'removeScriptElement'
     ] as Array<keyof SvgoOptions>
   }
 ] as const
