@@ -87,18 +87,22 @@ export default function SvgOptimizerPage () {
       return
     }
 
+    let cancelled = false
     let objectUrl: string | null = null
 
     const optimize = async () => {
       try {
         const optimized = await optimizeSvg(originalSvg, options)
-        setPreviewOptimizedSvg(optimized)
-        setPreviewOptimizedSize(new Blob([optimized]).size)
+        if (cancelled) return
 
         const blob = new Blob([optimized], { type: 'image/svg+xml' })
         objectUrl = URL.createObjectURL(blob)
+
+        setPreviewOptimizedSvg(optimized)
+        setPreviewOptimizedSize(blob.size)
         setPreviewUrl(objectUrl)
       } catch (err) {
+        if (cancelled) return
         console.error('Preview optimization failed:', err)
         setPreviewOptimizedSvg(null)
         setPreviewOptimizedSize(0)
@@ -109,6 +113,7 @@ export default function SvgOptimizerPage () {
     optimize()
 
     return () => {
+      cancelled = true
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl)
       }
