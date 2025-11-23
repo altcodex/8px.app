@@ -14,9 +14,8 @@ import { useColorHistory } from '@/contexts/color-history-context'
 import { hexToCmyk, hexToHsl, hexToOklch, hexToRgb } from '@/lib/color/color-utils'
 import type { ColorPalette } from '@/lib/color/palette-generator'
 import {
-  adjustPaletteHue,
-  adjustPaletteLightness,
-  adjustPaletteSaturation,
+  adjustColor,
+  adjustPalette,
   generatePalette,
   getShadeLabels
 } from '@/lib/color/palette-generator'
@@ -30,6 +29,7 @@ export default function TailwindPaletteGeneratorPage () {
 
   // State
   const [inputColor, setInputColor] = useState('#0ea5e9') // Default: Tailwind blue-500
+  const [baseColor, setBaseColor] = useState(inputColor)
   const [palette, setPalette] = useState<ColorPalette>({ // Default: Tailwind sky
     50: '#f0f9ff',
     100: '#e0f2fe',
@@ -43,12 +43,12 @@ export default function TailwindPaletteGeneratorPage () {
     900: '#0c4a6e',
     950: '#082f49'
   })
-  const [baseHue, setBaseHue] = useState(198) // Input color's H value
-  const [targetHue, setTargetHue] = useState(198) // Current slider value
-  const [baseLightness, setBaseLightness] = useState(55) // Input color's L value
-  const [baseSaturation, setBaseSaturation] = useState(90) // Input color's C value
-  const [targetLightness, setTargetLightness] = useState(55) // Current slider value
-  const [targetSaturation, setTargetSaturation] = useState(90) // Current slider value
+  const [baseHue, setBaseHue] = useState(237) // Input color's H value
+  const [targetHue, setTargetHue] = useState(237) // Current slider value
+  const [baseLightness, setBaseLightness] = useState(68) // Input color's L value
+  const [targetLightness, setTargetLightness] = useState(68) // Current slider value
+  const [baseSaturation, setBaseSaturation] = useState(19) // Input color's C value
+  const [targetSaturation, setTargetSaturation] = useState(19) // Current slider value
   const [basePalette, setBasePalette] = useState<ColorPalette | null>(null)
   const [selectedFormat, setSelectedFormat] = useState<'hex' | 'rgb' | 'hsl' | 'cmyk'>('hex')
 
@@ -61,14 +61,15 @@ export default function TailwindPaletteGeneratorPage () {
       const generated = generatePalette(normalizedInputColor)
       const oklch = hexToOklch(normalizedInputColor)
       if (generated && oklch) {
+        setBaseColor(normalizedInputColor)
         setBasePalette(generated)
         setPalette(generated)
         // Set base and target to input color's actual values
         setBaseHue(Math.round(oklch.h))
         setTargetHue(Math.round(oklch.h))
         setBaseLightness(Math.round(oklch.l))
-        setBaseSaturation(Math.round(oklch.c))
         setTargetLightness(Math.round(oklch.l))
+        setBaseSaturation(Math.round(oklch.c))
         setTargetSaturation(Math.round(oklch.c))
       }
     }, 100) // 100ms debounce (optimized for responsive UX)
@@ -87,26 +88,6 @@ export default function TailwindPaletteGeneratorPage () {
     setInputColor(hex)
   }, [])
 
-  // Apply all adjustments to base palette
-  const applyAdjustments = useCallback((
-    base: ColorPalette,
-    hue: number,
-    lightnessShift: number,
-    saturationShift: number
-  ) => {
-    let adjusted = base
-    if (hue !== 0) {
-      adjusted = adjustPaletteHue(adjusted, hue)
-    }
-    if (lightnessShift !== 0) {
-      adjusted = adjustPaletteLightness(adjusted, lightnessShift)
-    }
-    if (saturationShift !== 0) {
-      adjusted = adjustPaletteSaturation(adjusted, saturationShift)
-    }
-    return adjusted
-  }, [])
-
   // Adjust hue
   const handleHueChange = useCallback((sliderValue: number) => {
     setTargetHue(sliderValue)
@@ -114,10 +95,12 @@ export default function TailwindPaletteGeneratorPage () {
       const hueShift = sliderValue - baseHue
       const lightnessShift = targetLightness - baseLightness
       const saturationShift = targetSaturation - baseSaturation
-      const adjusted = applyAdjustments(basePalette, hueShift, lightnessShift, saturationShift)
-      setPalette(adjusted)
+      const adjustedColor = adjustColor(inputColor, hueShift, lightnessShift, saturationShift)
+      setBaseColor(adjustedColor || inputColor)
+      const adjustedPalette = adjustPalette(basePalette, hueShift, lightnessShift, saturationShift)
+      setPalette(adjustedPalette)
     }
-  }, [basePalette, baseHue, targetLightness, baseLightness, targetSaturation, baseSaturation, applyAdjustments])
+  }, [inputColor, basePalette, baseHue, targetLightness, baseLightness, targetSaturation, baseSaturation])
 
   // Adjust lightness
   const handleLightnessChange = useCallback((sliderValue: number) => {
@@ -126,10 +109,12 @@ export default function TailwindPaletteGeneratorPage () {
       const hueShift = targetHue - baseHue
       const lightnessShift = sliderValue - baseLightness
       const saturationShift = targetSaturation - baseSaturation
-      const adjusted = applyAdjustments(basePalette, hueShift, lightnessShift, saturationShift)
-      setPalette(adjusted)
+      const adjustedColor = adjustColor(inputColor, hueShift, lightnessShift, saturationShift)
+      setBaseColor(adjustedColor || inputColor)
+      const adjustedPalette = adjustPalette(basePalette, hueShift, lightnessShift, saturationShift)
+      setPalette(adjustedPalette)
     }
-  }, [basePalette, baseLightness, targetHue, baseHue, targetSaturation, baseSaturation, applyAdjustments])
+  }, [inputColor, basePalette, baseLightness, targetHue, baseHue, targetSaturation, baseSaturation])
 
   // Adjust saturation
   const handleSaturationChange = useCallback((sliderValue: number) => {
@@ -138,10 +123,12 @@ export default function TailwindPaletteGeneratorPage () {
       const hueShift = targetHue - baseHue
       const lightnessShift = targetLightness - baseLightness
       const saturationShift = sliderValue - baseSaturation
-      const adjusted = applyAdjustments(basePalette, hueShift, lightnessShift, saturationShift)
-      setPalette(adjusted)
+      const adjustedColor = adjustColor(inputColor, hueShift, lightnessShift, saturationShift)
+      setBaseColor(adjustedColor || inputColor)
+      const adjustedPalette = adjustPalette(basePalette, hueShift, lightnessShift, saturationShift)
+      setPalette(adjustedPalette)
     }
-  }, [basePalette, targetLightness, baseLightness, baseSaturation, targetHue, baseHue, applyAdjustments])
+  }, [inputColor, basePalette, targetLightness, baseLightness, baseSaturation, targetHue, baseHue])
 
   // Reset adjustments to base values
   const handleReset = useCallback(() => {
@@ -151,7 +138,8 @@ export default function TailwindPaletteGeneratorPage () {
     if (basePalette) {
       setPalette(basePalette)
     }
-  }, [baseHue, baseLightness, baseSaturation, basePalette])
+    setBaseColor(inputColor)
+  }, [baseHue, baseLightness, baseSaturation, basePalette, inputColor])
 
   // Select format
   const handleSelectFormat = useCallback((format: 'hex' | 'rgb' | 'hsl' | 'cmyk') => {
@@ -357,46 +345,65 @@ export default function TailwindPaletteGeneratorPage () {
                 />
               </div>
             </section>
-            <section className='mb-4 flex items-center justify-between'>
-              <h6 className='text-sm font-semibold'>生成されたパレット</h6>
-              <Popover className='relative'>
-                {({ open }) => (
-                  <>
-                    <PopoverButton className='flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'>
-                      {selectedFormat}
-                      <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
-                    </PopoverButton>
-                    <Transition
-                      enter='transition duration-100 ease-out'
-                      enterFrom='transform scale-95 opacity-0'
-                      enterTo='transform scale-100 opacity-100'
-                      leave='transition duration-100 ease-out'
-                      leaveFrom='transform scale-100 opacity-100'
-                      leaveTo='transform scale-95 opacity-0'
-                    >
-                      <PopoverPanel className='absolute right-0 z-50 mt-2 w-32'>
-                        <div className='overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
-                          {(['hex', 'rgb', 'hsl', 'cmyk'] as const).map((format) => (
-                            <button
-                              key={format}
-                              onClick={() => handleSelectFormat(format)}
-                              className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm uppercase outline-none transition-colors ${selectedFormat === format ? 'bg-sky-50 font-medium dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter dark:focus-visible:bg-atom-one-dark-lighter'
+            <section>
+              <div className='mb-4 flex items-center justify-between'>
+                <h6 className='text-sm font-semibold'>生成されたパレット</h6>
+                <Popover className='relative'>
+                  {({ open }) => (
+                    <>
+                      <PopoverButton className='flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'>
+                        {selectedFormat}
+                        <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+                      </PopoverButton>
+                      <Transition
+                        enter='transition duration-100 ease-out'
+                        enterFrom='transform scale-95 opacity-0'
+                        enterTo='transform scale-100 opacity-100'
+                        leave='transition duration-100 ease-out'
+                        leaveFrom='transform scale-100 opacity-100'
+                        leaveTo='transform scale-95 opacity-0'
+                      >
+                        <PopoverPanel className='absolute right-0 z-50 mt-2 w-32'>
+                          <div className='overflow-hidden rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-atom-one-dark-light'>
+                            {(['hex', 'rgb', 'hsl', 'cmyk'] as const).map((format) => (
+                              <button
+                                key={format}
+                                onClick={() => handleSelectFormat(format)}
+                                className={`block w-full rounded-lg px-3 py-1.5 text-left text-sm uppercase outline-none transition-colors ${selectedFormat === format ? 'bg-sky-50 font-medium dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter dark:focus-visible:bg-atom-one-dark-lighter'
                                 }`}
-                            >
-                              {format}
-                            </button>
-                          ))}
-                        </div>
-                      </PopoverPanel>
-                    </Transition>
-                  </>
-                )}
-              </Popover>
-            </section>
+                              >
+                                {format}
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverPanel>
+                      </Transition>
+                    </>
+                  )}
+                </Popover>
+              </div>
 
-            <>
               {/* Color Swatches */}
-              <div className='mb-4 space-y-1'>
+              <div className='space-y-1'>
+                <div className='flex items-center gap-2 rounded px-1 py-1'>
+                  {/* Color Preview */}
+                  <button
+                    onClick={() => handleCopyColor(baseColor)}
+                    className='size-12 flex-shrink-0 cursor-pointer rounded shadow-sm outline-none transition-transform hover:scale-110 focus-visible:scale-110 active:scale-95'
+                    style={{ backgroundColor: baseColor }}
+                    title='クリックでコピー'
+                  />
+
+                  {/* Shade Label */}
+                  <div className='w-12 font-mono text-sm'>
+                    BASE
+                  </div>
+
+                  {/* Formatted Color Value */}
+                  <div className='font-mono text-sm font-medium'>
+                    {getFormattedColor(baseColor)}
+                  </div>
+                </div>
                 {getShadeLabels().map((shade) => {
                   const hex = palette[shade]
 
@@ -426,29 +433,29 @@ export default function TailwindPaletteGeneratorPage () {
                   )
                 })}
               </div>
+            </section>
 
-              {/* Tailwind Config Snippet */}
-              <section>
-                <h6 className='mb-4 text-sm font-semibold'>Tailwind Config</h6>
-                <div className='relative'>
-                  <pre className='overflow-x-auto rounded-lg bg-atom-one-dark p-3 font-mono text-xs text-gray-300 dark:bg-atom-one-dark-light dark:text-gray-300'>
-                    {`colors: {
+            {/* Tailwind Config Snippet */}
+            <section>
+              <h6 className='mb-4 text-sm font-semibold'>Tailwind Config</h6>
+              <div className='relative'>
+                <pre className='overflow-x-auto rounded-lg bg-atom-one-dark p-3 font-mono text-xs text-gray-300 dark:bg-atom-one-dark-light dark:text-gray-300'>
+                  {`colors: {
   custom: {
 ${getShadeLabels().map(shade => `    ${shade}: '${palette[shade]}',`).join('\n')}
   }
 }`}
-                  </pre>
-                  <button
-                    onClick={handleCopyAsTailwind}
-                    className='absolute right-2 top-2 rounded-lg p-1 text-gray-300 transition-colors hover:bg-white/10 dark:text-gray-300'
-                    title='コピー'
-                    aria-label='コピー'
-                  >
-                    <ClipboardDocumentIcon className='size-5' aria-label='コピー' />
-                  </button>
-                </div>
-              </section>
-            </>
+                </pre>
+                <button
+                  onClick={handleCopyAsTailwind}
+                  className='absolute right-2 top-2 rounded-lg p-1 text-gray-300 transition-colors hover:bg-white/10 dark:text-gray-300'
+                  title='コピー'
+                  aria-label='コピー'
+                >
+                  <ClipboardDocumentIcon className='size-5' aria-label='コピー' />
+                </button>
+              </div>
+            </section>
           </div>
         </div>
       </div>
