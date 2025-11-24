@@ -6,8 +6,8 @@ Web・UI開発者のためのツールセット。
 すべて無料、すべてオープンソース。`,
   author: '8px.app Project',
   title: {
-    default: '8px.app | Web Developer Toolkit',
-    template: '%s | 8px.app'
+    default: '8px.app - Developer Toolkit',
+    template: '%s - 8px.app'
   },
   locale: 'ja_JP',
   links: {

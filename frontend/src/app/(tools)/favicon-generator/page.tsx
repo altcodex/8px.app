@@ -207,13 +207,13 @@ export default function FaviconGeneratorPage () {
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'Faviconジェネレーター' }
+          { label: tool?.name ?? 'favicon-generator' }
         ]}
       />
 
       <div className='mx-auto max-w-screen-lg'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'Faviconジェネレーター'}</h1>
+          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'favicon-generator'}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
             {tool?.description ?? ''}
           </p>

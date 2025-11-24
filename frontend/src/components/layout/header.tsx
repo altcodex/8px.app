@@ -79,7 +79,7 @@ export function Header () {
         {/* Logo */}
         <Link href='/' className='flex items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500'>
           <LogoIcon className='size-6' />
-          <h1 className='font-logo text-xl font-semibold'>{siteConfig.name}</h1>
+          <div className='font-logo text-xl font-semibold'>{siteConfig.name}</div>
         </Link>
 
         {/* Desktop Navigation */}

@@ -68,13 +68,13 @@ export default function PasswordGeneratorPage () {
       <Breadcrumb
         items={[
           { label: 'ホーム', href: '/' },
-          { label: tool?.name ?? 'パスワードジェネレーター' }
+          { label: tool?.name ?? 'password-generator' }
         ]}
       />
 
       <div className='mx-auto max-w-screen-sm'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'パスワードジェネレーター'}</h1>
+          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'password-generator'}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
             {tool?.description ?? ''}
           </p>

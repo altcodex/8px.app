@@ -156,13 +156,13 @@ export default function SvgOptimizerPage () {
       <Breadcrumb
         items={[
           { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'SVG圧縮ツール' }
+          { label: tool?.name ?? 'svg-optimizer' }
         ]}
       />
 
       <div className='mx-auto max-w-screen-lg'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'SVG圧縮ツール'}</h1>
+          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'svg-optimizer'}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
             {tool?.description ?? ''}
           </p>
