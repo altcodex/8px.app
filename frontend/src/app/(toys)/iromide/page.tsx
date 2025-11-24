@@ -321,8 +321,7 @@ export default function IromidePage () {
                         <PolaroidFrame
                           image={{
                             src: imagePreview!,
-                            alt: 'Uploaded',
-                            className: '' // Display cropped image at native size
+                            alt: 'Uploaded'
                           }}
                           rotation={resultRotation}
                           chekiPadding={chekiPadding ?? undefined}
