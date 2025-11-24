@@ -9,6 +9,18 @@ export interface FileValidationResult {
 }
 
 /**
+ * Validate file size
+ * Common utility for all file types
+ */
+export function validateFileSize (file: File, maxSize: number): string | null {
+  if (file.size > maxSize) {
+    const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(0)
+    return `ファイルサイズが大きすぎます（最大${maxSizeMB}MB）`
+  }
+  return null
+}
+
+/**
  * Validate file type using MIME type and file extension
  *
  * Note: Detailed format validation (magic numbers, corruption check, etc.)
@@ -45,6 +57,28 @@ export function validateImageFileType (file: File): FileValidationResult {
 }
 
 /**
+ * Validate SVG file
+ * MIME type check + size check
+ */
+export function validateSvgFile (
+  file: File,
+  options: { maxSize?: number } = {}
+): string | null {
+  // MIME type check (SVG specific)
+  if (file.type !== 'image/svg+xml') {
+    return 'SVGファイルのみアップロードできます'
+  }
+
+  // File size check
+  if (options.maxSize) {
+    const sizeError = validateFileSize(file, options.maxSize)
+    if (sizeError) return sizeError
+  }
+
+  return null
+}
+
+/**
  * Complete validation of image files
  * MIME type check + size check + optional dimension check
  */
@@ -62,9 +96,9 @@ export async function validateImageFile (
   }
 
   // File size check
-  if (options.maxSize && file.size > options.maxSize) {
-    const maxSizeMB = (options.maxSize / (1024 * 1024)).toFixed(0)
-    return `ファイルサイズが大きすぎます（最大${maxSizeMB}MB）`
+  if (options.maxSize) {
+    const sizeError = validateFileSize(file, options.maxSize)
+    if (sizeError) return sizeError
   }
 
   // Image dimensions check (optional)
