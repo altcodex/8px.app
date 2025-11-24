@@ -2,6 +2,7 @@
  * カラー抽出API
  */
 
+import { handleApiFetchError } from '@/lib/api/api-error'
 import { loadImageFromFile, processImage } from '@/lib/image/image-processing'
 
 export type ExtractedColor = {
@@ -36,7 +37,8 @@ export async function extractColorsFromImage (
   )
 
   if (!response.ok) {
-    throw new Error('Failed to extract colors')
+    const errorMessage = await handleApiFetchError(response, '色の抽出に失敗しました')
+    throw new Error(errorMessage)
   }
 
   const data = await response.json()

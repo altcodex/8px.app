@@ -96,6 +96,7 @@ export default function PasswordGeneratorPage () {
               onClick={handleCopy}
               disabled={!password}
               className='absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1.5 rounded-md bg-sky-500 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-sky-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:opacity-50 dark:focus-visible:ring-offset-atom-one-dark'
+              aria-label='パスワードをクリップボードにコピー'
             >
               {copied
                 ? (

@@ -21,9 +21,10 @@ import {
   OUTPUT_SETS
 } from '@/lib/image/favicon-generator'
 import { downloadBlob, loadImageFromFile, processImage } from '@/lib/image/image-processing'
+import { getHeicSupport } from '@/lib/image/media-support'
 
 const ACCEPTED_IMAGE_TYPES = 'image/png, image/jpeg, image/webp, image/svg+xml, image/gif, image/avif, image/tiff, image/bmp'
-const ACCEPTED_IMAGE_TYPES_SAFARI = 'image/png, image/jpeg, image/webp, image/svg+xml, image/gif, image/tiff, image/bmp, image/heic, image/heif'
+const HEIC_TYPES = 'image/heic, image/heif'
 
 export default function FaviconGeneratorPage () {
   const tool = getToolById('favicon-generator')
@@ -40,13 +41,12 @@ export default function FaviconGeneratorPage () {
   const [backgroundColor, setBackgroundColor] = useState('#888888')
   const [useBackground, setUseBackground] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [isSafari, setIsSafari] = useState(false)
+  const [isHeicSupport, setIsHeicSupport] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Detect Safari for HEIC/HEIF support
+  // Detect HEIC/HEIF support
   useEffect(() => {
-    const isSafari = typeof window.safari !== 'undefined'
-    setIsSafari(isSafari)
+    setIsHeicSupport(getHeicSupport())
   }, [])
 
   const validateImageFileWrapper = useCallback(async (file: File): Promise<string | null> => {
@@ -201,7 +201,7 @@ export default function FaviconGeneratorPage () {
   return (
     <FullPageDropZone
       onFileDrop={handleFileSelect}
-      accept={isSafari ? ACCEPTED_IMAGE_TYPES_SAFARI : ACCEPTED_IMAGE_TYPES}
+      accept={isHeicSupport ? `${ACCEPTED_IMAGE_TYPES}, ${HEIC_TYPES}` : ACCEPTED_IMAGE_TYPES}
     >
       {/* Breadcrumb */}
       <Breadcrumb
@@ -231,7 +231,7 @@ export default function FaviconGeneratorPage () {
               <input
                 ref={fileInputRef}
                 type='file'
-                accept={isSafari ? ACCEPTED_IMAGE_TYPES_SAFARI : ACCEPTED_IMAGE_TYPES}
+                accept={isHeicSupport ? `${ACCEPTED_IMAGE_TYPES}, ${HEIC_TYPES}` : ACCEPTED_IMAGE_TYPES}
                 onChange={handleInputChange}
                 className='hidden'
               />
@@ -248,7 +248,7 @@ export default function FaviconGeneratorPage () {
                 または画面のどこにでもドラッグ&ドロップ
               </p>
               {/* Privacy Notice */}
-              <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900 dark:border-sky-950 dark:bg-sky-950 dark:text-gray-300'>
+              <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-950 dark:bg-sky-950'>
                 <ShieldCheckIcon className='size-5 shrink-0' />
                 <div className='text-sm'>
                   画像はサーバーに送信されず、ブラウザで安全に実行されます。

@@ -1,13 +1,15 @@
 """Logging utilities with request ID support."""
 
 import logging
+from collections.abc import Sequence
 from contextvars import ContextVar
+from typing import Any
 
 # Context variable to store request ID across async context
 request_id_var: ContextVar[str | None] = ContextVar('request_id', default=None)
 
 
-def _has_request_id_filter(filters: list[logging.Filter]) -> bool:
+def _has_request_id_filter(filters: Sequence[Any]) -> bool:
     """Check if RequestIDFilter is already attached."""
     return any(isinstance(f, RequestIDFilter) for f in filters)
 

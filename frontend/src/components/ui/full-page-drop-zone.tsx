@@ -25,6 +25,18 @@ export function FullPageDropZone ({
 
   const handleDragEnter = useCallback((e: globalThis.DragEvent) => {
     e.preventDefault()
+
+    // Ignore drag events from interactive elements (sliders, inputs, etc.)
+    const target = e.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.closest('input[type="range"]')) {
+      return
+    }
+
+    // Check if dragged content includes files
+    if (!e.dataTransfer?.types.includes('Files')) {
+      return
+    }
+
     dragCounterRef.current++
     setIsDragging(true)
   }, [])

@@ -12,6 +12,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
 import { getToolById } from '@/config/tools'
+import { validateSvgFile } from '@/lib/file/file-validation'
 import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
 import { DEFAULT_SVGO_OPTIONS, optimizeSvg, PRESETS } from '@/lib/image/svgo-optimizer'
 
@@ -30,16 +31,10 @@ export default function SvgOptimizerPage () {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = useCallback(async (file: File) => {
-    // Validate file type (SVG only)
-    if (file.type !== 'image/svg+xml') {
-      toast.error('SVGファイルのみアップロードできます')
-      return
-    }
-
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024
-    if (file.size > maxSize) {
-      toast.error('ファイルサイズが大きすぎます（最大10MB）')
+    // Validate SVG file (type + size)
+    const validationError = validateSvgFile(file, { maxSize: 10 * 1024 * 1024 })
+    if (validationError) {
+      toast.error(validationError)
       return
     }
 
@@ -202,7 +197,7 @@ export default function SvgOptimizerPage () {
                 または画面のどこにでもドラッグ&ドロップ
               </p>
               {/* Privacy Notice */}
-              <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900 dark:border-sky-950 dark:bg-sky-950 dark:text-gray-300'>
+              <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-950 dark:bg-sky-950'>
                 <ShieldCheckIcon className='size-5 shrink-0' />
                 <div className='text-sm'>
                   画像はサーバーに送信されず、ブラウザで安全に実行されます。

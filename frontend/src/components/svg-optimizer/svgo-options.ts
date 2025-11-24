@@ -7,7 +7,6 @@ import type { SvgoOptions } from '@/lib/image/svgo-optimizer'
 
 // Plugin descriptions for UI
 export const PLUGIN_DESCRIPTIONS: Record<keyof SvgoOptions, string> = {
-  sanitize: 'サニタイズ',
   floatPrecision: '小数点以下の桁数',
   transformPrecision: 'transform属性の精度',
   removeDoctype: 'DOCTYPE宣言を削除',
@@ -43,8 +42,8 @@ export const PLUGIN_DESCRIPTIONS: Record<keyof SvgoOptions, string> = {
   convertShapeToPath: '図形をパスに変換',
   sortAttrs: '属性をソート',
   removeDimensions: 'width/height属性を削除',
-  removeStyleElement: 'style要素を削除',
-  removeScriptElement: 'script要素を削除'
+  keepScripts: 'スクリプトを維持する（非推奨）',
+  keepStyleElement: 'style要素を維持する（非推奨）'
 }
 
 // Plugin groups for organized UI
@@ -52,7 +51,7 @@ export const PLUGIN_GROUPS = [
   {
     id: 'cleanup',
     label: 'クリーンアップ',
-    description: '不要な要素や属性を削除します。',
+    description: '',
     plugins: [
       'removeDoctype',
       'removeComments',
@@ -70,7 +69,7 @@ export const PLUGIN_GROUPS = [
   {
     id: 'optimization',
     label: '最適化',
-    description: 'コードを最適化してファイルサイズを削減します。',
+    description: '',
     plugins: [
       'cleanupIds',
       'cleanupNumericValues',
@@ -89,7 +88,7 @@ export const PLUGIN_GROUPS = [
   {
     id: 'structural',
     label: '構造変更',
-    description: 'SVGの構造を変更して最適化します。',
+    description: '',
     plugins: [
       'moveElemsAttrsToGroup',
       'moveGroupAttrsToElems',
@@ -102,15 +101,21 @@ export const PLUGIN_GROUPS = [
   {
     id: 'advanced',
     label: '高度な設定',
-    description: '特定の属性や要素を削除します。レイアウトに影響する可能性があります。',
+    description: '',
     plugins: [
       'removeTitle',
       'removeDesc',
       'removeViewBox',
-      'removeDimensions',
-      'sanitize',
-      'removeStyleElement',
-      'removeScriptElement'
+      'removeDimensions'
+    ] as Array<keyof SvgoOptions>
+  },
+  {
+    id: 'dangerous',
+    label: '危険な設定',
+    description: 'セキュリティリスクがあります。信頼できるSVGファイルのみ使用してください。',
+    plugins: [
+      'keepScripts',
+      'keepStyleElement'
     ] as Array<keyof SvgoOptions>
   }
 ] as const

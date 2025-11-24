@@ -4,9 +4,6 @@ import type { Config } from 'svgo/browser'
  * SVGO plugin options
  */
 export type SvgoOptions = {
-  // Security
-  sanitize: boolean
-
   // Numeric options
   floatPrecision: number
   transformPrecision: number
@@ -45,15 +42,16 @@ export type SvgoOptions = {
   convertShapeToPath: boolean
   sortAttrs: boolean
   removeDimensions: boolean
-  removeStyleElement: boolean
-  removeScriptElement: boolean
+
+  // Dangerous options (inverted flags - default: false = safe)
+  keepScripts: boolean
+  keepStyleElement: boolean
 }
 
 /**
  * Preset configurations
  */
 export const PRESET_SAFE: SvgoOptions = {
-  sanitize: true,
   // Numeric values
   floatPrecision: 3,
   transformPrecision: 5,
@@ -92,12 +90,13 @@ export const PRESET_SAFE: SvgoOptions = {
   convertShapeToPath: true,
   sortAttrs: false,
   removeDimensions: false,
-  removeStyleElement: true,
-  removeScriptElement: true
+
+  // Security (safe defaults)
+  keepScripts: false,
+  keepStyleElement: false
 }
 
 export const PRESET_SVGO_DEFAULT: SvgoOptions = {
-  sanitize: true,
   // Numeric values
   floatPrecision: 3,
   transformPrecision: 5,
@@ -136,12 +135,13 @@ export const PRESET_SVGO_DEFAULT: SvgoOptions = {
   convertShapeToPath: true,
   sortAttrs: false,
   removeDimensions: false,
-  removeStyleElement: true,
-  removeScriptElement: true
+
+  // Security (safe defaults)
+  keepScripts: false,
+  keepStyleElement: false
 }
 
 export const PRESET_MAXIMUM: SvgoOptions = {
-  sanitize: true,
   // Numeric values (lower precision = smaller file)
   floatPrecision: 1,
   transformPrecision: 3,
@@ -180,8 +180,10 @@ export const PRESET_MAXIMUM: SvgoOptions = {
   convertShapeToPath: true,
   sortAttrs: true,
   removeDimensions: true, // Remove width/height
-  removeStyleElement: true, // Remove style elements
-  removeScriptElement: true // Remove scripts
+
+  // Security (safe defaults)
+  keepScripts: false,
+  keepStyleElement: false
 }
 
 export const DEFAULT_SVGO_OPTIONS = PRESET_SAFE
@@ -210,8 +212,6 @@ export const PRESETS = [
  * Convert our custom options format to SVGO config
  */
 export function buildSvgoConfig (options: SvgoOptions): Config {
-  const sanitize = options.sanitize !== false
-
   // Build plugins array with overrides for preset-default plugins
   const plugins: any[] = [
     // Start with preset-default but customize specific plugins
@@ -265,23 +265,14 @@ export function buildSvgoConfig (options: SvgoOptions): Config {
     { name: 'removeDesc', active: options.removeDesc },
     { name: 'removeDimensions', active: options.removeDimensions },
     { name: 'removeRasterImages', active: options.removeRasterImages },
-    { name: 'removeScripts', active: sanitize || options.removeScriptElement },
-    { name: 'removeStyleElement', active: sanitize || options.removeStyleElement }
+    // Security plugins (inverted logic: keepScripts=false means remove)
+    { name: 'removeScripts', active: !options.keepScripts },
+    { name: 'removeStyleElement', active: !options.keepStyleElement }
   ]
 
   standalonePlugins.forEach(plugin => {
     plugins.push(plugin.active ? { name: plugin.name } : { name: plugin.name, active: false })
   })
-
-  // Extra hardening: strip inline event handlers when sanitizing
-  if (sanitize) {
-    plugins.push({
-      name: 'removeAttrs',
-      params: {
-        attrs: ['on.*']
-      }
-    })
-  }
 
   return {
     plugins,
