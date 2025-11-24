@@ -68,7 +68,7 @@ export function PolaroidFrame ({
             src={image.src}
             alt={image.alt}
             crossOrigin='anonymous'
-            className={image.className ?? 'max-w-[160px] sm:max-w-[640px]'}
+            className={`drag-none ${image.className ?? 'max-w-[160px] sm:max-w-[640px]'}`}
             style={image.style}
           />
 

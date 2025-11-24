@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import containerQueries from '@tailwindcss/container-queries'
+import plugin from 'tailwindcss/plugin';
 
 const config: Config = {
   content: [
@@ -36,7 +37,18 @@ const config: Config = {
     }
   },
   plugins: [
-    containerQueries
+    containerQueries,
+    plugin(function ({ addUtilities }) {
+			addUtilities({
+				'.drag-none': {
+					'-webkit-user-drag': 'none',
+					'-khtml-user-drag': 'none',
+					'-moz-user-drag': 'none',
+					'-o-user-drag': 'none',
+					'user-drag': 'none'
+				}
+			});
+		})
   ]
 }
 

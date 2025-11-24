@@ -194,7 +194,7 @@ export default function IromidePage () {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'palette.png'
+        a.download = 'cheki.png'
         a.click()
         URL.revokeObjectURL(url)
       }
@@ -252,7 +252,7 @@ export default function IromidePage () {
                         width={500}
                         height={600}
                         unoptimized
-                        className='max-h-[60vh] w-auto max-w-[60vw]'
+                        className='max-h-[60vh] w-auto max-w-[60vw] drag-none'
                         style={{ transform: `rotate(${index === 0 ? 2 : index === 1 ? -2 : 1}deg)` }}
                       />
                     ))}
@@ -260,28 +260,33 @@ export default function IromidePage () {
                 </div>
 
                 {/* Upload Area */}
-                <label className='group flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 transition-colors hover:border-gray-400 dark:border-gray-600 dark:bg-atom-one-dark dark:hover:border-gray-500'>
-                  <div className='mb-4 rounded-full bg-gray-100 p-4 transition-colors group-hover:bg-gray-200 dark:bg-atom-one-dark-light dark:group-hover:bg-atom-one-dark-lighter'>
-                    <PhotoIcon className='size-8 text-gray-600 dark:text-gray-400' />
-                  </div>
-                  <span className='mb-2 font-semibold'>
+                <div className='flex w-full max-w-lg flex-col items-center justify-center gap-6 rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 dark:border-gray-600 dark:bg-atom-one-dark'>
+                  <PhotoIcon className='size-10 text-gray-500' />
+                  <span className='font-semibold'>
                     あなたの画像で試す
                   </span>
-                  <p className='text-center text-sm text-gray-500'>
+                  <label>
+                    <input
+                      type='file'
+                      accept={isHeicSupport ? `${ACCEPTED_IMAGE_TYPES}, ${HEIC_TYPES}` : ACCEPTED_IMAGE_TYPES}
+                      onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                      className='hidden'
+                    />
+                    <span className='inline-block cursor-pointer rounded-full bg-sky-500 px-8 py-3 font-medium text-white transition-colors hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'>
+                      画像を選択
+                    </span>
+                  </label>
+                </div>
+
+                <div className='space-y-2'>
+                  <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
                     推奨: 縦長 (3:4) / 正方形 (1:1) / 横長 (8:5)
                   </p>
-                  <input
-                    type='file'
-                    accept={isHeicSupport ? `${ACCEPTED_IMAGE_TYPES}, ${HEIC_TYPES}` : ACCEPTED_IMAGE_TYPES}
-                    onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-                    className='hidden'
-                  />
-                </label>
-
-                {/* Privacy Notice */}
-                <p className='text-center text-sm text-gray-500'>
-                  ※ 画像は処理のみに使用され、保存されません
-                </p>
+                  {/* Privacy Notice */}
+                  <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
+                    画像は処理のみに使用され、保存されません
+                  </p>
+                </div>
               </div>
               )
             : isProcessing
@@ -399,7 +404,7 @@ export default function IromidePage () {
                       type='text'
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder='メッセージを追加'
+                      placeholder='メッセージを追加 (任意)'
                       className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-center outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-gray-600 dark:bg-atom-one-dark-light'
                     />
                   </div>
