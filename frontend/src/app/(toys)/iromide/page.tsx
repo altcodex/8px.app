@@ -15,7 +15,7 @@ import { getToolById } from '@/config/tools'
 import type { ExtractedColor } from '@/lib/api/colors'
 import { extractColorsFromImage, } from '@/lib/api/colors'
 import { validateImageFile } from '@/lib/file/file-validation'
-import type { ChekiPadding } from '@/lib/image/cheki-size'
+import type { ChekiPadding, ChekiSize } from '@/lib/image/cheki-size'
 import { calculateChekiPadding, determineChekiSize } from '@/lib/image/cheki-size'
 import { loadImageFromFile, processImageForCheki } from '@/lib/image/image-processing'
 import { getHeicSupport } from '@/lib/image/media-support'
@@ -40,6 +40,8 @@ export default function IromidePage () {
   const [isHeicSupport, setIsHeicSupport] = useState(false)
   const [loadedSamples, setLoadedSamples] = useState<Set<number>>(new Set())
   const [isPolaroidLoaded, setIsPolaroidLoaded] = useState(false)
+  const [chekiSize, setChekiSize] = useState<ChekiSize | null>(null)
+  const [thumbnailSize, setThumbnailSize] = useState<ChekiSize | null>(null)
 
   // Detect HEIC/HEIF support
   useEffect(() => {
@@ -119,8 +121,11 @@ export default function IromidePage () {
       const thumbPadding = calculateChekiPadding(thumbWidth, thumbHeight, chekiSize.aspectRatio)
       setThumbnailPadding(thumbPadding)
 
+      setChekiSize(chekiSize)
+      setThumbnailSize({ width: thumbWidth, height: thumbHeight, aspectRatio: chekiSize.aspectRatio })
+
       // Random rotation for result (-3 to 3)
-      setResultRotation(Math.random() * 6 - 3)
+      setResultRotation(Math.random() * 4 - 2)
 
       // Extract colors using backend API
       const colors = await extractColorsFromImage(file, colorCount)
@@ -166,7 +171,10 @@ export default function IromidePage () {
 
       // Capture the element
       const blob = await domToBlob(shareTargetRef.current, {
-        scale: 1.5
+        scale: 1.5,
+        style: {
+          rotate: '180deg' // Flip back the rotation
+        }
       })
 
       if (!blob) {
@@ -175,7 +183,7 @@ export default function IromidePage () {
         return
       }
 
-      const file = new File([blob], 'palette.png', { type: 'image/png' })
+      const file = new File([blob], 'iromide.png', { type: 'image/png' })
 
       // Check if Web Share API with files is supported
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -198,7 +206,7 @@ export default function IromidePage () {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'cheki.png'
+        a.download = 'iromide.png'
         a.click()
         URL.revokeObjectURL(url)
       }
@@ -231,14 +239,14 @@ export default function IromidePage () {
       <CorkBoardBackground className='left-1/2 -mb-12 -mt-6 w-screen -translate-x-1/2 border-b border-gray-200 px-4 py-12 dark:border-gray-700 sm:px-6 sm:py-20 lg:px-8'>
         <div className='mx-auto flex min-h-[calc(100vh-160px)] max-w-screen-md flex-col px-4'>
           {/* Header */}
-          {!imagePreview && (
-            <div className='mb-16 text-center'>
-              <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
+          <div className='mb-16 text-center'>
+            <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
+            {!imagePreview && (
               <p className='mt-2 whitespace-pre-line text-gray-500'>
                 {tool?.description ?? ''}
               </p>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Main Content */}
           {!imagePreview && !isProcessing
@@ -310,14 +318,14 @@ export default function IromidePage () {
                 // Result State
                 <div className='flex flex-col items-center gap-4'>
                   {/* Hidden Share Target - positioned off-screen */}
-                  <div className='pointer-events-none fixed left-0 top-0 max-h-0 max-w-0 overflow-hidden'>
-                    <CorkBoardBackground className='size-fit p-20' ref={shareTargetRef}>
+                  <div className='pointer-events-none fixed -top-[9999px]'>
+                    <CorkBoardBackground className='size-fit rotate-[180deg] p-16' ref={shareTargetRef}>
                       <div className='relative flex justify-center'>
                         {/* Decorative Masking Tape */}
                         <MaskingTape
                           className='absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2'
-                          width={chekiPadding ? Math.round(chekiPadding.top * 2) : undefined}
-                          height={chekiPadding ? Math.round(chekiPadding.top * 0.6) : undefined}
+                          width={Math.round((chekiPadding?.top ?? 0) * (chekiSize?.aspectRatio === 'landscape' ? 3.2 : 2.4))}
+                          height={Math.round((chekiPadding?.top ?? 0) * 0.8)}
                         />
 
                         <PolaroidFrame
@@ -334,7 +342,7 @@ export default function IromidePage () {
                               {extractedColors.map((color, index) => (
                                 <div
                                   key={index}
-                                  className='rounded-full shadow-sm'
+                                  className='rounded-full border border-neutral-200'
                                   style={{
                                     backgroundColor: color.hex,
                                     width: chekiPadding ? `${Math.round(chekiPadding.bottom * 0.3)}px` : '32px',
@@ -364,8 +372,8 @@ export default function IromidePage () {
                   <div className={`relative mb-8 transition-opacity ${isPolaroidLoaded ? 'opacity-100' : 'opacity-0'}`}>
                     <MaskingTape
                       className='absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2'
-                      width={thumbnailPadding ? Math.round(thumbnailPadding.top * 2) : undefined}
-                      height={thumbnailPadding ? Math.round(thumbnailPadding.top * 0.6) : undefined}
+                      width={Math.round((thumbnailPadding?.top ?? 0) * (thumbnailSize?.aspectRatio === 'landscape' ? 3.2 : 2.4))}
+                      height={Math.round((thumbnailPadding?.top ?? 0) * 0.8)}
                     />
                     <PolaroidFrame
                       image={{
@@ -382,7 +390,7 @@ export default function IromidePage () {
                           {extractedColors.map((color, index) => (
                             <div
                               key={index}
-                              className='rounded-full shadow-sm'
+                              className='rounded-full'
                               style={{
                                 backgroundColor: color.hex,
                                 width: thumbnailPadding ? `${Math.round(thumbnailPadding.bottom * 0.3)}px` : '32px',
