@@ -10,20 +10,23 @@ export default function cloudflareLoader ({
   width,
   quality
 }: ImageLoaderProps): string {
-  // In development, return the original path (no Cloudflare transformation)
-  // This allows local images to be displayed without deploying first
-  const isDevelopment = process.env.NODE_ENV === 'development'
+  // Only use Cloudflare Images in production environment
+  // Skip transformation in development and preview environments
+  const isProduction = process.env.VERCEL_ENV === 'production'
 
-  if (isDevelopment) {
-    // Return original path for local development
+  if (!isProduction) {
+    // Return original path for local development and preview deployments
     return src
   }
 
-  // Image subdomain (must be proxied through Cloudflare with orange cloud)
+  // Production environment: Image subdomain is required
   const imagesDomain = process.env.NEXT_PUBLIC_IMAGES_DOMAIN
 
   if (!imagesDomain) {
-    throw new Error('NEXT_PUBLIC_IMAGES_DOMAIN is not defined')
+    throw new Error(
+      'NEXT_PUBLIC_IMAGES_DOMAIN is required in production environment. ' +
+      'Please set it in Vercel environment variables (Production only).'
+    )
   }
 
   // If src is an absolute URL (external image), use Cloudflare to transform it
