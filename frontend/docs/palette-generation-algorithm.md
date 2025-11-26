@@ -44,7 +44,7 @@ H[shade] = lerpAngle(green.H[shade], cyan.H[shade], 0.46)
 **重要な改善**: アンカーマッチングを廃止し、常に補間を使用することで、
 微妙な色相の違い（シアンっぽい青 vs インディゴっぽい青）を保持。
 
-### 3. 黄色専用処理（非対称強度）
+### 3. 黄色専用処理（カーブ別最適化）
 
 **黄色は視覚的に特別**（人間の視覚システムの4つの基本色の1つ）：
 
@@ -56,16 +56,29 @@ const SIGMA = 22  // ガウシアン標準偏差（対称）
 // ガウシアン影響度を計算（対称）
 yellowInfluence = exp(-(distance²) / (2 * σ²))
 
-// 非対称な強度でブレンド
-const baseStrength = hue > 86° ? 0.8 : 0.5  // Lime側強く、Amber側弱く
+// 基本強度（全カーブ共通）
+let baseStrength = 0.5
+
+// カーブ別の調整
+if (curveType === 'hueShift' && hue > 86° && yellowValue > 0) {
+  // Lime寄りで緑方向シフトを防ぐ
+  baseStrength *= 0.1  // 90%削減
+} else if (curveType === 'chroma' && hue > 86° && yellowValue < normalValue) {
+  // Lime寄りで鮮やかさを保持
+  baseStrength *= 0.3  // 70%削減
+} else if (curveType === 'lightness' && hue > 86° && yellowChroma < limeChroma) {
+  // Lime寄りで明るさを保持
+  baseStrength = max(baseStrength, 0.85)  // 強化
+}
+
 finalValue = lerp(normalValue, yellowValue, yellowInfluence * baseStrength)
 ```
 
 **効果**:
-- H=103°（薄い黄色）→ 59%の黄色影響（Lime化を強力に防ぐ）
-- H=95°（やや緑）→ 74%の黄色影響
-- H=80°（Amber寄り）→ 48%の黄色影響（Amberの個性を保持）
-- ガウシアン減衰で滑らかな境界、強度は方向別に最適化
+- **hueShift**: Lime化を防ぐため、緑方向へのシフトを大幅に抑制
+- **chroma**: Limeの高い彩度を活かし、鮮やかさを維持
+- **lightness**: 黄色の明るさを強く保持し、暗くなるのを防ぐ
+- ガウシアン減衰で滑らかな境界、カーブごとに最適化された処理
 
 ### 4. パレット生成
 
@@ -218,7 +231,7 @@ const rotated = generatePalette('#3B82F6', { hueShift: 30 })
 | -------------------- | -------------------------------------------------------------------- |
 | **色相の個性保持**   | 微妙な色相差（シアンっぽい青 vs インディゴっぽい青）を正確に保持    |
 | **滑らかな補間**     | 10アンカー間を補間、境界の不連続性なし                               |
-| **黄色の特別扱い**   | 視覚的に特別な黄色をガウシアン処理で適切に保持                       |
+| **黄色の特別扱い**   | カーブ別最適化でライム化を防ぎつつ、鮮やかさと明るさを保持           |
 | **高速**             | 早期終了とバイナリサーチ最適化で0.032ms/パレット                     |
 | **正確性**           | OKLCh色空間で知覚的に均一な明度・彩度                                |
 | **科学的正当性**     | 人間の視覚システム（反対色理論）に基づく黄色の特別処理               |
@@ -241,13 +254,22 @@ npx tsx scripts/extract-anchor-colors.ts > output.txt
 ```typescript
 // src/lib/color/palette-generator.ts
 
-// ガウシアン標準偏差（影響範囲・対称）
+// ガウシアン標準偏差（影響範囲）
 const SIGMA = 22  // より広く: 25-30, より狭く: 15-20
 
-// 非対称ブレンド強度
-const baseStrength = hue > YELLOW_HUE ? 0.8 : 0.5
-// Lime側をより強く: 0.8 → 0.85-0.9
-// Amber側をより弱く: 0.5 → 0.3-0.4
+// 基本ブレンド強度
+let baseStrength = 0.5  // より強く: 0.6-0.7, より弱く: 0.3-0.4
+
+// カーブ別調整係数
+if (curveType === 'hueShift' && ...) {
+  baseStrength *= 0.1  // hueShift削減率: 0.05-0.2
+}
+if (curveType === 'chroma' && ...) {
+  baseStrength *= 0.3  // chroma削減率: 0.2-0.4
+}
+if (curveType === 'lightness' && ...) {
+  baseStrength = max(baseStrength, 0.85)  // lightness強化: 0.8-0.9
+}
 
 // 適用範囲
 const YELLOW_RANGE_START = 70   // Amber寄り

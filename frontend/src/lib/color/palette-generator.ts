@@ -160,10 +160,35 @@ function getBlendedValue (
     if (yellowInfluence > 0) {
       const yellowValue = ANCHOR_CURVES.yellow[curveType][shade]
 
-      // Asymmetric blend strength:
-      // - Lime side (hue > 86°): stronger (0.8) to prevent lime-ification
-      // - Amber side (hue < 86°): moderate (0.5) to preserve amber character
-      const baseStrength = hue > YELLOW_HUE ? 0.8 : 0.5
+      // Base blend strength for yellow influence
+      // Set to 0.5 for moderate yellow preservation
+      // Specific adjustments are applied per curve type below
+      let baseStrength = 0.5
+
+      // Apply curve-specific adjustments
+      if (curveType === 'hueShift') {
+        // Prevent double-greening: If input is already greener than yellow and
+        // yellow's hueShift is positive (pushing toward green), dramatically
+        // reduce influence to avoid double-shifting toward lime
+        if (hue > YELLOW_HUE && yellowValue > 0) {
+          baseStrength *= 0.1
+        }
+      } else if (curveType === 'chroma') {
+        // Preserve vibrancy: If input is lime-side and yellow's chroma is lower
+        // than the interpolated value, reduce influence to maintain lime's higher chroma
+        if (hue > YELLOW_HUE && yellowValue < normalValue) {
+          baseStrength *= 0.3
+        }
+      } else if (curveType === 'lightness') {
+        // Preserve yellow brightness: When chroma is being reduced (lime-side with
+        // lower yellow chroma), maintain or strengthen lightness influence to prevent
+        // the palette from appearing too dark
+        if (hue > YELLOW_HUE && ANCHOR_CURVES.yellow.chroma[shade] < ANCHOR_CURVES.lime.chroma[shade]) {
+          // Maintain full strength for lightness to preserve yellow's characteristic brightness
+          baseStrength = Math.max(baseStrength, 0.85)
+        }
+      }
+
       const blendStrength = yellowInfluence * baseStrength
 
       if (curveType === 'hueShift') {
