@@ -3,7 +3,10 @@
  * Generates 50-950 color scales in the style of Tailwind CSS
  *
  * Color space: OKLCh (perceptually uniform, better than CIELCh for yellows)
- * Algorithm: Hue-based anchor matching → interpolation → gamut mapping
+ * Algorithm: Hue-based interpolation between anchors → gamut mapping
+ *
+ * Key improvement: Always interpolates between adjacent anchors (no anchor matching)
+ * This preserves subtle color variations (e.g., cyan-ish blue vs indigo-ish blue)
  *
  * Performance: ~0.032ms/palette (31,000 palettes/sec)
  * - Binary search precision: 0.5 (40% faster than 0.1)
@@ -11,7 +14,6 @@
  *
  * @see docs/palette-generation-algorithm.md for detailed explanation
  * @see scripts/extract-anchor-colors.ts to regenerate anchor curves data
- * @see scripts/test-10-anchors.ts for uniformity tests
  */
 
 import type { AnchorColorName } from '@/config/anchor-curves'
@@ -40,39 +42,7 @@ function angleDist (h1: number, h2: number): number {
   return diff
 }
 
-/**
- * Estimate the intended base hue for colors with large hue shifts
- * Reverse-engineers the base hue from the input's lightness and hue
- */
-function estimateAnchorBaseHue (
-  inputOklch: OKLCh,
-  anchorName: AnchorColorName
-): number {
-  const { l, h } = inputOklch
-  const anchor = ANCHOR_CURVES[anchorName]
-
-  // Find which shade's lightness is closest to the input
-  let closestShade: TailwindShade = 500
-  let minLDiff = Infinity
-
-  for (const shade of SHADES) {
-    const shadeL = anchor.lightness[shade]
-    const diff = Math.abs(shadeL - l)
-    if (diff < minLDiff) {
-      minLDiff = diff
-      closestShade = shade
-    }
-  }
-
-  // Get the hue shift that would be applied at this shade
-  const expectedHueShift = anchor.hueShift[closestShade]
-
-  // Reverse-engineer the base hue
-  // If input is H=101.5° and expected shift is +15.5°, then base should be 86°
-  const estimatedBaseHue = normalizeHue(h - expectedHueShift)
-
-  return estimatedBaseHue
-}
+// Removed estimateAnchorBaseHue function - no longer needed without anchor matching
 
 /**
  * Linear interpolation for angles (handles 360° wraparound)
@@ -138,25 +108,168 @@ function findAdjacentAnchors (hue: number): [AnchorColorName, AnchorColorName, n
 }
 
 /**
+ * Calculate yellow influence factor with asymmetric Gaussian falloff
+ * Yellow is visually special - human eyes are most sensitive to hue changes around yellow
+ *
+ * Uses asymmetric Gaussian distribution to prevent lime drift:
+ * - Amber side (hue < 86°): σ=28 (wider influence, preserves warmth)
+ * - Lime side (hue > 86°): σ=12 (narrower influence, prevents greening)
+ *   Reduced from 16 to 12 to better handle pure yellow (#ffff00, H≈110°)
+ */
+function getYellowInfluence (distanceToYellow: number, hue: number): number {
+  const YELLOW_HUE = 86
+
+  // Asymmetric Gaussian: wider on amber side, narrower on lime side
+  // This prevents "lemon" colors from drifting toward lime/green
+  const SIGMA_AMBER = 28  // Wider influence toward amber (preserves yellow warmth)
+  const SIGMA_LIME = 12   // Narrower influence toward lime (prevents greening of pure yellows)
+
+  const sigma = hue < YELLOW_HUE ? SIGMA_AMBER : SIGMA_LIME
+
+  // Gaussian function: e^(-(distance²) / (2σ²))
+  return Math.exp(-(distanceToYellow ** 2) / (2 * sigma ** 2))
+}
+
+/**
+ * Cusp-aware lightness floors for yellow-adjacent hues
+ * Yellow's maximum chroma in OKLab sits near L≈80, so darker shades
+ * need MINIMAL lightness floors to prevent brown-out when interpolation
+ * goes too dark. These are safety floors, not target values.
+ *
+ * Values are set conservatively below Tailwind yellow to prevent over-brightening.
+ */
+const YELLOW_LIGHTNESS_FLOOR: Record<TailwindShade, number> = {
+  50: 96,   // Very light shades: minimal intervention
+  100: 94,
+  200: 90,
+  300: 84,
+  400: 78,
+  500: 70,  // Below yellow-500 (79.5), only catches severe darkening
+  600: 58,  // Below yellow-600 (68.1)
+  700: 48,  // Below yellow-700 (55.4)
+  800: 40,  // Below yellow-800 (47.6)
+  900: 35,  // Below yellow-900 (42.1)
+  950: 24   // Below yellow-950 (28.6)
+}
+
+/**
  * Get blended curve value by interpolating between two anchor colors
+ * Special handling for yellow due to its unique perceptual properties
  */
 function getBlendedValue (
   hue: number,
   shade: TailwindShade,
   curveType: 'lightness' | 'chroma' | 'hueShift'
 ): number {
-  const [anchor1, anchor2, ratio] = findAdjacentAnchors(hue)
+  // Yellow-specific processing
+  // Yellow is perceptually special - it's one of the four unique hues in human vision
+  // and we're most sensitive to hue variations around yellow
+  const YELLOW_HUE = ANCHOR_CURVES.yellow.centerHue // 86°
+  const YELLOW_RANGE_START = 70  // Amber side
+  const YELLOW_RANGE_END = 115   // Lime side (extended to 115° to include pure yellow #ffff00 at H≈110°)
 
+  // Get normal interpolation between adjacent anchors
+  const [anchor1, anchor2, ratio] = findAdjacentAnchors(hue)
   const value1 = ANCHOR_CURVES[anchor1][curveType][shade]
   const value2 = ANCHOR_CURVES[anchor2][curveType][shade]
 
-  // For hue shift, use angle interpolation
+  let normalValue: number
   if (curveType === 'hueShift') {
-    return lerpAngle(value1, value2, ratio)
+    normalValue = lerpAngle(value1, value2, ratio)
+  } else {
+    normalValue = lerp(value1, value2, ratio)
   }
 
-  // For lightness and chroma, use linear interpolation
-  return lerp(value1, value2, ratio)
+  // Apply yellow influence if in yellow's range
+  if (hue >= YELLOW_RANGE_START && hue <= YELLOW_RANGE_END) {
+    const distanceToYellow = Math.abs(hue - YELLOW_HUE)
+    const yellowInfluence = getYellowInfluence(distanceToYellow, hue)
+
+    if (yellowInfluence > 0) {
+      const yellowValue = ANCHOR_CURVES.yellow[curveType][shade]
+
+      // Base blend strength for yellow influence
+      // Set to 0.5 for moderate yellow preservation
+      // Specific adjustments are applied per curve type below
+      let baseStrength = 0.5
+
+      // Apply curve-specific adjustments
+      if (curveType === 'hueShift') {
+        // Prevent double-greening: If input is already greener than yellow and
+        // yellow's hueShift is positive (pushing toward green), dramatically
+        // reduce influence to avoid double-shifting toward lime
+        if (hue > YELLOW_HUE && yellowValue > 0) {
+          baseStrength *= 0.1
+        } else if (hue < YELLOW_HUE && yellowValue < 0 && shade >= 600) {
+          // Amber-side protection: Prevent dark yellows from collapsing into ochre
+          // by clamping negative hueShift in mid/dark tones
+          // For amber-side yellows in darker shades, limit how much they can shift
+          // toward orange/brown (prevent ochre collapse)
+          baseStrength *= 0.4
+        }
+      } else if (curveType === 'chroma') {
+        // Preserve vibrancy: If input is lime-side and yellow's chroma is lower
+        // than the interpolated value, reduce influence to maintain lime's higher chroma
+        if (hue > YELLOW_HUE && yellowValue < normalValue) {
+          baseStrength *= 0.3
+        }
+      } else if (curveType === 'lightness') {
+        // Preserve yellow brightness: When chroma is being reduced (lime-side with
+        // lower yellow chroma), apply modest lightness boost to prevent darkening
+        // Reduced from 0.85 to 0.3 to avoid over-brightening all shades
+        if (hue > YELLOW_HUE && ANCHOR_CURVES.yellow.chroma[shade] < ANCHOR_CURVES.lime.chroma[shade]) {
+          baseStrength = Math.max(baseStrength, 0.3)
+        }
+      }
+
+      const blendStrength = yellowInfluence * baseStrength
+
+      let finalValue: number
+      if (curveType === 'hueShift') {
+        finalValue = lerpAngle(normalValue, yellowValue, blendStrength)
+
+        // Additional amber-side hueShift clamping for dark shades
+        if (hue < YELLOW_HUE && shade >= 600) {
+          const MIN_HUE_SHIFT = -6  // Prevent excessive shift toward orange/brown
+          finalValue = Math.max(finalValue, MIN_HUE_SHIFT)
+        } else if (hue > YELLOW_HUE && shade <= 400) {
+          // Cap hueShift toward 90° for high-L shades on lime side to prevent greening
+          // Stricter cap for pure yellows (H>105°) to prevent lime drift
+          const MAX_HUE_SHIFT = hue > 105 ? 2 : 4
+          finalValue = Math.min(finalValue, MAX_HUE_SHIFT)
+        }
+
+        // Perceptual optimization: Pure yellow amber warming
+        // Pure sRGB yellow (#ffff00, H≈110°) appears artificial and overly bright.
+        // Natural yellows (sunlight, egg yolks, honey) are warmer (amber-leaning).
+        // This Super-Gaussian correction adds warmth to pure yellows for more
+        // natural, pleasant appearance - a perceptual optimization for UI design.
+        const PURE_YELLOW_HUE = 110  // sRGB pure yellow (#ffff00)
+        const PURE_YELLOW_SIGMA = 8  // Influence range
+        const GAUSSIAN_EXPONENT = 4  // Super-Gaussian: sharper falloff than standard Gaussian
+        const MAX_AMBER_CORRECTION = -4  // Maximum shift toward amber (negative = warmer)
+
+        const distanceToPureYellow = Math.abs(hue - PURE_YELLOW_HUE)
+        const normalizedDist = distanceToPureYellow / PURE_YELLOW_SIGMA
+        const pureYellowInfluence = Math.exp(-(normalizedDist ** GAUSSIAN_EXPONENT))
+        const amberCorrection = MAX_AMBER_CORRECTION * pureYellowInfluence
+
+        finalValue += amberCorrection
+      } else {
+        finalValue = lerp(normalValue, yellowValue, blendStrength)
+      }
+
+      // Cusp-aware lightness floor: Keep yellows luminous instead of muddy
+      if (curveType === 'lightness') {
+        const minL = YELLOW_LIGHTNESS_FLOOR[shade]
+        finalValue = Math.max(finalValue, minL)
+      }
+
+      return finalValue
+    }
+  }
+
+  return normalValue
 }
 
 /**
@@ -255,75 +368,43 @@ export function generatePalette (
   if (!inputOklch) return null
 
   // Always use full chroma from anchor curves for Tailwind-style vibrant palettes
-  // This ensures all inputs (red-200, red-500, red-900) produce equally vibrant palettes
-  // Only the hue matters for determining the color family, not the input's saturation
+  // This ensures all inputs produce equally vibrant palettes
   const chromaScale = 1.0
 
-  // Check if input closely matches ANY anchor's specific shade
-  // This ensures uniform output even when colors have large hue shifts (e.g., orange, amber)
-  // We check ALL anchors, not just adjacent ones, because hue shifts can move shades far from centerHue
-  let matchedAnchor: AnchorColorName | null = null
-  let bestMatchDist = Infinity
-
-  const allAnchors = Object.keys(ANCHOR_CURVES) as AnchorColorName[]
-
-  for (const anchorName of allAnchors) {
-    const anchor = ANCHOR_CURVES[anchorName]
-
-    for (const shade of SHADES) {
-      const shadeL = anchor.lightness[shade]
-      const expectedH = normalizeHue(anchor.centerHue + anchor.hueShift[shade])
-      const lDiff = Math.abs(inputOklch.l - shadeL)
-      const hDiff = angleDist(inputOklch.h, expectedH)
-      const totalDist = lDiff + hDiff
-
-      // Use tight thresholds for precise matching
-      if (lDiff < 5 && hDiff < 5 && totalDist < bestMatchDist) {
-        matchedAnchor = anchorName
-        bestMatchDist = totalDist
-      }
-    }
-  }
-
-  // Determine base hue for palette generation
-  let baseHue: number
-
-  if (matchedAnchor) {
-    // Input matches a specific anchor shade - use that anchor's centerHue
-    const estimatedBase = estimateAnchorBaseHue(inputOklch, matchedAnchor)
-    baseHue = normalizeHue(estimatedBase + hueShift)
-  } else {
-    // Use input hue directly as base
-    baseHue = normalizeHue(inputOklch.h + hueShift)
-  }
+  // Always use input hue directly as base - no anchor matching
+  // This preserves the subtle color variations in the input
+  // (e.g., cyan-ish blue vs indigo-ish blue will produce different palettes)
+  const baseHue = normalizeHue(inputOklch.h + hueShift)
 
   // Generate all shades
   const palette: Partial<ColorPalette> = {}
 
   for (const shade of SHADES) {
-    // If input matched a specific anchor, use that anchor's curves directly
-    // Otherwise, blend between adjacent anchors
-    let targetL: number, standardChroma: number, hShift: number
-
-    if (matchedAnchor) {
-      // Use matched anchor directly for uniform output
-      const anchor = ANCHOR_CURVES[matchedAnchor]
-      targetL = anchor.lightness[shade]
-      standardChroma = anchor.chroma[shade]
-      hShift = anchor.hueShift[shade]
-    } else {
-      // Blend between adjacent anchors
-      targetL = getBlendedValue(inputOklch.h, shade, 'lightness')
-      standardChroma = getBlendedValue(inputOklch.h, shade, 'chroma')
-      hShift = getBlendedValue(inputOklch.h, shade, 'hueShift')
-    }
+    // Always blend between adjacent anchors based on input hue
+    // This preserves subtle color variations in the input
+    const targetL = getBlendedValue(inputOklch.h, shade, 'lightness')
+    const standardChroma = getBlendedValue(inputOklch.h, shade, 'chroma')
+    const hShift = getBlendedValue(inputOklch.h, shade, 'hueShift')
 
     // Calculate final values
     const l = targetL
     const h = normalizeHue(baseHue + hShift)
 
-    // Apply relative chroma scaling, clamped to gamut maximum
+    // Apply relative chroma scaling
     const scaledChroma = standardChroma * chromaScale
+
+    // Cusp-based chroma floor for yellow range (DISABLED for now)
+    // Yellow's sRGB gamut peaks near H≈95 with high C at mid-high L
+    // This floor was causing over-saturation of anchor colors
+    // May be re-enabled with careful tuning if specific desaturation issues arise
+    // if (inputOklch.h >= YELLOW_RANGE_START && inputOklch.h <= YELLOW_RANGE_END) {
+    //   const maxChroma = findMaxChromaInGamut(l, h)
+    //   const minChroma = maxChroma * 0.50  // 50% of max chroma as conservative floor
+    //
+    //   if (scaledChroma < minChroma) {
+    //     scaledChroma = minChroma
+    //   }
+    // }
 
     // Optimization: Early termination if scaledChroma is already in gamut
     // This skips the expensive binary search for ~50-70% of Tailwind colors
