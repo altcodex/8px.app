@@ -62,7 +62,7 @@ export default function PrivacyPage () {
               <p>
                 一部のツールでは画像をアップロードいただく場合があります。
                 アップロードされた画像は、カラー抽出などの処理のためにサーバーに送信されますが、
-                <strong className='font-semibold'>処理のみに使用され、保存されません</strong>。
+                処理のみに使用され、保存されません。
               </p>
             </div>
 
@@ -112,13 +112,13 @@ export default function PrivacyPage () {
           <h2 className='mb-4 text-xl font-semibold'>5. データの保存期間</h2>
           <div className='space-y-2 leading-relaxed'>
             <p>
-              <strong className='font-semibold'>画像データ：</strong>保存されません。
+              画像データ：保存されません。
             </p>
             <p>
-              <strong className='font-semibold'>ローカルストレージ：</strong>ユーザーがブラウザから削除するまで保持されます。
+              ローカルストレージ：ユーザーがブラウザから削除するまで保持されます。
             </p>
             <p>
-              <strong className='font-semibold'>アクセス解析データ：</strong>各サービスのデータ保持ポリシーに従います。
+              アクセス解析データ：各サービスのデータ保持ポリシーに従います。
             </p>
           </div>
         </section>
@@ -160,10 +160,10 @@ export default function PrivacyPage () {
           </p>
           <div className='mt-4 leading-relaxed'>
             <p>
-              <strong className='font-semibold'>運営者：</strong>{siteConfig.author}
+              運営者：{siteConfig.author}
             </p>
             <p className='mt-2'>
-              <strong className='font-semibold'>お問い合わせ：</strong>
+              お問い合わせ：
               <a
                 href={siteConfig.links.github ? `${siteConfig.links.github}/discussions/categories/general` : '#'}
                 target='_blank'
