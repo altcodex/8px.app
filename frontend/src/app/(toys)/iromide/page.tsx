@@ -263,6 +263,7 @@ export default function IromidePage () {
                         alt={`Sample ${index + 1}`}
                         width={500}
                         height={600}
+                        sizes='(max-width: 833px) 60vw, 500px'
                         onLoad={() => {
                           setLoadedSamples(prev => new Set(prev).add(index))
                         }}
