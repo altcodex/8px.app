@@ -95,11 +95,11 @@ export default function RootLayout ({
   return (
     <html
       lang='ja'
-      className='bg-gradient-to-b from-white from-[50%] to-gray-100 to-[50%] dark:from-atom-one-dark dark:to-atom-one-dark-light'
+      className={`${fontASCII.variable} ${fontJP.variable} ${fontMono.variable} ${fontZenMaru.variable} ${fontOutfit.variable}`}
       suppressHydrationWarning
     >
       <body
-        className={`text-gray-700 antialiased dark:text-gray-300 ${fontASCII.variable} ${fontJP.variable} ${fontMono.variable} ${fontZenMaru.variable} ${fontOutfit.variable}`}
+        className='bg-gradient-to-b from-white from-[50%] to-gray-100 to-[50%] text-gray-700 antialiased dark:from-atom-one-dark dark:to-atom-one-dark-light dark:text-gray-300'
       >
         <Providers>
           <div className='flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-atom-one-dark'>
