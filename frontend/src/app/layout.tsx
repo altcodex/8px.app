@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { siteConfig } from '@/config/site'
+import { CloudflareAnalytics } from '@/lib/analytics/cloudflare-analytics'
 import { Providers } from '@/lib/providers'
 
 const fontASCII = Roboto_Flex({
@@ -105,6 +106,7 @@ export default function RootLayout ({
         </Providers>
         <Analytics />
         <SpeedInsights />
+        <CloudflareAnalytics />
       </body>
     </html>
   )
