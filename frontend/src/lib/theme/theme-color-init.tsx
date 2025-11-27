@@ -15,11 +15,10 @@ export function ThemeColorInit () {
             const theme = localStorage.getItem('theme');
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const resolved = theme === 'dark' || (theme === 'system' && isDark) ? 'dark' : 'light';
+            const color = resolved === 'dark' ? '#282c34' : '#ffffff';
 
             const meta = document.querySelector('meta[name="theme-color"]');
-            if (meta) {
-              meta.setAttribute('content', resolved === 'dark' ? '#282c34' : '#ffffff');
-            }
+            if (meta) meta.content = color;
           })();
         `
       }}
