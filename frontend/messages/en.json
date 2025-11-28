@@ -1,0 +1,203 @@
+{
+  "site": {
+    "name": "8px.app",
+    "description": "Control every color, every icon.\nA free toolkit for web and app developers including Favicon generation, color palette creation, SVG optimization, and more.\nNo account required, ready to use immediately.",
+    "heroDescription": "Control every color, every icon.\nA toolkit for web and app developers.\nAll free, All open source.",
+    "title": {
+      "default": "8px.app - Developer Toolkit",
+      "template": "%s | 8px.app"
+    }
+  },
+  "categories": {
+    "toys": "Toys",
+    "tools": "Tools"
+  },
+  "tools": {
+    "tw-palette-generator": {
+      "name": "TW Palette Generator",
+      "description": "Automatically generate color palettes optimized for TailwindCSS from your chosen colors.\nCreate cohesive color schemes from 50 to 950 based on your corporate or brand colors for free.",
+      "shortDescription": "Generate color palettes from selected colors"
+    },
+    "iromide": {
+      "name": "Iromide - Oshi Color Generator",
+      "description": "A free tool to generate color palettes of your favorite colors from photos.\nExtract your \"oshi colors\" with image analysis close to human perception.\nEasy SNS sharing with polaroid-style design.",
+      "shortDescription": "Create your oshi color polaroid from photos!"
+    },
+    "favicon-generator": {
+      "name": "Favicon Generator",
+      "description": "A free batch favicon generation tool. Simply upload images in PNG, JPEG, SVG, or other formats to automatically generate all sizes of favicons and Apple Touch Icons needed for your website.\nEasily complete rounded corner processing and background color settings right in your browser.",
+      "shortDescription": "Generate favicon files from images"
+    },
+    "svg-optimizer": {
+      "name": "SVG Optimizer",
+      "description": "A free SVG optimization and compression tool. Reduce file size while maintaining quality and improve website loading speed.\nSecure and fast optimization completed entirely in the browser.",
+      "shortDescription": "Optimize and compress SVG files"
+    },
+    "password-generator": {
+      "name": "Password Generator",
+      "description": "A free powerful password generation tool. Create secure passwords by freely combining character length, uppercase/lowercase letters, numbers, and symbols.\nSupports exclusion of confusing characters and is safe with browser-only processing.",
+      "shortDescription": "Simple password generator"
+    }
+  },
+  "footer": {
+    "support": "Support",
+    "bugReport": "Bug Reports",
+    "contact": "Contact & Inquiries",
+    "donate": "Donate & Support",
+    "privacyPolicy": "Privacy Policy",
+    "github": "GitHub"
+  },
+  "supportSection": {
+    "title": "Your support means the world!",
+    "shareOnX": "Post",
+    "sendTip": "Donate"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "description": "Learn about our handling of personal information and data processing.",
+    "breadcrumb": {
+      "home": "Home"
+    }
+  },
+  "aria": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "common": {
+    "home": "Home",
+    "selectImage": "Select Image",
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied",
+    "regenerate": "Regenerate",
+    "reset": "Reset",
+    "preview": "Preview",
+    "processing": "Processing",
+    "analyzing": "Analyzing",
+    "privacyNotice": "Images are processed securely in your browser and never sent to servers.",
+    "dragDropAnywhere": "Or drag and drop anywhere on the screen",
+    "imageProcessingOnlyNotice": "Images are only used for processing and are not stored",
+    "unsupportedFileType": "Unsupported file type.",
+    "fileValidationError": "An error occurred while validating the file.",
+    "dropToUpload": "Drop to upload image"
+  },
+  "faviconGenerator": {
+    "outputOptions": "Output Options",
+    "uploadHint": "Upload PNG, JPG, WEBP, SVG or other image files (max 10MB)",
+    "previewPlaceholder": {
+      "line1": "Select an image to",
+      "line2": "display preview"
+    },
+    "fileFormat": "File Format",
+    "faviconSizes": "Sizes to include in favicon.ico",
+    "recommendedSizes": "Recommended Sizes",
+    "otherSizes": "Other Sizes",
+    "borderRadius": "Border Radius",
+    "borderRadiusHint": "Round the corners of the icon. Apple Touch Icons are automatically rounded by iOS.",
+    "backgroundColorSetting": "Background Color",
+    "backgroundColorHint": "Add background color to transparent PNGs. Background color is always applied to Apple Touch Icons.",
+    "addBackgroundColor": "Add background color",
+    "selectBackgroundColor": "Select background color",
+    "backgroundColorCode": "Background color code",
+    "toggleFormat": "{action} {format}",
+    "toggleSize": "{action} {size}×{size} pixels",
+    "select": "Select",
+    "deselect": "Deselect",
+    "errors": {
+      "imageLoadFailed": "Failed to load image",
+      "selectImage": "Please select an image file",
+      "selectOutputFormat": "Please select at least one output format",
+      "selectSize": "Please select at least one size when favicon.ico is selected",
+      "generateFailed": "Failed to generate favicon"
+    }
+  },
+  "twPaletteGenerator": {
+    "baseColorSelection": "Base Color Selection",
+    "colorCode": "Color Code",
+    "adjustment": "Adjustment",
+    "hue": "Hue",
+    "lightness": "Lightness",
+    "saturation": "Saturation",
+    "resetAdjustment": "Reset Adjustment",
+    "generatedPalette": "Generated Palette",
+    "saveToHistory": "Save to History",
+    "paletteHistory": "Palette History",
+    "deleteAllHistory": "Delete All History",
+    "historyEmptyMessage": "You can add created color palettes to history",
+    "tailwindConfig": "Tailwind Config",
+    "copyConfig": "Copy Tailwind Config",
+    "deleteFromHistory": "Delete from History",
+    "errors": {
+      "colorCodeCopyFailed": "Failed to copy",
+      "colorCodeCopied": "Color code copied",
+      "configCopied": "Copied as Tailwind config",
+      "addedToHistory": "Added to history"
+    }
+  },
+  "passwordGenerator": {
+    "selectCharacterTypes": "Please select character types",
+    "copyToClipboard": "Copy password to clipboard",
+    "length": "Length",
+    "characterTypes": "Character Types",
+    "characterTypesHint": "At least one character of selected types will be included",
+    "uppercase": "Uppercase",
+    "lowercase": "Lowercase",
+    "numbers": "Numbers",
+    "symbols": "Symbols",
+    "avoidAmbiguous": "Avoid Ambiguous Characters",
+    "avoidAmbiguousHint": "Such as 0 and O, 1 and l and I",
+    "errors": {
+      "copyFailed": "Failed to copy"
+    }
+  },
+  "svgOptimizer": {
+    "uploadHint": "Upload SVG files (max 10MB)",
+    "previewPlaceholder": {
+      "line1": "Select an SVG file to",
+      "line2": "display preview"
+    },
+    "original": "Original",
+    "optimized": "Optimized",
+    "compressionRatio": "Compression",
+    "preset": "Preset",
+    "safe": "Recommended",
+    "svgo-default": "Standard",
+    "maximum": "Maximum",
+    "custom": "Custom",
+    "selectPreset": "Select {preset}",
+    "precisionSettings": "Precision Settings",
+    "precisionHint": "Adjust numeric precision. Lower values increase compression but reduce precision.",
+    "floatPrecision": "Floating point precision",
+    "transformPrecision": "Transform precision",
+    "options": "Optimization Options",
+    "groups": {
+      "cleanup": "Cleanup",
+      "optimization": "Optimization",
+      "structural": "Structural",
+      "advanced": "Advanced",
+      "dangerous": "Dangerous",
+      "dangerousDescription": "Security risks exist. Use only with trusted SVG files."
+    },
+    "errors": {
+      "svgLoadFailed": "Failed to load SVG file",
+      "selectSvg": "Please select an SVG file",
+      "optimizeFailed": "Failed to optimize SVG"
+    }
+  },
+  "iromide": {
+    "tryWithYourImage": "Try with your image",
+    "recommendedAspectRatio": "Recommended: Portrait (3:4) / Square (1:1) / Landscape (8:5)",
+    "addMessage": "Add message (optional)",
+    "sharing": "Generating...",
+    "share": "Share",
+    "tryAnotherImage": "Try Another Image",
+    "errors": {
+      "colorExtractionFailed": "Failed to extract colors",
+      "shareTargetNotReady": "Share image is not ready",
+      "imageGenerationFailed": "Failed to generate image",
+      "shareFailed": "Failed to share",
+      "shareNotSupported": "Share feature is not supported in your browser. Please download the image."
+    },
+    "shareText": "What color is your favorite? Create a palette with Iromide!"
+  }
+}

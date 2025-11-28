@@ -1,0 +1,203 @@
+{
+  "site": {
+    "name": "8px.app",
+    "description": "その色も、そのアイコンも、思い通りに。\nFavicon生成、カラーパレット作成、SVG最適化など、Web・アプリ開発者のための無料ツールセット。\nアカウント登録不要、すぐに使えます。",
+    "heroDescription": "その色も、そのアイコンも、思い通りに。\nWeb・アプリ開発者のためのツールセット。\nすべて無料、すべてオープンソース。",
+    "title": {
+      "default": "8px.app - Developer Toolkit",
+      "template": "%s | 8px.app"
+    }
+  },
+  "categories": {
+    "toys": "Toys",
+    "tools": "Tools"
+  },
+  "tools": {
+    "tw-palette-generator": {
+      "name": "TWパレットジェネレーター",
+      "description": "指定した色から、TailwindCSSに最適化されたカラーパレットを自動生成。\nコーポレートカラーやブランドカラーをベースに、50〜950まで統一感のある配色を無料で作成できます。",
+      "shortDescription": "選んだ色からカラーパレットを生成"
+    },
+    "iromide": {
+      "name": "推し色生成 イロマイド",
+      "description": "写真から推し色のカラーパレットを生成する無料ツール。\n人間の知覚に近い画像解析で、あなたの「推し色」を抽出。\nチェキ風デザインでSNSシェアも簡単です。",
+      "shortDescription": "写真から推し色チェキを作ろう!"
+    },
+    "favicon-generator": {
+      "name": "Faviconジェネレーター",
+      "description": "無料のFavicon一括生成ツール。PNG、JPEG、SVGなどの画像をアップロードするだけで、Webサイトに必要な全サイズのFaviconとApple Touch Iconを自動生成。\n角丸加工や背景色の設定もブラウザ上で簡単に完了します。",
+      "shortDescription": "画像からfaviconファイルを生成"
+    },
+    "svg-optimizer": {
+      "name": "SVG最適化",
+      "description": "無料のSVG最適化・圧縮ツール。品質を保ったままファイルサイズを削減し、Webサイトの読み込み速度を改善。\nブラウザ上で完結するため、セキュアで高速に最適化できます。",
+      "shortDescription": "SVGファイルを最適化・圧縮"
+    },
+    "password-generator": {
+      "name": "パスワードジェネレーター",
+      "description": "無料の強力なパスワード生成ツール。文字数、大文字・小文字・数字・記号を自由に組み合わせて、セキュアなパスワードを作成。\n紛らわしい文字の除外にも対応し、ブラウザ完結で安全です。",
+      "shortDescription": "シンプルなパスワードジェネレーター"
+    }
+  },
+  "footer": {
+    "support": "Support",
+    "bugReport": "バグ報告",
+    "contact": "問い合わせ等",
+    "donate": "寄付・支援",
+    "privacyPolicy": "プライバシーポリシー",
+    "github": "GitHub"
+  },
+  "supportSection": {
+    "title": "応援よろしくお願いします！",
+    "shareOnX": "ポストする",
+    "sendTip": "チップを送る"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "description": "個人情報の取り扱いやデータ処理について説明します。",
+    "breadcrumb": {
+      "home": "ホーム"
+    }
+  },
+  "aria": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "common": {
+    "home": "ホーム",
+    "selectImage": "画像を選択",
+    "download": "ダウンロード",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "regenerate": "再生成",
+    "reset": "リセット",
+    "preview": "プレビュー",
+    "processing": "処理中",
+    "analyzing": "解析中",
+    "privacyNotice": "画像はサーバーに送信されず、ブラウザで安全に実行されます。",
+    "dragDropAnywhere": "または画面のどこにでもドラッグ&ドロップ",
+    "imageProcessingOnlyNotice": "画像は処理のみに使用され、保存されません",
+    "unsupportedFileType": "対応していないファイル形式です。",
+    "fileValidationError": "ファイルの検証中にエラーが発生しました。",
+    "dropToUpload": "ドロップして画像をアップロード"
+  },
+  "faviconGenerator": {
+    "outputOptions": "出力オプション",
+    "uploadHint": "PNG, JPG, WEBP, SVGなど画像ファイルをアップロードできます (最大10MB)",
+    "previewPlaceholder": {
+      "line1": "画像を選択すると",
+      "line2": "プレビューが表示されます"
+    },
+    "fileFormat": "ファイル形式",
+    "faviconSizes": "favicon.icoに含めるサイズ",
+    "recommendedSizes": "推奨サイズ",
+    "otherSizes": "その他サイズ",
+    "borderRadius": "角丸の調整",
+    "borderRadiusHint": "アイコンの角を丸くします。Apple Touch IconはiOSが自動的に角丸にします。",
+    "backgroundColorSetting": "背景色の設定",
+    "backgroundColorHint": "透過PNGに背景色を追加します。Apple Touch Iconは常に背景色が適用されます。",
+    "addBackgroundColor": "背景色を追加する",
+    "selectBackgroundColor": "背景色を選択",
+    "backgroundColorCode": "背景色のカラーコード",
+    "toggleFormat": "{format}を{action}",
+    "toggleSize": "{size}×{size}ピクセルを{action}",
+    "select": "選択",
+    "deselect": "選択解除",
+    "errors": {
+      "imageLoadFailed": "画像の読み込みに失敗しました",
+      "selectImage": "画像ファイルを選択してください",
+      "selectOutputFormat": "少なくとも1つの出力形式を選択してください",
+      "selectSize": "favicon.icoを選択した場合、少なくとも1つのサイズを選択してください",
+      "generateFailed": "ファビコンの生成に失敗しました"
+    }
+  },
+  "twPaletteGenerator": {
+    "baseColorSelection": "ベースカラー選択",
+    "colorCode": "カラーコード",
+    "adjustment": "調整",
+    "hue": "色相",
+    "lightness": "明度",
+    "saturation": "彩度",
+    "resetAdjustment": "調整をリセット",
+    "generatedPalette": "生成されたパレット",
+    "saveToHistory": "ヒストリーに保存",
+    "paletteHistory": "パレットヒストリー",
+    "deleteAllHistory": "ヒストリーを全削除",
+    "historyEmptyMessage": "作成したカラーパレットを履歴に追加することができます",
+    "tailwindConfig": "Tailwind Config",
+    "copyConfig": "Tailwind設定をコピー",
+    "deleteFromHistory": "履歴から削除",
+    "errors": {
+      "colorCodeCopyFailed": "コピーに失敗しました",
+      "colorCodeCopied": "カラーコードをコピーしました",
+      "configCopied": "Tailwind設定としてコピーしました",
+      "addedToHistory": "ヒストリーに追加しました"
+    }
+  },
+  "passwordGenerator": {
+    "selectCharacterTypes": "文字種を選択してください",
+    "copyToClipboard": "パスワードをクリップボードにコピー",
+    "length": "文字数",
+    "characterTypes": "使用する文字",
+    "characterTypesHint": "選択した文字種は必ず1文字以上含まれます",
+    "uppercase": "大文字",
+    "lowercase": "小文字",
+    "numbers": "数字",
+    "symbols": "記号",
+    "avoidAmbiguous": "紛らわしい文字を除外",
+    "avoidAmbiguousHint": "0とO、1とlとIなど",
+    "errors": {
+      "copyFailed": "コピーに失敗しました"
+    }
+  },
+  "svgOptimizer": {
+    "uploadHint": "SVGファイルをアップロードできます (最大10MB)",
+    "previewPlaceholder": {
+      "line1": "SVGファイルを選択すると",
+      "line2": "プレビューが表示されます"
+    },
+    "original": "元のファイル",
+    "optimized": "最適化後",
+    "compressionRatio": "圧縮率",
+    "preset": "プリセット",
+    "safe": "推奨",
+    "svgo-default": "標準圧縮",
+    "maximum": "最大圧縮",
+    "custom": "カスタム",
+    "selectPreset": "{preset}を選択",
+    "precisionSettings": "精度設定",
+    "precisionHint": "数値の精度を調整します。値が低いほど圧縮率が高くなりますが、精度が低下します。",
+    "floatPrecision": "小数点以下の桁数",
+    "transformPrecision": "transform属性の精度",
+    "options": "最適化オプション",
+    "groups": {
+      "cleanup": "クリーンアップ",
+      "optimization": "最適化",
+      "structural": "構造変更",
+      "advanced": "高度な設定",
+      "dangerous": "危険な設定",
+      "dangerousDescription": "セキュリティリスクがあります。信頼できるSVGファイルのみ使用してください。"
+    },
+    "errors": {
+      "svgLoadFailed": "SVGファイルの読み込みに失敗しました",
+      "selectSvg": "SVGファイルを選択してください",
+      "optimizeFailed": "SVGの最適化に失敗しました"
+    }
+  },
+  "iromide": {
+    "tryWithYourImage": "あなたの画像で試す",
+    "recommendedAspectRatio": "推奨: 縦長 (3:4) / 正方形 (1:1) / 横長 (8:5)",
+    "addMessage": "メッセージを追加 (任意)",
+    "sharing": "発行中...",
+    "share": "シェアする",
+    "tryAnotherImage": "別の画像で試す",
+    "errors": {
+      "colorExtractionFailed": "色の抽出に失敗しました",
+      "shareTargetNotReady": "シェア用の画像が準備できていません",
+      "imageGenerationFailed": "画像の生成に失敗しました",
+      "shareFailed": "シェアに失敗しました",
+      "shareNotSupported": "お使いのブラウザではシェア機能が使えません。画像をダウンロードしてください。"
+    },
+    "shareText": "あなたの推しは、なに色？イロマイドでパレットを作成しましょう！"
+  }
+}

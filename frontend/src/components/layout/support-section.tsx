@@ -1,7 +1,13 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 import { OfuseButton } from '@/components/ui/ofuse-button'
 import { XShareButton } from '@/components/ui/x-share-button'
 
 export function SupportSection () {
+  const t = useTranslations()
+
   return (
     <div className='relative mx-auto my-32 flex max-w-screen-md flex-col items-center gap-12'>
 
@@ -10,7 +16,7 @@ export function SupportSection () {
         <span className='flex-1 border-t-2 border-dashed border-gray-400 dark:border-gray-600' />
 
         <h3 className='whitespace-nowrap px-4 text-center text-lg font-semibold'>
-          応援よろしくお願いします！
+          {t('supportSection.title')}
         </h3>
 
         <span className='flex-1 border-t-2 border-dashed border-gray-400 dark:border-gray-600' />

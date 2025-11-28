@@ -3,6 +3,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { PhotoIcon, PlusIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -11,13 +12,12 @@ import { SvgOptionsPanel } from '@/components/svg-optimizer/svg-options-panel'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
-import { getToolById } from '@/config/tools'
 import { validateSvgFile } from '@/lib/file/file-validation'
 import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
 import { DEFAULT_SVGO_OPTIONS, optimizeSvg, PRESETS } from '@/lib/image/svgo-optimizer'
 
 export default function SvgOptimizerPage () {
-  const tool = getToolById('svg-optimizer')
+  const t = useTranslations()
   const toast = useToast()
   const [originalSvg, setOriginalSvg] = useState<string | null>(null)
   const [previewOptimizedSvg, setPreviewOptimizedSvg] = useState<string | null>(null)
@@ -44,10 +44,10 @@ export default function SvgOptimizerPage () {
       setOriginalSize(file.size)
       setFileName(file.name)
     } catch (err) {
-      toast.error('SVGファイルの読み込みに失敗しました')
+      toast.error(t('svgOptimizer.errors.svgLoadFailed'))
       console.error(err)
     }
-  }, [toast])
+  }, [toast, t])
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -118,7 +118,7 @@ export default function SvgOptimizerPage () {
 
   const handleDownload = useCallback(async () => {
     if (!originalSvg) {
-      toast.error('SVGファイルを選択してください')
+      toast.error(t('svgOptimizer.errors.selectSvg'))
       return
     }
 
@@ -136,12 +136,12 @@ export default function SvgOptimizerPage () {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (err) {
-      toast.error('SVGの最適化に失敗しました')
+      toast.error(t('svgOptimizer.errors.optimizeFailed'))
       console.error(err)
     } finally {
       setIsDownloading(false)
     }
-  }, [originalSvg, options, fileName, toast])
+  }, [originalSvg, options, fileName, toast, t])
 
   const compressionRatio = originalSize && previewOptimizedSize
     ? ((1 - previewOptimizedSize / originalSize) * 100).toFixed(1)
@@ -155,16 +155,16 @@ export default function SvgOptimizerPage () {
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'svg-optimizer' }
+          { label: t('common.home'), href: '/' },
+          { label: t('tools.svg-optimizer.name') }
         ]}
       />
 
       <div className='mx-auto max-w-screen-lg'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'svg-optimizer'}</h1>
+          <h1 className='text-2xl font-semibold'>{t('tools.svg-optimizer.name')}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
-            {tool?.description ?? ''}
+            {t('tools.svg-optimizer.description')}
           </p>
         </div>
 
@@ -175,7 +175,7 @@ export default function SvgOptimizerPage () {
             {/* File Upload */}
             <div className='space-y-2'>
               <h6 className='block text-sm font-semibold'>
-                ファイルを選択
+                {t('common.selectImage')}
               </h6>
               <input
                 ref={fileInputRef}
@@ -189,18 +189,18 @@ export default function SvgOptimizerPage () {
                 className='flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white outline-none transition-colors hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:bg-sky-600 dark:hover:bg-sky-500'
               >
                 <PlusIcon className='size-5 stroke-2' />
-                ファイルを選択
+                {t('common.selectImage')}
               </button>
               <p className='text-xs text-gray-600 dark:text-gray-400'>
-                SVGファイルをアップロードできます（最大10MB）
+                {t('svgOptimizer.uploadHint')}
                 <br />
-                または画面のどこにでもドラッグ&ドロップ
+                {t('common.dragDropAnywhere')}
               </p>
               {/* Privacy Notice */}
               <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-950 dark:bg-sky-950'>
                 <ShieldCheckIcon className='size-5 shrink-0' />
                 <div className='text-sm'>
-                  画像はサーバーに送信されず、ブラウザで安全に実行されます。
+                  {t('common.privacyNotice')}
                 </div>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function SvgOptimizerPage () {
               {({ open }) => (
                 <div className='overflow-hidden rounded-lg bg-gray-100 dark:bg-atom-one-dark-light'>
                   <DisclosureButton className='flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-medium outline-none transition-colors hover:bg-gray-200 dark:hover:bg-gray-700'>
-                    <h6 className='text-sm font-semibold'>圧縮オプション</h6>
+                    <h6 className='text-sm font-semibold'>{t('svgOptimizer.options')}</h6>
                     <ChevronDownIcon
                       className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''
                         }`}
@@ -231,15 +231,15 @@ export default function SvgOptimizerPage () {
             {/* Preview */}
             <div className='flex flex-col'>
               <h6 className='mb-2 block text-sm font-semibold'>
-                プレビュー
+                {t('common.preview')}
               </h6>
               <div className='space-y-4'>
                 <CheckerboardPreview
                   emptyState={
                     <div className='text-center text-sm text-gray-600 dark:text-gray-400'>
                       <PhotoIcon className='mx-auto mb-2 h-12 w-12' />
-                      <p>SVGファイルを選択すると</p>
-                      <p>プレビューが表示されます</p>
+                      <p>{t('svgOptimizer.previewPlaceholder.line1')}</p>
+                      <p>{t('svgOptimizer.previewPlaceholder.line2')}</p>
                     </div>
                   }
                 >
@@ -260,15 +260,15 @@ export default function SvgOptimizerPage () {
                 {previewOptimizedSvg && (
                   <div className='space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-700 dark:bg-atom-one-dark-light'>
                     <div className='flex justify-between'>
-                      <span className='text-gray-600 dark:text-gray-400'>圧縮前:</span>
+                      <span className='text-gray-600 dark:text-gray-400'>{t('svgOptimizer.original')}:</span>
                       <span className='font-medium'>{(originalSize / 1024).toFixed(2)} KB</span>
                     </div>
                     <div className='flex justify-between'>
-                      <span className='text-gray-600 dark:text-gray-400'>圧縮後:</span>
+                      <span className='text-gray-600 dark:text-gray-400'>{t('svgOptimizer.optimized')}:</span>
                       <span className='font-medium'>{(previewOptimizedSize / 1024).toFixed(2)} KB</span>
                     </div>
                     <div className='flex justify-between'>
-                      <span className='text-gray-600 dark:text-gray-400'>削減:</span>
+                      <span className='text-gray-600 dark:text-gray-400'>{t('svgOptimizer.compressionRatio')}:</span>
                       <span className='font-medium text-green-600 dark:text-green-400'>
                         {compressionRatio}%
                       </span>
@@ -285,14 +285,14 @@ export default function SvgOptimizerPage () {
                 disabled={!originalSvg || isDownloading}
                 className='rounded-full bg-amber-500 px-8 py-3 font-medium text-white outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 enabled:hover:bg-amber-600 disabled:bg-gray-300 disabled:text-gray-500 dark:bg-amber-600 enabled:dark:hover:bg-amber-500 disabled:dark:bg-atom-one-dark-light'
               >
-                ダウンロード
+                {t('common.download')}
               </button>
             </div>
           </div>
 
           {/* Right Column - Options Panel (Desktop Only) */}
           <div className='hidden lg:block lg:flex-1'>
-            <h6 className='mb-4 text-sm font-semibold'>圧縮オプション</h6>
+            <h6 className='mb-4 text-sm font-semibold'>{t('svgOptimizer.options')}</h6>
             <SvgOptionsPanel
               options={options}
               onOptionsChange={handleOptionsChange}

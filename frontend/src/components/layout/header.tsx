@@ -2,22 +2,26 @@
 
 import { CloseButton, Dialog, DialogPanel, Popover, PopoverButton, PopoverPanel, Transition, TransitionChild } from '@headlessui/react'
 import { Bars3Icon, ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useCallback, useState } from 'react'
 
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
+import { Link } from '@/i18n/navigation'
 
+import { LocaleSwitcher } from './locale-switcher'
 import { ThemeToggle } from './theme-toggle'
 
 function CategoryPopover ({ category }: { category: typeof categories[number] }) {
+  const t = useTranslations()
+
   return (
     <Popover className='group relative'>
       <PopoverButton
         className='flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium uppercase outline-none transition-colors hover:bg-gray-100 data-[focus]:bg-gray-100 data-[open]:bg-gray-100 dark:hover:bg-atom-one-dark-lighter data-[focus]:dark:bg-atom-one-dark-lighter data-[open]:dark:bg-atom-one-dark-lighter'
       >
-        {category.name}
+        {t(`categories.${category.id}`)}
         <ChevronDownIcon className='size-4 transition-transform group-data-[open]:rotate-180' />
       </PopoverButton>
       <Transition
@@ -38,9 +42,9 @@ function CategoryPopover ({ category }: { category: typeof categories[number] })
                 className='flex w-full items-center gap-3 rounded-md px-3 py-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
               >
                 <div className='space-y-0.5'>
-                  <span className='text-sm font-medium'>{tool.name}</span>
+                  <span className='text-sm font-medium'>{t(`tools.${tool.id}.name`)}</span>
                   <span className='line-clamp-2 text-xs text-gray-500'>
-                    {tool.shortDescription || tool.description}
+                    {t(`tools.${tool.id}.shortDescription`)}
                   </span>
                 </div>
               </CloseButton>
@@ -53,6 +57,7 @@ function CategoryPopover ({ category }: { category: typeof categories[number] })
 }
 
 export function Header () {
+  const t = useTranslations()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleOpenMobileMenu = useCallback(() => {
@@ -65,25 +70,28 @@ export function Header () {
 
   return (
     <header>
-      <nav className='mx-auto flex h-16 max-w-screen-xl items-center justify-between bg-transparent px-4 sm:px-6 lg:px-8'>
+      <nav className='relative mx-auto flex h-16 max-w-screen-xl items-center justify-between bg-transparent px-4 sm:px-6 lg:px-8'>
         {/* Mobile menu button */}
         <button
           type='button'
-          className='flex items-center justify-center rounded-lg p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10 sm:hidden'
+          className='z-10 flex items-center justify-center rounded-lg p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10 sm:hidden'
           onClick={handleOpenMobileMenu}
-          aria-label='Open menu'
+          aria-label={t('aria.openMenu')}
         >
           <Bars3Icon className='size-6' />
         </button>
 
-        {/* Logo */}
-        <Link href='/' className='flex items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500'>
+        {/* Logo - centered on mobile, left on desktop */}
+        <Link
+          href='/'
+          className='absolute left-1/2 flex -translate-x-1/2 items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500 sm:static sm:translate-x-0'
+        >
           <LogoIcon className='size-6' />
           <div className='font-logo text-xl font-semibold'>{siteConfig.name}</div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className='hidden items-center gap-4 sm:flex'>
+        <div className='hidden items-center gap-3 sm:flex'>
           {/* Category Popovers */}
           <div className='flex items-center gap-2'>
             {categories.map((category) => (
@@ -91,12 +99,16 @@ export function Header () {
             ))}
           </div>
 
+          {/* Locale Switcher */}
+          <LocaleSwitcher />
+
           {/* Theme Toggle */}
           <ThemeToggle />
         </div>
 
-        {/* Mobile Theme Toggle */}
-        <div className='sm:hidden'>
+        {/* Mobile Controls */}
+        <div className='z-10 flex items-center gap-2 sm:hidden'>
+          <LocaleSwitcher />
           <ThemeToggle />
         </div>
       </nav>
@@ -136,7 +148,7 @@ export function Header () {
                     type='button'
                     className='flex items-center justify-center rounded-lg p-2 outline-none transition hover:bg-black/5 active:bg-black/10 hover:dark:bg-white/5 active:dark:bg-white/10'
                     onClick={handleCloseMobileMenu}
-                    aria-label='Close menu'
+                    aria-label={t('aria.closeMenu')}
                   >
                     <XMarkIcon className='size-6' />
                   </button>
@@ -146,7 +158,7 @@ export function Header () {
                     {categories.map((category) => (
                       <div key={category.id} className='space-y-1'>
                         <div className='px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400'>
-                          {category.name}
+                          {t(`categories.${category.id}`)}
                         </div>
                         {category.tools.map((tool) => (
                           <Link
@@ -155,9 +167,9 @@ export function Header () {
                             className='block rounded-lg px-3 py-2 transition-colors hover:bg-gray-100 dark:hover:bg-atom-one-dark-lighter'
                             onClick={handleCloseMobileMenu}
                           >
-                            <div className='text-sm font-medium'>{tool.name}</div>
+                            <div className='text-sm font-medium'>{t(`tools.${tool.id}.name`)}</div>
                             <div className='mt-0.5 text-xs text-gray-600 dark:text-gray-400'>
-                              {tool.shortDescription || tool.description}
+                              {t(`tools.${tool.id}.shortDescription`)}
                             </div>
                           </Link>
                         ))}

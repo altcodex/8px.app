@@ -1,5 +1,8 @@
+'use client'
+
 import { Field, Label, Switch } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/solid'
+import { useTranslations } from 'next-intl'
 import { useCallback } from 'react'
 
 import { Slider } from '@/components/ui/slider'
@@ -16,6 +19,8 @@ type SvgOptionsPanelProps = {
 }
 
 export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onPresetChange }: SvgOptionsPanelProps) {
+  const t = useTranslations()
+
   const handleToggle = useCallback((key: keyof SvgoOptions) => {
     onOptionsChange({
       ...options,
@@ -44,7 +49,7 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
       <div>
         <div className='mb-3'>
           <span className='block text-sm font-semibold'>
-            プリセット
+            {t('svgOptimizer.preset')}
           </span>
         </div>
         <div className='flex flex-wrap gap-2'>
@@ -57,10 +62,10 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
                   ? 'bg-sky-500 text-white hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'
                   : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
               }`}
-              aria-label={`${preset.label}を選択`}
+              aria-label={t('svgOptimizer.selectPreset', { preset: t(`svgOptimizer.${preset.id}`) })}
               aria-pressed={selectedPreset === preset.id}
             >
-              {preset.label}
+              {t(`svgOptimizer.${preset.id}`)}
             </button>
           ))}
         </div>
@@ -70,23 +75,23 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
       <div>
         <div className='mb-3'>
           <span className='block text-sm font-semibold'>
-            精度設定
+            {t('svgOptimizer.precisionSettings')}
           </span>
           <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
-            数値の精度を調整します。値が低いほど圧縮率が高くなりますが、精度が低下します。
+            {t('svgOptimizer.precisionHint')}
           </p>
         </div>
 
         <div className='space-y-4'>
           <Slider
-            label={PLUGIN_DESCRIPTIONS.floatPrecision}
+            label={t('svgOptimizer.floatPrecision')}
             value={options.floatPrecision}
             min={0}
             max={10}
             onChange={handleFloatPrecisionChange}
           />
           <Slider
-            label={PLUGIN_DESCRIPTIONS.transformPrecision}
+            label={t('svgOptimizer.transformPrecision')}
             value={options.transformPrecision}
             min={0}
             max={10}
@@ -109,11 +114,11 @@ export function SvgOptionsPanel ({ options, onOptionsChange, selectedPreset, onP
                   {isDangerous && (
                     <ExclamationTriangleIcon className='size-5 shrink-0' />
                   )}
-                  {group.label}
+                  {t(`svgOptimizer.groups.${group.id}`)}
                 </span>
-                {group.description && (
+                {isDangerous && (
                   <p className='mt-1 text-xs font-medium text-gray-600 dark:text-gray-400'>
-                    {group.description}
+                    {t('svgOptimizer.groups.dangerousDescription')}
                   </p>
                 )}
               </div>

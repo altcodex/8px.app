@@ -3,6 +3,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { PhotoIcon, PlusIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -10,7 +11,6 @@ import { FaviconOptionsPanel } from '@/components/favicon-generator/favicon-opti
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
-import { getToolById } from '@/config/tools'
 import { validateImageFile } from '@/lib/file/file-validation'
 import { createZip } from '@/lib/file/zip-utils'
 import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
@@ -27,7 +27,7 @@ const ACCEPTED_IMAGE_TYPES = 'image/png, image/jpeg, image/webp, image/svg+xml, 
 const HEIC_TYPES = 'image/heic, image/heif'
 
 export default function FaviconGeneratorPage () {
-  const tool = getToolById('favicon-generator')
+  const t = useTranslations()
   const toast = useToast()
   const [image, setImage] = useState<HTMLImageElement | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -69,10 +69,10 @@ export default function FaviconGeneratorPage () {
       const loadedImage = await loadImageFromFile(file)
       setImage(loadedImage)
     } catch (err) {
-      toast.error('画像の読み込みに失敗しました')
+      toast.error(t('faviconGenerator.errors.imageLoadFailed'))
       console.error(err)
     }
-  }, [validateImageFileWrapper, toast])
+  }, [validateImageFileWrapper, toast, t])
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -147,17 +147,17 @@ export default function FaviconGeneratorPage () {
 
   const handleGenerate = useCallback(async () => {
     if (!image) {
-      toast.error('画像ファイルを選択してください')
+      toast.error(t('faviconGenerator.errors.selectImage'))
       return
     }
 
     if (selectedSets.size === 0) {
-      toast.error('少なくとも1つの出力形式を選択してください')
+      toast.error(t('faviconGenerator.errors.selectOutputFormat'))
       return
     }
 
     if (selectedSets.has('favicon') && selectedSizes.size === 0) {
-      toast.error('favicon.icoを選択した場合、少なくとも1つのサイズを選択してください')
+      toast.error(t('faviconGenerator.errors.selectSize'))
       return
     }
 
@@ -191,12 +191,12 @@ export default function FaviconGeneratorPage () {
         downloadBlob(zipBlob, 'favicons.zip')
       }
     } catch (err) {
-      toast.error('ファビコンの生成に失敗しました')
+      toast.error(t('faviconGenerator.errors.generateFailed'))
       console.error(err)
     } finally {
       setIsGenerating(false)
     }
-  }, [image, selectedSets, selectedSizes, borderRadius, backgroundColor, useBackground, toast])
+  }, [image, selectedSets, selectedSizes, borderRadius, backgroundColor, useBackground, toast, t])
 
   return (
     <FullPageDropZone
@@ -206,16 +206,16 @@ export default function FaviconGeneratorPage () {
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
-          { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'favicon-generator' }
+          { label: t('common.home'), href: '/' },
+          { label: t('tools.favicon-generator.name') }
         ]}
       />
 
       <div className='mx-auto max-w-screen-lg'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'favicon-generator'}</h1>
+          <h1 className='text-2xl font-semibold'>{t('tools.favicon-generator.name')}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
-            {tool?.description ?? ''}
+            {t('tools.favicon-generator.description')}
           </p>
         </div>
 
@@ -226,7 +226,7 @@ export default function FaviconGeneratorPage () {
             {/* File Upload */}
             <div className='space-y-2'>
               <h6 className='block text-sm font-semibold'>
-                画像を選択
+                {t('common.selectImage')}
               </h6>
               <input
                 ref={fileInputRef}
@@ -240,18 +240,18 @@ export default function FaviconGeneratorPage () {
                 className='flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white outline-none transition-colors hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500  dark:bg-sky-600 dark:hover:bg-sky-500 '
               >
                 <PlusIcon className='size-5 stroke-2' />
-                画像を選択
+                {t('common.selectImage')}
               </button>
               <p className='text-xs text-gray-600 dark:text-gray-400'>
-                PNG, JPG, WEBP, SVGなど画像ファイルをアップロードできます (最大10MB)
+                {t('faviconGenerator.uploadHint')}
                 <br />
-                または画面のどこにでもドラッグ&ドロップ
+                {t('common.dragDropAnywhere')}
               </p>
               {/* Privacy Notice */}
               <div className='flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 dark:border-sky-950 dark:bg-sky-950'>
                 <ShieldCheckIcon className='size-5 shrink-0' />
                 <div className='text-sm'>
-                  画像はサーバーに送信されず、ブラウザで安全に実行されます。
+                  {t('common.privacyNotice')}
                 </div>
               </div>
             </div>
@@ -261,7 +261,7 @@ export default function FaviconGeneratorPage () {
               {({ open }) => (
                 <div className='overflow-hidden rounded-lg bg-gray-100 dark:bg-atom-one-dark-light'>
                   <DisclosureButton className='flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-medium outline-none transition-colors hover:bg-gray-100 dark:hover:bg-gray-700'>
-                    <h6 className='text-sm font-semibold'>出力オプション</h6>
+                    <h6 className='text-sm font-semibold'>{t('faviconGenerator.outputOptions')}</h6>
                     <ChevronDownIcon
                       className={`h-5 w-5 transition-transform ${open ? 'rotate-180' : ''
                         }`}
@@ -289,7 +289,7 @@ export default function FaviconGeneratorPage () {
             {/* Preview */}
             <div className='flex flex-col'>
               <h6 className='mb-2 block text-sm font-semibold'>
-                プレビュー
+                {t('common.preview')}
               </h6>
               <div className='flex w-full items-center justify-center'>
                 <div
@@ -317,8 +317,8 @@ export default function FaviconGeneratorPage () {
                     : (
                       <div className='text-center text-sm text-gray-600 dark:text-gray-400'>
                         <PhotoIcon className='mx-auto mb-2 h-12 w-12' />
-                        <p>画像を選択すると</p>
-                        <p>プレビューが表示されます</p>
+                        <p>{t('faviconGenerator.previewPlaceholder.line1')}</p>
+                        <p>{t('faviconGenerator.previewPlaceholder.line2')}</p>
                       </div>
                       )}
                 </div>
@@ -332,14 +332,14 @@ export default function FaviconGeneratorPage () {
                 disabled={!image || selectedSets.size === 0 || isGenerating}
                 className='rounded-full bg-amber-500 px-8 py-3 font-medium text-white outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 enabled:hover:bg-amber-600 disabled:bg-gray-300 disabled:text-gray-500 dark:bg-amber-600 enabled:dark:hover:bg-amber-500 disabled:dark:bg-atom-one-dark-light'
               >
-                ダウンロード
+                {t('common.download')}
               </button>
             </div>
           </div>
 
           {/* Right Column - Settings Panel (Desktop Only) */}
           <div className='hidden lg:block lg:flex-1'>
-            <h6 className='mb-4 text-sm font-semibold'>出力オプション</h6>
+            <h6 className='mb-4 text-sm font-semibold'>{t('faviconGenerator.outputOptions')}</h6>
             <FaviconOptionsPanel
               selectedSets={selectedSets}
               selectedSizes={selectedSizes}

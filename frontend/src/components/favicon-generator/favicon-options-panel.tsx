@@ -1,3 +1,7 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
+
 import { Slider } from '@/components/ui/slider'
 import { TogglePill } from '@/components/ui/toggle-pill'
 import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
@@ -30,6 +34,7 @@ export function FaviconOptionsPanel ({
   onUseBackgroundChange,
   checkboxIdSuffix = ''
 }: FaviconOptionsPanelProps) {
+  const t = useTranslations()
   const checkboxId = `use-background${checkboxIdSuffix}`
 
   return (
@@ -38,7 +43,7 @@ export function FaviconOptionsPanel ({
       <div>
         <div className='mb-3'>
           <span className='block text-sm font-semibold'>
-            ファイル形式
+            {t('faviconGenerator.fileFormat')}
           </span>
         </div>
         <div className='flex flex-wrap gap-2'>
@@ -47,7 +52,10 @@ export function FaviconOptionsPanel ({
               key={outputSet.id}
               pressed={selectedSets.has(outputSet.id)}
               onClick={() => onSetToggle(outputSet.id)}
-              ariaLabel={`${outputSet.label}を${selectedSets.has(outputSet.id) ? '選択解除' : '選択'}`}
+              ariaLabel={t('faviconGenerator.toggleFormat', {
+                format: outputSet.label,
+                action: selectedSets.has(outputSet.id) ? t('faviconGenerator.deselect') : t('faviconGenerator.select')
+              })}
             >
               {outputSet.label}
             </TogglePill>
@@ -70,7 +78,7 @@ export function FaviconOptionsPanel ({
           <div>
             <div className='mb-3'>
               <span className='block text-sm font-semibold'>
-                favicon.icoに含めるサイズ
+                {t('faviconGenerator.faviconSizes')}
               </span>
             </div>
 
@@ -78,7 +86,7 @@ export function FaviconOptionsPanel ({
               {/* 推奨サイズ */}
               <div>
                 <div className='mb-2 text-xs font-medium text-gray-700 dark:text-gray-300'>
-                  推奨サイズ
+                  {t('faviconGenerator.recommendedSizes')}
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {DEFAULT_SIZES.map((size) => (
@@ -86,7 +94,10 @@ export function FaviconOptionsPanel ({
                       key={size}
                       pressed={selectedSizes.has(size)}
                       onClick={() => onSizeToggle(size)}
-                      ariaLabel={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
+                      ariaLabel={t('faviconGenerator.toggleSize', {
+                        size,
+                        action: selectedSizes.has(size) ? t('faviconGenerator.deselect') : t('faviconGenerator.select')
+                      })}
                     >
                       {size}×{size}
                     </TogglePill>
@@ -97,7 +108,7 @@ export function FaviconOptionsPanel ({
               {/* 追加サイズ */}
               <div>
                 <div className='mb-2 text-xs font-medium text-gray-600 dark:text-gray-400'>
-                  その他サイズ
+                  {t('faviconGenerator.otherSizes')}
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {AVAILABLE_SIZES.filter(s => !DEFAULT_SIZES.includes(s)).map((size) => (
@@ -105,7 +116,10 @@ export function FaviconOptionsPanel ({
                       key={size}
                       pressed={selectedSizes.has(size)}
                       onClick={() => onSizeToggle(size)}
-                      ariaLabel={`${size}×${size}ピクセルを${selectedSizes.has(size) ? '選択解除' : '選択'}`}
+                      ariaLabel={t('faviconGenerator.toggleSize', {
+                        size,
+                        action: selectedSizes.has(size) ? t('faviconGenerator.deselect') : t('faviconGenerator.select')
+                      })}
                     >
                       {size}×{size}
                     </TogglePill>
@@ -123,10 +137,10 @@ export function FaviconOptionsPanel ({
       <div>
         <div className='mb-3'>
           <span className='block text-sm font-semibold'>
-            角丸の調整
+            {t('faviconGenerator.borderRadius')}
           </span>
           <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
-            アイコンの角を丸くします。Apple Touch IconはiOSが自動的に角丸にします。
+            {t('faviconGenerator.borderRadiusHint')}
           </p>
         </div>
         <Slider
@@ -146,10 +160,10 @@ export function FaviconOptionsPanel ({
       <div>
         <div className='mb-3'>
           <span className='block text-sm font-semibold'>
-            背景色の設定
+            {t('faviconGenerator.backgroundColorSetting')}
           </span>
           <p className='mt-1 text-xs text-gray-600 dark:text-gray-400'>
-            透過PNGに背景色を追加します。Apple Touch Iconは常に背景色が適用されます。
+            {t('faviconGenerator.backgroundColorHint')}
           </p>
         </div>
         <div className='space-y-3'>
@@ -162,7 +176,7 @@ export function FaviconOptionsPanel ({
               className='size-4 accent-sky-600 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
             />
             <label htmlFor={checkboxId} className='text-sm font-medium'>
-              背景色を追加する
+              {t('faviconGenerator.addBackgroundColor')}
             </label>
           </div>
           <div className='flex items-center gap-3'>
@@ -172,7 +186,7 @@ export function FaviconOptionsPanel ({
               onChange={(e) => onBackgroundColorChange(e.target.value)}
               disabled={!useBackground}
               className='h-10 w-20 cursor-pointer rounded bg-transparent outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-default disabled:opacity-20'
-              aria-label='背景色を選択'
+              aria-label={t('faviconGenerator.selectBackgroundColor')}
             />
             <input
               type='text'
@@ -181,7 +195,7 @@ export function FaviconOptionsPanel ({
               disabled={!useBackground}
               placeholder='#000000'
               className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 disabled:opacity-40 dark:border-gray-600 dark:bg-atom-one-dark-light'
-              aria-label='背景色のカラーコード'
+              aria-label={t('faviconGenerator.backgroundColorCode')}
             />
           </div>
         </div>

@@ -1,15 +1,19 @@
+import { useTranslations } from 'next-intl'
+
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { ToolCard } from '@/components/tool-card'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
 
 export default function Home () {
+  const t = useTranslations()
+
   // JSON-LD structured data
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: siteConfig.name,
-    description: siteConfig.description.replace(/\r?\n/g, ''),
+    description: t('site.description').replace(/\r?\n/g, ''),
     url: siteConfig.url
   }
 
@@ -48,7 +52,7 @@ export default function Home () {
             {siteConfig.name}
           </h1>
           <p className='whitespace-pre-line font-medium'>
-            {siteConfig.heroDescription}
+            {t('site.heroDescription')}
           </p>
         </div>
       </div>
@@ -60,7 +64,7 @@ export default function Home () {
             {/* Category Header */}
             <div className='mb-4'>
               <h2 className='text-2xl font-semibold'>
-                {category.name}
+                {t(`categories.${category.id}`)}
               </h2>
             </div>
 

@@ -1,11 +1,15 @@
-import Link from 'next/link'
+'use client'
+
+import { useTranslations } from 'next-intl'
 
 import { GitHubIcon } from '@/components/icons/github-icon'
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
+import { Link } from '@/i18n/navigation'
 
 export function Footer () {
+  const t = useTranslations()
   const githubRepoUrl = siteConfig.links.github
   const issuesUrl = githubRepoUrl ? `${githubRepoUrl}/issues` : ''
   const sponsorUrl = siteConfig.links.sponsor
@@ -21,7 +25,7 @@ export function Footer () {
               <span className='font-logo text-xl font-semibold'>{siteConfig.name}</span>
             </Link>
             <p className='mt-3 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400'>
-              {siteConfig.description}
+              {t('site.description')}
             </p>
             {githubRepoUrl && (
               <a
@@ -31,7 +35,7 @@ export function Footer () {
                 className='mt-4 inline-flex items-center gap-2 text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
               >
                 <GitHubIcon className='size-5' />
-                GitHub
+                {t('footer.github')}
               </a>
             )}
           </div>
@@ -41,7 +45,7 @@ export function Footer () {
             {categories.map((category) => (
               <div key={category.id}>
                 <h3 className='mb-3 text-sm font-semibold uppercase tracking-wider'>
-                  {category.name}
+                  {t(`categories.${category.id}`)}
                 </h3>
                 <ul className='space-y-2'>
                   {category.tools.map((tool) => (
@@ -50,7 +54,7 @@ export function Footer () {
                         href={`/${tool.id}`}
                         className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                       >
-                        {tool.name}
+                        {t(`tools.${tool.id}.name`)}
                       </Link>
                     </li>
                   ))}
@@ -62,7 +66,7 @@ export function Footer () {
           {/* Right: Feedback Links */}
           <div>
             <h3 className='mb-3 text-sm font-semibold uppercase tracking-wider'>
-              Support
+              {t('footer.support')}
             </h3>
             <ul className='space-y-2'>
               {issuesUrl && (
@@ -73,7 +77,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    バグ報告
+                    {t('footer.bugReport')}
                   </a>
                 </li>
               )}
@@ -85,7 +89,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    問い合わせ等
+                    {t('footer.contact')}
                   </a>
                 </li>
               )}
@@ -97,7 +101,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    寄付・支援
+                    {t('footer.donate')}
                   </a>
                 </li>
               )}
@@ -106,7 +110,7 @@ export function Footer () {
                   href='/privacy'
                   className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                 >
-                  プライバシーポリシー
+                  {t('footer.privacyPolicy')}
                 </Link>
               </li>
             </ul>
