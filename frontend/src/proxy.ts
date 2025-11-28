@@ -1,18 +1,9 @@
 import createMiddleware from 'next-intl/middleware'
 
-import { defaultLocale, locales } from './i18n/request'
+import { routing } from './i18n/routing'
 
 export default createMiddleware({
-  // Supported locales
-  locales,
-
-  // Default locale
-  defaultLocale,
-
-  // Whether to include the default locale in the path
-  // When 'as-needed', /page is accessible instead of /ja/page for default locale
-  localePrefix: 'as-needed',
-
+  ...routing,
   // Disable automatic locale detection
   // Reasons: SEO optimization, performance, consistency with Japan-focused promotion
   // - / is always Japanese (for domestic Japan promotion)
