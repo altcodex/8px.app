@@ -61,7 +61,8 @@
   },
   "aria": {
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "toggleTheme": "テーマを切り替え"
   },
   "common": {
     "home": "ホーム",
@@ -79,7 +80,10 @@
     "imageProcessingOnlyNotice": "画像は処理のみに使用され、保存されません",
     "unsupportedFileType": "対応していないファイル形式です。",
     "fileValidationError": "ファイルの検証中にエラーが発生しました。",
-    "dropToUpload": "ドロップして画像をアップロード"
+    "dropToUpload": "ドロップして画像をアップロード",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "themeSystem": "システム"
   },
   "faviconGenerator": {
     "outputOptions": "出力オプション",

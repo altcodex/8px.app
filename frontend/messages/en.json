@@ -61,7 +61,8 @@
   },
   "aria": {
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "toggleTheme": "Toggle theme"
   },
   "common": {
     "home": "Home",
@@ -79,7 +80,10 @@
     "imageProcessingOnlyNotice": "Images are only used for processing and are not stored",
     "unsupportedFileType": "Unsupported file type.",
     "fileValidationError": "An error occurred while validating the file.",
-    "dropToUpload": "Drop to upload image"
+    "dropToUpload": "Drop to upload image",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
   },
   "faviconGenerator": {
     "outputOptions": "Output Options",
