@@ -185,16 +185,17 @@ export function FaviconOptionsPanel ({
               value={backgroundColor}
               onChange={(e) => onBackgroundColorChange(e.target.value)}
               disabled={!useBackground}
-              className='h-10 w-20 cursor-pointer rounded bg-transparent outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-default disabled:opacity-20'
+              className='size-10 cursor-pointer bg-transparent outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-default disabled:opacity-20'
               aria-label={t('faviconGenerator.selectBackgroundColor')}
             />
             <input
               type='text'
+              name='hex-input'
               value={backgroundColor}
               onChange={(e) => onBackgroundColorChange(e.target.value)}
               disabled={!useBackground}
               placeholder='#000000'
-              className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 disabled:opacity-40 dark:border-gray-600 dark:bg-atom-one-dark-light'
+              className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 disabled:opacity-40 dark:border-gray-600 dark:bg-atom-one-dark-light'
               aria-label={t('faviconGenerator.backgroundColorCode')}
             />
           </div>
