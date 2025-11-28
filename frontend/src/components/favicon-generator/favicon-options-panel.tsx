@@ -64,7 +64,7 @@ export function FaviconOptionsPanel ({
         <div className='mt-4 text-xs text-gray-600 dark:text-gray-400'>
           {OUTPUT_SETS.map((set) => (
             <div key={set.id}>
-              <strong>{set.label}:</strong> {set.description}
+              <strong>{set.label}:</strong> {t(`faviconGenerator.formatDescriptions.${set.id}`)}
             </div>
           ))}
         </div>

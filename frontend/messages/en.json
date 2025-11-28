@@ -94,6 +94,11 @@
       "line2": "display preview"
     },
     "fileFormat": "File Format",
+    "formatDescriptions": {
+      "favicon": "For legacy browsers",
+      "apple-touch-icon": "For iOS (180×180)",
+      "android-icon": "For Android/PWA (192×192, 512×512)"
+    },
     "faviconSizes": "Sizes to include in favicon.ico",
     "recommendedSizes": "Recommended Sizes",
     "otherSizes": "Other Sizes",
