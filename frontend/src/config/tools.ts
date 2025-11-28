@@ -95,8 +95,3 @@ export const categories: Category[] = categoryDefinitions.map(cat => ({
   iconBgColor: cat.iconBgColor,
   tools: tools.filter(tool => tool.category === cat.id)
 }))
-
-// Helper function
-export function getToolById (id: string): Tool | undefined {
-  return tools.find(t => t.id === id)
-}

@@ -15,7 +15,6 @@ import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { siteConfig } from '@/config/site'
-import { getToolById } from '@/config/tools'
 import type { ExtractedColor } from '@/lib/api/colors'
 import { extractColorsFromImage, NetworkError } from '@/lib/api/colors'
 import { validateImageFile } from '@/lib/file/file-validation'
@@ -31,7 +30,6 @@ const HEIC_TYPES = 'image/heic, image/heif'
 
 export default function IromidePage () {
   const t = useTranslations()
-  const tool = getToolById('iromide')
   const toast = useToast()
   const shareTargetRef = useRef<HTMLDivElement>(null)
 
@@ -200,7 +198,7 @@ export default function IromidePage () {
       // Check if Web Share API with files is supported
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          const shareUrl = `${siteConfig.url ?? 'https://8px.app'}/${tool?.id ?? 'iromide'}`
+          const shareUrl = `${siteConfig.url ?? 'https://8px.app'}/iromide`
           await navigator.share({
             files: [file],
             text: `${message || t('iromide.shareText')} - ${shareUrl}`
@@ -228,7 +226,7 @@ export default function IromidePage () {
     } finally {
       setIsSharing(false)
     }
-  }, [toast, message, tool, t])
+  }, [toast, message, t])
 
   // Reset
   const handleReset = useCallback(() => {
