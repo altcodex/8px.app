@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowPathIcon, ClipboardDocumentIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useState } from 'react'
 
 import { HueSlider } from '@/components/tw-palette-generator/hue-slider'
@@ -8,7 +9,6 @@ import { LightnessSlider } from '@/components/tw-palette-generator/lightness-sli
 import { SaturationSlider } from '@/components/tw-palette-generator/saturation-slider'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { useToast } from '@/components/ui/toast'
-import { getToolById } from '@/config/tools'
 import { hexToOklch } from '@/lib/color/color-utils'
 import type { ColorPalette } from '@/lib/color/palette-generator'
 import {
@@ -21,7 +21,7 @@ import type { TailwindColorName, TailwindShade } from '@/lib/color/tailwind-colo
 import { getColorNames, getShades, isGrayScale, tailwindColors } from '@/lib/color/tailwind-colors'
 
 export default function TailwindPaletteGeneratorPage () {
-  const tool = getToolById('tw-palette-generator')
+  const t = useTranslations()
   const toast = useToast()
 
   // Palette history type
@@ -172,12 +172,12 @@ export default function TailwindPaletteGeneratorPage () {
   const handleCopyColor = useCallback(async (hex: string) => {
     try {
       await navigator.clipboard.writeText(hex.toUpperCase())
-      toast.success('カラーコードをコピーしました')
+      toast.success(t('twPaletteGenerator.errors.colorCodeCopied'))
     } catch (err) {
-      toast.error('コピーに失敗しました')
+      toast.error(t('twPaletteGenerator.errors.colorCodeCopyFailed'))
       console.error('Failed to copy:', err)
     }
-  }, [toast])
+  }, [toast, t])
 
   // Copy as Tailwind Config
   const handleCopyAsTailwind = useCallback(() => {
@@ -187,12 +187,12 @@ export default function TailwindPaletteGeneratorPage () {
         .map(shade => `    ${shade}: '${palette[shade]}',`)
         .join('\n')}\n  }\n}`
       navigator.clipboard.writeText(tailwindConfig)
-      toast.success('Tailwind設定としてコピーしました')
+      toast.success(t('twPaletteGenerator.errors.configCopied'))
     } catch (err) {
-      toast.error('コピーに失敗しました')
+      toast.error(t('twPaletteGenerator.errors.colorCodeCopyFailed'))
       console.error(err)
     }
-  }, [palette, toast])
+  }, [palette, toast, t])
 
   // Add current palette to history
   const handleAddToHistory = useCallback(() => {
@@ -208,8 +208,8 @@ export default function TailwindPaletteGeneratorPage () {
       // Keep only the latest MAX_HISTORY items (remove oldest)
       return updated.slice(-MAX_HISTORY)
     })
-    toast.success('ヒストリーに追加しました')
-  }, [baseColor, palette, toast])
+    toast.success(t('twPaletteGenerator.errors.addedToHistory'))
+  }, [baseColor, palette, toast, t])
 
   // Remove palette from history
   const handleRemoveFromHistory = useCallback((id: string) => {
@@ -225,16 +225,16 @@ export default function TailwindPaletteGeneratorPage () {
     <>
       <Breadcrumb
         items={[
-          { label: 'Home', href: '/' },
-          { label: tool?.name ?? 'tw-palette-generator' }
+          { label: t('common.home'), href: '/' },
+          { label: t('tools.tw-palette-generator.name') }
         ]}
       />
 
       <div className='mx-auto max-w-screen-sm lg:max-w-screen-xl'>
         <div className='mb-8 space-y-4'>
-          <h1 className='text-2xl font-semibold'>{tool?.name ?? 'tw-palette-generator'}</h1>
+          <h1 className='text-2xl font-semibold'>{t('tools.tw-palette-generator.name')}</h1>
           <p className='whitespace-pre-line text-gray-600 dark:text-gray-400'>
-            {tool?.description ?? ''}
+            {t('tools.tw-palette-generator.description')}
           </p>
         </div>
 
@@ -244,22 +244,23 @@ export default function TailwindPaletteGeneratorPage () {
           <div className='space-y-8'>
             {/* HEX Input */}
             <section>
-              <h6 className='mb-4 text-sm font-semibold'>ベースカラー選択</h6>
+              <h6 className='mb-4 text-sm font-semibold'>{t('twPaletteGenerator.baseColorSelection')}</h6>
               <div className='flex gap-3'>
                 <input
                   type='color'
                   value={normalizedInputColor}
                   onChange={handleInputChange}
-                  className='h-10 w-20 cursor-pointer rounded bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-sky-500'
-                  aria-label='色を選択'
+                  className='size-10 cursor-pointer bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-sky-500'
+                  aria-label={t('twPaletteGenerator.baseColorSelection')}
                 />
                 <input
                   type='text'
+                  name='hex-input'
                   value={inputColor}
                   onChange={handleInputChange}
                   placeholder='#3b82f6'
-                  className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-gray-600 dark:bg-atom-one-dark-light'
-                  aria-label='カラーコード'
+                  className='flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-gray-600 dark:bg-atom-one-dark-light'
+                  aria-label={t('twPaletteGenerator.colorCode')}
                 />
               </div>
             </section>
@@ -340,12 +341,12 @@ export default function TailwindPaletteGeneratorPage () {
             {/* Adjustments */}
             <section>
               <div className='mb-4 flex items-center justify-between'>
-                <h6 className='text-sm font-semibold'>調整</h6>
+                <h6 className='text-sm font-semibold'>{t('twPaletteGenerator.adjustment')}</h6>
                 <button
                   onClick={handleReset}
                   className='rounded-lg p-1.5 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
-                  title='調整をリセット'
-                  aria-label='調整をリセット'
+                  title={t('twPaletteGenerator.resetAdjustment')}
+                  aria-label={t('twPaletteGenerator.resetAdjustment')}
                 >
                   <ArrowPathIcon className='size-5' />
                 </button>
@@ -353,7 +354,7 @@ export default function TailwindPaletteGeneratorPage () {
               <div className='space-y-4 px-4'>
                 {/* Hue */}
                 <HueSlider
-                  label='色相'
+                  label={t('twPaletteGenerator.hue')}
                   value={targetHue}
                   min={0}
                   max={360}
@@ -362,13 +363,13 @@ export default function TailwindPaletteGeneratorPage () {
                 />
                 {/* Lightness */}
                 <LightnessSlider
-                  label='明度'
+                  label={t('twPaletteGenerator.lightness')}
                   value={targetLightness}
                   onChange={handleLightnessChange}
                 />
                 {/* Saturation */}
                 <SaturationSlider
-                  label='彩度'
+                  label={t('twPaletteGenerator.saturation')}
                   value={targetSaturation}
                   inputColor={normalizedInputColor}
                   onChange={handleSaturationChange}
@@ -377,12 +378,12 @@ export default function TailwindPaletteGeneratorPage () {
             </section>
             <section>
               <div className='mb-4 flex items-center justify-between'>
-                <h6 className='text-sm font-semibold'>生成されたパレット</h6>
+                <h6 className='text-sm font-semibold'>{t('twPaletteGenerator.generatedPalette')}</h6>
                 <button
                   onClick={handleAddToHistory}
                   className='rounded-lg p-1.5 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
-                  title='ヒストリーに保存'
-                  aria-label='ヒストリーに保存'
+                  title={t('twPaletteGenerator.saveToHistory')}
+                  aria-label={t('twPaletteGenerator.saveToHistory')}
                 >
                   <PlusIcon className='size-5' />
                 </button>
@@ -427,12 +428,12 @@ export default function TailwindPaletteGeneratorPage () {
             {/* Palette History */}
             <section>
               <div className='mb-4 flex items-center justify-between'>
-                <h6 className='text-sm font-semibold'>パレットヒストリー</h6>
+                <h6 className='text-sm font-semibold'>{t('twPaletteGenerator.paletteHistory')}</h6>
                 <button
                   onClick={handleClearHistory}
                   className='rounded-lg p-1.5 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
-                  title='ヒストリーを全削除'
-                  aria-label='ヒストリーを全削除'
+                  title={t('twPaletteGenerator.deleteAllHistory')}
+                  aria-label={t('twPaletteGenerator.deleteAllHistory')}
                 >
                   <TrashIcon className='size-5' />
                 </button>
@@ -472,8 +473,8 @@ export default function TailwindPaletteGeneratorPage () {
                         <button
                           onClick={() => handleRemoveFromHistory(item.id)}
                           className='rounded p-1 text-gray-600 transition-colors hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-600'
-                          title='履歴から削除'
-                          aria-label='履歴から削除'
+                          title={t('twPaletteGenerator.deleteFromHistory')}
+                          aria-label={t('twPaletteGenerator.deleteFromHistory')}
                         >
                           <XMarkIcon className='size-4' />
                         </button>
@@ -481,12 +482,12 @@ export default function TailwindPaletteGeneratorPage () {
                     ))}
                   </div>
                   )
-                : <p className='text-center text-sm text-gray-600 dark:text-gray-400'>作成したカラーパレットを履歴に追加することができます</p>}
+                : <p className='text-center text-sm text-gray-600 dark:text-gray-400'>{t('twPaletteGenerator.historyEmptyMessage')}</p>}
             </section>
 
             {/* Tailwind Config Snippet */}
             <section>
-              <h6 className='mb-4 text-sm font-semibold'>Tailwind Config</h6>
+              <h6 className='mb-4 text-sm font-semibold'>{t('twPaletteGenerator.tailwindConfig')}</h6>
               <div className='relative'>
                 <pre className='overflow-x-auto rounded-lg bg-atom-one-dark p-3 font-mono text-xs text-gray-300 dark:bg-atom-one-dark-light dark:text-gray-300'>
                   {`colors: {
@@ -498,8 +499,8 @@ ${getShadeLabels().map(shade => `    ${shade}: '${palette[shade]}',`).join('\n')
                 <button
                   onClick={handleCopyAsTailwind}
                   className='absolute right-2 top-2 rounded-lg p-1 text-gray-300 transition-colors hover:bg-white/10 dark:text-gray-300'
-                  title='Tailwind設定をコピー'
-                  aria-label='Tailwind設定をコピー'
+                  title={t('twPaletteGenerator.copyConfig')}
+                  aria-label={t('twPaletteGenerator.copyConfig')}
                 >
                   <ClipboardDocumentIcon className='size-5' />
                 </button>

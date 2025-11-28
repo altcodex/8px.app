@@ -2,6 +2,7 @@
 
 import { PhotoIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import sampleCheki1 from '@/assets/images/iromide/sample-cheki-1.webp'
@@ -14,9 +15,8 @@ import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast'
 import { siteConfig } from '@/config/site'
-import { getToolById } from '@/config/tools'
 import type { ExtractedColor } from '@/lib/api/colors'
-import { extractColorsFromImage, } from '@/lib/api/colors'
+import { extractColorsFromImage, NetworkError } from '@/lib/api/colors'
 import { validateImageFile } from '@/lib/file/file-validation'
 import type { ChekiPadding, ChekiSize } from '@/lib/image/cheki-size'
 import { calculateChekiPadding, determineChekiSize } from '@/lib/image/cheki-size'
@@ -29,7 +29,7 @@ const ACCEPTED_IMAGE_TYPES = 'image/png, image/jpeg, image/webp, image/gif, imag
 const HEIC_TYPES = 'image/heic, image/heif'
 
 export default function IromidePage () {
-  const tool = getToolById('iromide')
+  const t = useTranslations()
   const toast = useToast()
   const shareTargetRef = useRef<HTMLDivElement>(null)
 
@@ -136,19 +136,29 @@ export default function IromidePage () {
       const colors = await extractColorsFromImage(file, colorCount)
       setExtractedColors(colors)
     } catch (err) {
-      // Display detailed error message from API
-      const errorMessage = err instanceof Error ? err.message : '色の抽出に失敗しました'
+      // Handle different types of errors
+      let errorMessage: string
+      if (err instanceof NetworkError) {
+        // Network errors (Cloudflare block, API server down, etc.)
+        errorMessage = t('common.networkError')
+      } else if (err instanceof Error) {
+        // API errors with specific messages
+        errorMessage = err.message
+      } else {
+        // Unknown errors
+        errorMessage = t('iromide.errors.colorExtractionFailed')
+      }
       toast.error(errorMessage)
       console.error('Failed to extract colors:', err)
     } finally {
       setIsProcessing(false)
     }
-  }, [toast, colorCount])
+  }, [toast, colorCount, t])
 
   // Share palette image using Web Share API
   const handleSharePalette = useCallback(async () => {
     if (!shareTargetRef.current) {
-      toast.error('シェア用の画像が準備できていません')
+      toast.error(t('iromide.errors.shareTargetNotReady'))
       console.error('Share target ref is null')
       return
     }
@@ -178,7 +188,7 @@ export default function IromidePage () {
       const blob = await domToBlob(shareTargetRef.current, {})
 
       if (!blob) {
-        toast.error('画像の生成に失敗しました')
+        toast.error(t('iromide.errors.imageGenerationFailed'))
         console.error('domToBlob returned null')
         return
       }
@@ -188,21 +198,21 @@ export default function IromidePage () {
       // Check if Web Share API with files is supported
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
-          const shareUrl = `${siteConfig.url ?? 'https://8px.app'}/${tool?.id ?? 'iromide'}`
+          const shareUrl = `${siteConfig.url ?? 'https://8px.app'}/iromide`
           await navigator.share({
             files: [file],
-            text: `${message || 'あなたの推しは、なに色？イロマイドでパレットを作成しましょう！'} - ${shareUrl}`
+            text: `${message || t('iromide.shareText')} - ${shareUrl}`
           })
         } catch (err) {
           // User cancelled or share failed
           if ((err as Error).name !== 'AbortError') {
-            toast.error('シェアに失敗しました')
+            toast.error(t('iromide.errors.shareFailed'))
             console.error('Share failed:', err)
           }
         }
       } else {
         // Fallback: download the file
-        toast.info('お使いのブラウザではシェア機能が使えません。画像をダウンロードしてください。')
+        toast.info(t('iromide.errors.shareNotSupported'))
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -211,12 +221,12 @@ export default function IromidePage () {
         URL.revokeObjectURL(url)
       }
     } catch (err) {
-      toast.error('画像の生成に失敗しました')
+      toast.error(t('iromide.errors.imageGenerationFailed'))
       console.error('Image capture failed:', err)
     } finally {
       setIsSharing(false)
     }
-  }, [toast, message, tool])
+  }, [toast, message, t])
 
   // Reset
   const handleReset = useCallback(() => {
@@ -243,10 +253,10 @@ export default function IromidePage () {
       <div className='mx-auto flex min-h-[calc(100vh-160px)] max-w-screen-md flex-col px-6 py-12 sm:px-8 sm:py-20 lg:px-12'>
         {/* Header */}
         <div className='mb-16 text-center'>
-          <h1 className='text-3xl font-bold'>{tool?.name ?? 'iromide'}</h1>
+          <h1 className='text-3xl font-bold'>{t('tools.iromide.name')}</h1>
           {!imagePreview && (
             <p className='mt-2 whitespace-pre-line text-gray-500'>
-              {tool?.description ?? ''}
+              {t('tools.iromide.description')}
             </p>
           )}
         </div>
@@ -281,7 +291,7 @@ export default function IromidePage () {
               <div className='flex w-full max-w-lg flex-col items-center justify-center gap-6 rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 dark:border-gray-600 dark:bg-atom-one-dark'>
                 <PhotoIcon className='size-10 text-gray-500' />
                 <span className='font-semibold'>
-                  あなたの画像で試す
+                  {t('iromide.tryWithYourImage')}
                 </span>
                 <label>
                   <input
@@ -291,18 +301,18 @@ export default function IromidePage () {
                     className='hidden'
                   />
                   <span className='inline-block cursor-pointer rounded-full bg-sky-500 px-8 py-3 font-medium text-white transition-colors hover:bg-sky-600 dark:bg-sky-600 dark:hover:bg-sky-500'>
-                    画像を選択
+                    {t('common.selectImage')}
                   </span>
                 </label>
               </div>
 
               <div className='space-y-2'>
                 <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
-                  推奨: 縦長 (3:4) / 正方形 (1:1) / 横長 (8:5)
+                  {t('iromide.recommendedAspectRatio')}
                 </p>
                 {/* Privacy Notice */}
                 <p className='text-center text-sm text-gray-600 dark:text-gray-400'>
-                  画像は処理のみに使用され、保存されません
+                  {t('common.imageProcessingOnlyNotice')}
                 </p>
               </div>
             </div>
@@ -313,7 +323,7 @@ export default function IromidePage () {
               <div className='flex flex-1 flex-col items-center justify-center gap-4'>
                 <Spinner size={24} />
                 <p className='text-lg font-medium text-gray-600 dark:text-gray-400'>
-                  解析中
+                  {t('common.analyzing')}
                 </p>
               </div>
               )
@@ -423,7 +433,7 @@ export default function IromidePage () {
                     type='text'
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder='メッセージを追加 (任意)'
+                    placeholder={t('iromide.addMessage')}
                     className='w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-center outline-none transition-colors focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-sky-500 dark:border-gray-600 dark:bg-atom-one-dark-light'
                   />
                 </div>
@@ -436,13 +446,13 @@ export default function IromidePage () {
                     className='flex w-40 items-center justify-center gap-2 rounded-full bg-sky-500 py-3 font-medium text-white transition-colors hover:bg-sky-600 disabled:opacity-50'
                   >
                     {isSharing && <Spinner className='size-5' />}
-                    {isSharing ? '発行中...' : 'シェアする'}
+                    {isSharing ? t('iromide.sharing') : t('iromide.share')}
                   </button>
                   <button
                     onClick={handleReset}
                     className='w-40 rounded-lg bg-stone-200 py-3 font-medium text-gray-600 transition-colors hover:bg-stone-300 dark:bg-atom-one-dark-light dark:text-gray-400 dark:hover:bg-atom-one-dark-lighter'
                   >
-                    別の画像で試す
+                    {t('iromide.tryAnotherImage')}
                   </button>
                 </div>
               </div>

@@ -193,17 +193,14 @@ export type PresetId = 'safe' | 'svgo-default' | 'maximum'
 export const PRESETS = [
   {
     id: 'safe' as const,
-    label: '推奨',
     options: PRESET_SAFE
   },
   {
     id: 'svgo-default' as const,
-    label: '標準圧縮',
     options: PRESET_SVGO_DEFAULT
   },
   {
     id: 'maximum' as const,
-    label: '最大圧縮',
     options: PRESET_MAXIMUM
   }
 ] as const

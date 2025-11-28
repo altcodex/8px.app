@@ -31,19 +31,19 @@ export const OUTPUT_SETS: OutputSet[] = [
   {
     id: 'favicon',
     label: 'favicon.ico',
-    description: '従来のブラウザ用',
+    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.favicon
     files: [{ name: 'favicon.ico', size: 'custom' }]
   },
   {
     id: 'apple-touch-icon',
     label: 'Apple Touch Icon',
-    description: 'iOS用 (180×180)',
+    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.apple-touch-icon
     files: [{ name: 'apple-touch-icon.png', size: 180 }]
   },
   {
     id: 'android-icon',
     label: 'Android Icon',
-    description: 'Android/PWA用 (192×192, 512×512)',
+    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.android-icon
     files: [
       { name: 'icon-192.png', size: 192 },
       { name: 'icon-512.png', size: 512 }

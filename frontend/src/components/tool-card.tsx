@@ -1,7 +1,10 @@
+'use client'
+
 import Image from 'next/image'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import type { Tool } from '@/config/tools'
+import { Link } from '@/i18n/navigation'
 
 type ToolCardProps = {
   tool: Tool
@@ -9,6 +12,8 @@ type ToolCardProps = {
 }
 
 export function ToolCard ({ tool, iconBgColor }: ToolCardProps) {
+  const t = useTranslations()
+
   return (
     <Link
       href={`/${tool.id}`}
@@ -19,20 +24,20 @@ export function ToolCard ({ tool, iconBgColor }: ToolCardProps) {
         <div className={`relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full ${iconBgColor}`}>
           <Image
             src={tool.icon}
-            alt={tool.name}
+            alt={t(`tools.${tool.id}.name`)}
             width={40}
             height={40}
             sizes='40px'
           />
         </div>
         <h3 className='font-semibold'>
-          {tool.name}
+          {t(`tools.${tool.id}.name`)}
         </h3>
       </div>
 
       {/* Description */}
       <p className='text-sm text-gray-600 dark:text-gray-400'>
-        {tool.description.replace(/\r?\n/g, '')}
+        {t(`tools.${tool.id}.description`).replace(/\r?\n/g, '')}
       </p>
     </Link>
   )

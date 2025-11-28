@@ -1,6 +1,7 @@
 'use client'
 
 import { DocumentPlusIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 import type { DragEvent, ReactNode } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -19,6 +20,7 @@ export function FullPageDropZone ({
   accept,
   children
 }: FullPageDropZoneProps) {
+  const t = useTranslations()
   const [isDragging, setIsDragging] = useState(false)
   const dragCounterRef = useRef(0)
   const toast = useToast()
@@ -85,7 +87,7 @@ export function FullPageDropZone ({
 
     // Validate file type if accept prop is provided
     if (accept && !isFileTypeAccepted(file, accept)) {
-      toast.error('対応していないファイル形式です。')
+      toast.error(t('common.unsupportedFileType'))
       return
     }
 
@@ -100,13 +102,13 @@ export function FullPageDropZone ({
       } catch (err) {
         // Validator threw an error - treat as validation failure
         console.error('File validation error:', err)
-        toast.error('ファイルの検証中にエラーが発生しました。')
+        toast.error(t('common.fileValidationError'))
         return
       }
     }
 
     onFileDrop(file)
-  }, [accept, validateFile, onFileDrop, toast])
+  }, [accept, validateFile, onFileDrop, toast, t])
 
   return (
     <div onDrop={handleDropOnDiv} className='relative'>
@@ -118,7 +120,7 @@ export function FullPageDropZone ({
           <div className='flex size-full flex-col items-center justify-center gap-4 rounded-2xl border-4 border-dashed border-blue-500'>
             <DocumentPlusIcon className='size-12' />
             <p className='text-xl font-semibold'>
-              ドロップして画像をアップロード
+              {t('common.dropToUpload')}
             </p>
           </div>
         </div>
