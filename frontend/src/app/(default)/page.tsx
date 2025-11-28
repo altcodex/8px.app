@@ -24,7 +24,7 @@ export default function Home () {
       {/* Hero Section with Wave Background */}
       <div className='relative -mt-6 mb-12 sm:mb-16'>
         {/* Wave Background - full width, extends to header and below */}
-        <div className='absolute -bottom-10 -top-24 left-1/2 z-0 w-screen -translate-x-1/2 overflow-hidden sm:-bottom-24 xl:-bottom-32'>
+        <div className='absolute -bottom-10 -top-24 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden sm:-bottom-24 xl:-bottom-32'>
           <div className='absolute inset-0 bg-gradient-to-br from-logo-light/10 to-logo-accent/10 dark:from-[#CFCFCF]/10 dark:to-[#7A7A7A]/10' />
           <svg
             xmlns='http://www.w3.org/2000/svg'

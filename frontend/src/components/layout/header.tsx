@@ -65,7 +65,7 @@ export function Header () {
 
   return (
     <header>
-      <nav className='absolute left-0 right-0 top-0 z-10 mx-auto flex h-16 max-w-screen-xl items-center justify-between bg-transparent px-4 sm:px-6 lg:px-8'>
+      <nav className='mx-auto flex h-16 max-w-screen-xl items-center justify-between bg-transparent px-4 sm:px-6 lg:px-8'>
         {/* Mobile menu button */}
         <button
           type='button'
