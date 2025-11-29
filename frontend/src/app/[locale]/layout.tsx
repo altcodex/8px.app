@@ -134,11 +134,11 @@ export default async function LocaleLayout ({
         <I18nProvider locale={locale as Locale}>
           <Providers>
             <div className='flex min-h-screen flex-col overflow-x-hidden'>
-              <Header />
+              <Header locale={locale as Locale} />
               <main className='mx-auto w-full max-w-screen-xl flex-1 px-4 pb-12 pt-8 sm:px-6 lg:px-8'>
                 {children}
               </main>
-              <Footer />
+              <Footer locale={locale as Locale} />
             </div>
           </Providers>
         </I18nProvider>

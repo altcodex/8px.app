@@ -1,15 +1,15 @@
-'use client'
-
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
-import { useMessages, useTranslations } from '@/lib/i18n/client'
+import { getMessages, getTranslations } from '@/lib/i18n/server'
+import type { Locale } from '@/lib/i18n/types'
 
 import { ToolCard } from './_components/tool-card'
 
-export default function Home () {
-  const messages = useMessages()
-  const t = useTranslations()
+export default async function Home ({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
+  const messages = await getMessages(locale)
+  const t = await getTranslations(locale)
 
   // JSON-LD structured data
   const jsonLd = {
@@ -74,7 +74,7 @@ export default function Home () {
             {/* Tool Cards Grid */}
             <div className='grid grid-cols-1 gap-3 lg:grid-cols-2'>
               {category.tools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} iconBgColor={category.iconBgColor} />
+                <ToolCard key={tool.id} tool={tool} iconBgColor={category.iconBgColor} locale={locale} />
               ))}
             </div>
           </div>

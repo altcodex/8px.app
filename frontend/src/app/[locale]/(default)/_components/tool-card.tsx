@@ -1,18 +1,18 @@
-'use client'
-
 import Image from 'next/image'
 
 import { Link } from '@/components/link'
 import type { Tool } from '@/config/tools'
-import { useTranslations } from '@/lib/i18n/client'
+import { getTranslations } from '@/lib/i18n/server'
+import type { Locale } from '@/lib/i18n/types'
 
 type ToolCardProps = {
   tool: Tool
   iconBgColor: string
+  locale: Locale
 }
 
-export function ToolCard ({ tool, iconBgColor }: ToolCardProps) {
-  const t = useTranslations()
+export async function ToolCard ({ tool, iconBgColor, locale }: ToolCardProps) {
+  const t = await getTranslations(locale)
 
   return (
     <Link

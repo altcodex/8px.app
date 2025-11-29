@@ -3,6 +3,7 @@ import type { Messages } from '@/messages/ja'
 import jaMessages from '@/messages/ja'
 
 import type { Locale, NestedKeys } from './types'
+import { defaultLocale } from './types'
 
 const messagesMap = {
   ja: jaMessages,
@@ -59,4 +60,22 @@ export async function getTranslations (locale: Locale, namespace?: string): Prom
 export async function getLocale (params: Promise<{ locale: string }>): Promise<Locale> {
   const { locale } = await params
   return locale as Locale
+}
+
+/**
+ * Generate localized path based on locale
+ * Default locale (ja) uses root path, other locales are prefixed
+ *
+ * @example
+ * // In ja locale
+ * getLocalizedPath('/iromide', 'ja') // -> '/iromide'
+ *
+ * // In en locale
+ * getLocalizedPath('/iromide', 'en') // -> '/en/iromide'
+ */
+export function getLocalizedPath (path: string, locale: Locale): string {
+  if (locale === defaultLocale) {
+    return path
+  }
+  return `/${locale}${path}`
 }

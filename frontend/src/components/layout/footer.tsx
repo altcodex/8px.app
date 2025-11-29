@@ -1,15 +1,14 @@
-'use client'
-
 import { GitHubIcon } from '@/components/icons/github-icon'
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { Link } from '@/components/link'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
-import { useMessages, useTranslations } from '@/lib/i18n/client'
+import { getMessages, getTranslations } from '@/lib/i18n/server'
+import type { Locale } from '@/lib/i18n/types'
 
-export function Footer () {
-  const messages = useMessages()
-  const t = useTranslations()
+export async function Footer ({ locale }: { locale: Locale }) {
+  const messages = await getMessages(locale)
+  const t = await getTranslations(locale)
   const githubRepoUrl = siteConfig.links.github
   const issuesUrl = githubRepoUrl ? `${githubRepoUrl}/issues` : ''
   const sponsorUrl = siteConfig.links.sponsor
