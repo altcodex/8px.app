@@ -69,7 +69,7 @@ export async function generateMetadata ({ params }: { params: Promise<{ locale: 
       url: locale === 'ja' ? '/' : '/en',
       title: messages.site.title.default,
       description: messages.site.description.replace(/\r?\n/g, ''),
-      siteName: siteConfig.name,
+      siteName: messages.site.name,
       images: [{
         url: `${siteConfig.url}/og/default.png`,
         width: 1200,

@@ -1,8 +1,8 @@
 import type { ChangeEvent } from 'react'
 import { useCallback, useMemo } from 'react'
 
-import { hexToOklch } from '@/lib/color/color-utils'
-import { getColorNames, tailwindColors } from '@/lib/color/tailwind-colors'
+import { getColorNames, tailwindColors } from '@/lib/constants/tailwind-colors'
+import { hexToOklch } from '@/lib/utils/color'
 
 export type HueSliderProps = {
   label?: string

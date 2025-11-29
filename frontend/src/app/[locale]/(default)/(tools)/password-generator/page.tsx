@@ -8,9 +8,9 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Slider } from '@/components/ui/slider'
 import { useToast } from '@/components/ui/toast'
 import { TogglePill } from '@/components/ui/toggle-pill'
+import type { PasswordOptions } from '@/lib/generators/password'
+import { generatePassword } from '@/lib/generators/password'
 import { useTranslations } from '@/lib/i18n/client'
-import type { PasswordOptions } from '@/lib/password/generator'
-import { generatePassword } from '@/lib/password/generator'
 
 export default function PasswordGeneratorPage () {
   const t = useTranslations()

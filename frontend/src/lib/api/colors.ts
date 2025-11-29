@@ -2,8 +2,9 @@
  * カラー抽出API
  */
 
-import { handleApiFetchError } from '@/lib/api/api-error'
-import { loadImageFromFile, processImage } from '@/lib/image/image-processing'
+import { loadImageFromFile, processImage } from '@/lib/utils/image'
+
+import { handleApiFetchError } from './client'
 
 export type ExtractedColor = {
   hex: string

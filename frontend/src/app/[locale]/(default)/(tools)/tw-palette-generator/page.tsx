@@ -3,22 +3,23 @@
 import { ArrowPathIcon, ClipboardDocumentIcon, PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useCallback, useEffect, useState } from 'react'
 
-import { HueSlider } from '@/components/tw-palette-generator/hue-slider'
-import { LightnessSlider } from '@/components/tw-palette-generator/lightness-slider'
-import { SaturationSlider } from '@/components/tw-palette-generator/saturation-slider'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { useToast } from '@/components/ui/toast'
-import { hexToOklch } from '@/lib/color/color-utils'
-import type { ColorPalette } from '@/lib/color/palette-generator'
+import type { TailwindColorName, TailwindShade } from '@/lib/constants/tailwind-colors'
+import { getColorNames, getShades, isGrayScale, tailwindColors } from '@/lib/constants/tailwind-colors'
+import type { ColorPalette } from '@/lib/generators/palette'
 import {
   adjustColor,
   adjustPalette,
   generatePalette,
   getShadeLabels
-} from '@/lib/color/palette-generator'
-import type { TailwindColorName, TailwindShade } from '@/lib/color/tailwind-colors'
-import { getColorNames, getShades, isGrayScale, tailwindColors } from '@/lib/color/tailwind-colors'
+} from '@/lib/generators/palette'
 import { useTranslations } from '@/lib/i18n/client'
+import { hexToOklch } from '@/lib/utils/color'
+
+import { HueSlider } from './_components/hue-slider'
+import { LightnessSlider } from './_components/lightness-slider'
+import { SaturationSlider } from './_components/saturation-slider'
 
 export default function TailwindPaletteGeneratorPage () {
   const t = useTranslations()

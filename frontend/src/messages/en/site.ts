@@ -3,6 +3,7 @@ import type { SameStructure } from '../type-utils'
 
 export const site: SameStructure<typeof jaSite> = {
   name: '8px.app',
+  author: 'unlibra',
   description:
     'Craft your perfect colors and icons. 8px.app offers a free toolkit for web and app developers, including favicon generation, color palette creation, SVG optimization, and more. No account needed, start creating instantly.',
   heroDescription:

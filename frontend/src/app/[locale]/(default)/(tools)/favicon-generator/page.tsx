@@ -6,22 +6,20 @@ import { PhotoIcon, PlusIcon, ShieldCheckIcon } from '@heroicons/react/24/outlin
 import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { FaviconOptionsPanel } from '@/components/favicon-generator/favicon-options-panel'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { CheckerboardPreview } from '@/components/ui/checkerboard-preview'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
-import { validateImageFile } from '@/lib/file/file-validation'
-import { createZip } from '@/lib/file/zip-utils'
+import type { FaviconSize } from '@/lib/generators/favicon'
+import { generateOutputSet } from '@/lib/generators/favicon'
 import { useTranslations } from '@/lib/i18n/client'
-import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
-import {
-  DEFAULT_OUTPUT_SETS,
-  DEFAULT_SIZES,
-  generateOutputSet,
-  OUTPUT_SETS
-} from '@/lib/image/favicon-generator'
-import { downloadBlob, loadImageFromFile, processImage } from '@/lib/image/image-processing'
-import { getHeicSupport } from '@/lib/image/media-support'
+import { validateImageFile } from '@/lib/utils/file'
+import { downloadBlob, getHeicSupport, loadImageFromFile, processImage } from '@/lib/utils/image'
+import { createZip } from '@/lib/utils/zip'
+
+import { FaviconOptionsPanel } from './_components/favicon-options-panel'
+import type { OutputSetId } from './_lib/favicon-presets'
+import { DEFAULT_OUTPUT_SETS, DEFAULT_SIZES, OUTPUT_SETS } from './_lib/favicon-presets'
 
 const ACCEPTED_IMAGE_TYPES = 'image/png, image/jpeg, image/webp, image/svg+xml, image/gif, image/avif, image/tiff, image/bmp'
 const HEIC_TYPES = 'image/heic, image/heif'
@@ -174,7 +172,7 @@ export default function FaviconGeneratorPage () {
         const outputSet = OUTPUT_SETS.find(s => s.id === setId)
         if (!outputSet) continue
 
-        const files = await generateOutputSet(image, outputSet, {
+        const files = await generateOutputSet(image, outputSet.files, {
           sizes,
           borderRadiusPercent: borderRadius,
           backgroundColor: effectiveBackgroundColor
@@ -291,38 +289,22 @@ export default function FaviconGeneratorPage () {
               <h6 className='mb-2 block text-sm font-semibold'>
                 {t('common.preview')}
               </h6>
-              <div className='flex w-full items-center justify-center'>
-                <div
-                  className={`flex items-center justify-center bg-gray-50 dark:bg-atom-one-dark-light ${previewUrl ? 'size-fit rounded' : 'aspect-square h-full max-h-64 w-full rounded-lg'}`}
-                  style={previewUrl
-                    ? {
-                        backgroundImage: `
-                      linear-gradient(45deg, #ccc 25%, transparent 25%),
-                      linear-gradient(-45deg, #ccc 25%, transparent 25%),
-                      linear-gradient(45deg, transparent 75%, #ccc 75%),
-                      linear-gradient(-45deg, transparent 75%, #ccc 75%)
-                    `,
-                        backgroundSize: '20px 20px',
-                        backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
-                      }
-                    : {}}
-                >
-                  {previewUrl
-                    ? (
-                      <img
-                        src={previewUrl}
-                        alt='プレビュー'
-                      />
-                      )
-                    : (
-                      <div className='text-center text-sm text-gray-600 dark:text-gray-400'>
-                        <PhotoIcon className='mx-auto mb-2 h-12 w-12' />
-                        <p>{t('faviconGenerator.previewPlaceholder.line1')}</p>
-                        <p>{t('faviconGenerator.previewPlaceholder.line2')}</p>
-                      </div>
-                      )}
-                </div>
-              </div>
+              <CheckerboardPreview
+                emptyState={
+                  <div className='text-center text-sm text-gray-600 dark:text-gray-400'>
+                    <PhotoIcon className='mx-auto mb-2 h-12 w-12' />
+                    <p>{t('faviconGenerator.previewPlaceholder.line1')}</p>
+                    <p>{t('faviconGenerator.previewPlaceholder.line2')}</p>
+                  </div>
+                }
+              >
+                {previewUrl && (
+                  <img
+                    src={previewUrl}
+                    alt='プレビュー'
+                  />
+                )}
+              </CheckerboardPreview>
             </div>
 
             {/* Download Button */}

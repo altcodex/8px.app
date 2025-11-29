@@ -16,12 +16,12 @@
  * @see scripts/extract-anchor-colors.ts to regenerate anchor curves data
  */
 
-import type { AnchorColorName } from '@/config/anchor-curves'
-import { ANCHOR_CURVES } from '@/config/anchor-curves'
+import type { TailwindShade } from '@/lib/constants/tailwind-colors'
+import type { OKLCh } from '@/lib/utils/color'
+import { hexToOklch, normalizeHue, oklchToHex } from '@/lib/utils/color'
 
-import type { OKLCh } from './color-utils'
-import { hexToOklch, normalizeHue, oklchToHex } from './color-utils'
-import type { TailwindShade } from './tailwind-colors'
+import type { AnchorColorName } from './palette-anchors'
+import { ANCHOR_CURVES } from './palette-anchors'
 
 /**
  * Generated color palette (50-950)

@@ -8,7 +8,7 @@
  * Data source: Extracted from Tailwind CSS colors using extract-anchor-colors.ts
  */
 
-import type { TailwindShade } from '@/lib/color/tailwind-colors'
+import type { TailwindShade } from '@/lib/constants/tailwind-colors'
 
 /**
  * 10 anchor colors covering the hue spectrum

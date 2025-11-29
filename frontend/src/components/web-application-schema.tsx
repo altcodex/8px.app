@@ -1,17 +1,29 @@
 import { siteConfig } from '@/config/site'
-import type { Tool } from '@/config/tools'
+import type { ToolId } from '@/config/tools'
+import { getMessages } from '@/lib/i18n/server'
+import type { Locale } from '@/lib/i18n/types'
+import { defaultLocale } from '@/lib/i18n/types'
 
 interface WebApplicationSchemaProps {
-  tool: Tool
+  toolId: ToolId
+  locale: Locale
 }
 
-export function WebApplicationSchema ({ tool }: WebApplicationSchemaProps) {
+export async function WebApplicationSchema ({ toolId, locale }: WebApplicationSchemaProps) {
+  const messages = await getMessages(locale)
+  const tool = messages.tools[toolId]
+
+  // Generate localized URL
+  const url = locale === defaultLocale
+    ? `${siteConfig.url}/${toolId}`
+    : `${siteConfig.url}/${locale}/${toolId}`
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: tool.name,
     description: tool.description.replace(/\r?\n/g, ' '),
-    url: `${siteConfig.url}/${tool.id}`,
+    url,
     applicationCategory: 'DesignApplication',
     operatingSystem: 'Any',
     browserRequirements: 'Requires JavaScript. Requires HTML5.',
@@ -22,8 +34,9 @@ export function WebApplicationSchema ({ tool }: WebApplicationSchemaProps) {
     },
     author: {
       '@type': 'Person',
-      name: siteConfig.author
-    }
+      name: messages.site.author
+    },
+    inLanguage: locale === 'ja' ? 'ja-JP' : 'en-US'
   }
 
   return (

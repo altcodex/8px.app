@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react'
 import { useCallback, useMemo } from 'react'
 
-import { hexToOklch, oklchToHex } from '@/lib/color/color-utils'
+import { hexToOklch, oklchToHex } from '@/lib/utils/color'
 
 export type SaturationSliderProps = {
   label?: string

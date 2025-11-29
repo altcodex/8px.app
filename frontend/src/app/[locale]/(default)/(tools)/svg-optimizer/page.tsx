@@ -6,15 +6,18 @@ import { PhotoIcon, PlusIcon, ShieldCheckIcon } from '@heroicons/react/24/outlin
 import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { CheckerboardPreview } from '@/components/checkerboard-preview'
-import { SvgOptionsPanel } from '@/components/svg-optimizer/svg-options-panel'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { CheckerboardPreview } from '@/components/ui/checkerboard-preview'
 import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
-import { validateSvgFile } from '@/lib/file/file-validation'
+import type { SvgoOptions } from '@/lib/generators/svgo'
+import { optimizeSvg } from '@/lib/generators/svgo'
 import { useTranslations } from '@/lib/i18n/client'
-import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
-import { DEFAULT_SVGO_OPTIONS, optimizeSvg, PRESETS } from '@/lib/image/svgo-optimizer'
+import { validateSvgFile } from '@/lib/utils/file'
+
+import { SvgOptionsPanel } from './_components/svg-options-panel'
+import type { PresetId } from './_lib/svgo-presets'
+import { DEFAULT_SVGO_OPTIONS, PRESETS } from './_lib/svgo-presets'
 
 export default function SvgOptimizerPage () {
   const t = useTranslations()

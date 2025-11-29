@@ -6,9 +6,8 @@ import { useCallback, useState } from 'react'
 
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { Link } from '@/components/link'
-import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
-import { useTranslations } from '@/lib/i18n/client'
+import { useMessages, useTranslations } from '@/lib/i18n/client'
 
 import { LocaleSwitcher } from './locale-switcher'
 import { ThemeToggle } from './theme-toggle'
@@ -57,6 +56,7 @@ function CategoryPopover ({ category }: { category: typeof categories[number] })
 }
 
 export function Header () {
+  const messages = useMessages()
   const t = useTranslations()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -87,7 +87,7 @@ export function Header () {
           className='absolute left-1/2 flex -translate-x-1/2 items-center gap-2 outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-500 sm:static sm:translate-x-0'
         >
           <LogoIcon className='size-6' />
-          <div className='font-logo text-xl font-semibold'>{siteConfig.name}</div>
+          <div className='font-logo text-xl font-semibold'>{messages.site.name}</div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -142,7 +142,7 @@ export function Header () {
                 <div className='flex items-center justify-between'>
                   <Link href='/' className='flex items-center gap-2 font-logo text-xl font-semibold' onClick={handleCloseMobileMenu}>
                     <LogoIcon className='size-6' />
-                    {siteConfig.name}
+                    {messages.site.name}
                   </Link>
                   <button
                     type='button'

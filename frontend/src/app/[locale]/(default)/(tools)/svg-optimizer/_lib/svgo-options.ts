@@ -1,9 +1,9 @@
 /**
  * UI-specific metadata for SVGO options
- * Core types and presets are defined in @/lib/image/svgo-optimizer
+ * Core types are defined in @/lib/generators/svgo
  */
 
-import type { SvgoOptions } from '@/lib/image/svgo-optimizer'
+import type { SvgoOptions } from '@/lib/generators/svgo'
 
 // Plugin names (displayed as-is in UI)
 export const PLUGIN_DESCRIPTIONS: Record<keyof SvgoOptions, string> = {

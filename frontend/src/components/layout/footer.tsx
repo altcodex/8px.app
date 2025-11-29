@@ -5,9 +5,10 @@ import { LogoIcon } from '@/components/icons/logo-icon'
 import { Link } from '@/components/link'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
-import { useTranslations } from '@/lib/i18n/client'
+import { useMessages, useTranslations } from '@/lib/i18n/client'
 
 export function Footer () {
+  const messages = useMessages()
   const t = useTranslations()
   const githubRepoUrl = siteConfig.links.github
   const issuesUrl = githubRepoUrl ? `${githubRepoUrl}/issues` : ''
@@ -21,7 +22,7 @@ export function Footer () {
           <div>
             <Link href='/' className='inline-flex items-center gap-2 transition-all hover:underline'>
               <LogoIcon className='size-6' />
-              <span className='font-logo text-xl font-semibold'>{siteConfig.name}</span>
+              <span className='font-logo text-xl font-semibold'>{messages.site.name}</span>
             </Link>
             <p className='mt-3 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400'>
               {t('site.description')}
@@ -118,7 +119,7 @@ export function Footer () {
 
         {/* Copyright */}
         <div className='mt-8 text-sm text-gray-600 dark:text-gray-400'>
-          © {new Date().getFullYear()} {siteConfig.author}
+          © {new Date().getFullYear()} {messages.site.author}
         </div>
       </div>
     </footer>

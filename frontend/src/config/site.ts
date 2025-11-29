@@ -1,7 +1,9 @@
+/**
+ * Site configuration based on environment variables
+ * Text content (name, author) is managed in i18n messages
+ */
 export const siteConfig = {
-  name: '8px.app',
-  url: 'https://8px.app',
-  author: 'unlibra',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://8px.app',
   links: {
     github: process.env.NEXT_PUBLIC_GITHUB_URL || '',
     sponsor: process.env.NEXT_PUBLIC_SPONSOR_URL || ''

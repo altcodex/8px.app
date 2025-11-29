@@ -1,13 +1,22 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
+import { WebApplicationSchema } from '@/components/web-application-schema'
+import type { Locale } from '@/lib/i18n/types'
 import { generateToolMetadata } from '@/lib/metadata'
 
-export async function generateMetadata ({ params }: { params: Promise<{ locale: 'ja' | 'en' }> }): Promise<Metadata> {
+export async function generateMetadata ({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params
-  return generateToolMetadata('svg-optimizer', '/svg-optimizer', locale)
+  return generateToolMetadata('svg-optimizer', '/svg-optimizer', locale as Locale)
 }
 
-export default function SvgOptimizerLayout ({ children }: { children: ReactNode }) {
-  return children
+export default async function SvgOptimizerLayout ({ children, params }: { children: ReactNode, params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+
+  return (
+    <>
+      <WebApplicationSchema toolId='svg-optimizer' locale={locale as Locale} />
+      {children}
+    </>
+  )
 }

@@ -1,15 +1,14 @@
-'use client'
-
 import { Field, Label, Switch } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/solid'
 import { useCallback } from 'react'
 
 import { Slider } from '@/components/ui/slider'
+import type { SvgoOptions } from '@/lib/generators/svgo'
 import { useTranslations } from '@/lib/i18n/client'
-import type { PresetId, SvgoOptions } from '@/lib/image/svgo-optimizer'
-import { PRESETS } from '@/lib/image/svgo-optimizer'
 
-import { PLUGIN_DESCRIPTIONS, PLUGIN_GROUPS } from './svgo-options'
+import { PLUGIN_DESCRIPTIONS, PLUGIN_GROUPS } from '../_lib/svgo-options'
+import type { PresetId } from '../_lib/svgo-presets'
+import { PRESETS } from '../_lib/svgo-presets'
 
 type SvgOptionsPanelProps = {
   options: SvgoOptions

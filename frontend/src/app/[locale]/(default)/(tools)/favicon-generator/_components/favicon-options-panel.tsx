@@ -1,10 +1,11 @@
-'use client'
-
 import { Slider } from '@/components/ui/slider'
 import { TogglePill } from '@/components/ui/toggle-pill'
+import type { FaviconSize } from '@/lib/generators/favicon'
+import { AVAILABLE_SIZES } from '@/lib/generators/favicon'
 import { useTranslations } from '@/lib/i18n/client'
-import type { FaviconSize, OutputSetId } from '@/lib/image/favicon-generator'
-import { AVAILABLE_SIZES, DEFAULT_SIZES, OUTPUT_SETS } from '@/lib/image/favicon-generator'
+
+import type { OutputSetId } from '../_lib/favicon-presets'
+import { DEFAULT_SIZES, OUTPUT_SETS } from '../_lib/favicon-presets'
 
 export interface FaviconOptionsPanelProps {
   selectedSets: Set<OutputSetId>

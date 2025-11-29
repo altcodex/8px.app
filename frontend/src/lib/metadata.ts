@@ -35,7 +35,7 @@ export async function generateToolMetadata (
       url,
       type: 'website',
       locale: locale === 'ja' ? 'ja_JP' : 'en_US',
-      siteName: siteConfig.name,
+      siteName: messages.site.name,
       images: [{
         url: `${siteConfig.url}/og/default.png`,
         width: 1200,

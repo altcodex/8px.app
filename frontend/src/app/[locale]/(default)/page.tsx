@@ -1,19 +1,21 @@
 'use client'
 
 import { LogoIcon } from '@/components/icons/logo-icon'
-import { ToolCard } from '@/components/tool-card'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
-import { useTranslations } from '@/lib/i18n/client'
+import { useMessages, useTranslations } from '@/lib/i18n/client'
+
+import { ToolCard } from './_components/tool-card'
 
 export default function Home () {
+  const messages = useMessages()
   const t = useTranslations()
 
   // JSON-LD structured data
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: siteConfig.name,
+    name: messages.site.name,
     description: t('site.description').replace(/\r?\n/g, ''),
     url: siteConfig.url
   }
@@ -50,7 +52,7 @@ export default function Home () {
             <LogoIcon className='size-16' />
           </div>
           <h1 className='mb-6 font-logo text-4xl font-semibold'>
-            {siteConfig.name}
+            {messages.site.name}
           </h1>
           <p className='whitespace-pre-line font-medium'>
             {t('site.heroDescription')}

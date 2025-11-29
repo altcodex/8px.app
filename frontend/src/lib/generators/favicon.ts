@@ -1,57 +1,14 @@
 /**
- * Favicon generator utility
- * Generates ICO files from images using PNG embedding (modern approach)
- * Also supports generating modern favicon formats (2025 best practices)
+ * Core favicon generation logic
+ * Handles ICO file creation and image processing
  */
 
-import type { ImageProcessingOptions } from './image-processing'
-import { processImage } from './image-processing'
+import type { ImageProcessingOptions } from '@/lib/utils/image'
+import { processImage } from '@/lib/utils/image'
 
 export type FaviconSize = 16 | 24 | 32 | 48 | 64 | 128 | 256
 
 export const AVAILABLE_SIZES: FaviconSize[] = [16, 24, 32, 48, 64, 128, 256]
-export const DEFAULT_SIZES: FaviconSize[] = [16, 32]
-
-// Output Set - represents what user selects in UI
-export type OutputSetId = 'favicon' | 'apple-touch-icon' | 'android-icon'
-
-export interface OutputFile {
-  name: string
-  size: number | 'custom'
-}
-
-export interface OutputSet {
-  id: OutputSetId
-  label: string
-  description: string
-  files: OutputFile[]
-}
-
-export const OUTPUT_SETS: OutputSet[] = [
-  {
-    id: 'favicon',
-    label: 'favicon.ico',
-    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.favicon
-    files: [{ name: 'favicon.ico', size: 'custom' }]
-  },
-  {
-    id: 'apple-touch-icon',
-    label: 'Apple Touch Icon',
-    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.apple-touch-icon
-    files: [{ name: 'apple-touch-icon.png', size: 180 }]
-  },
-  {
-    id: 'android-icon',
-    label: 'Android Icon',
-    description: '', // Translated via i18n key: faviconGenerator.formatDescriptions.android-icon
-    files: [
-      { name: 'icon-192.png', size: 192 },
-      { name: 'icon-512.png', size: 512 }
-    ]
-  }
-]
-
-export const DEFAULT_OUTPUT_SETS: OutputSetId[] = ['favicon']
 
 /**
  * Generate ICO file from PNG blobs
@@ -146,23 +103,28 @@ export async function generateFavicon (
   return generateICO(pngBlobs)
 }
 
+export interface OutputFile {
+  name: string
+  size: number | 'custom'
+}
+
 /**
- * Generate files for a single output set
+ * Generate files based on output configuration
  */
 export async function generateOutputSet (
   image: HTMLImageElement,
-  outputSet: OutputSet,
+  files: OutputFile[],
   options: {
-    sizes?: FaviconSize[] // Only for favicon.ico
+    sizes?: FaviconSize[]
     borderRadiusPercent?: number
     backgroundColor?: string
   } = {}
 ): Promise<Array<{ name: string, blob: Blob }>> {
-  const { sizes = DEFAULT_SIZES, borderRadiusPercent = 0, backgroundColor } = options
+  const { sizes = [16, 32], borderRadiusPercent = 0, backgroundColor } = options
 
   const results: Array<{ name: string, blob: Blob }> = []
 
-  for (const file of outputSet.files) {
+  for (const file of files) {
     let blob: Blob
 
     if (file.name === 'favicon.ico') {
