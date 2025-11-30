@@ -8,7 +8,7 @@ export async function SupportSection ({ locale }: { locale: Locale }) {
   const t = await getTranslations(locale)
 
   return (
-    <div className='relative mx-auto flex max-w-screen-md flex-col items-center gap-12 py-32'>
+    <div className='relative mx-auto flex max-w-screen-md flex-col items-center gap-12 py-24'>
 
       {/* タイトル＋左右線 */}
       <div className='flex w-full items-center justify-center'>

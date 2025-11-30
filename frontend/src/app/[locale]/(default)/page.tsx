@@ -1,3 +1,5 @@
+import { ChevronRightIcon } from '@heroicons/react/24/outline'
+
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
@@ -79,6 +81,30 @@ export default async function Home ({ params }: { params: Promise<{ locale: Loca
             </div>
           </div>
         ))}
+      </div>
+
+      {/* About Section - band from right screen edge to center, rounded left end */}
+      <div className='ml-auto mr-[calc(50%-50vw)] mt-24 flex w-full max-w-screen-sm flex-col justify-center gap-2 rounded-l-full bg-gray-100 py-10 pl-20 pr-8 dark:bg-gray-800/50 sm:py-12 sm:pl-24'>
+
+        <span className='text-lg font-semibold'>
+          {t('about.title')}
+        </span>
+        <p className='whitespace-pre-line break-keep text-sm text-gray-600 dark:text-gray-400 sm:text-base'>
+          {t('about.description')}
+        </p>
+        {siteConfig.links.portfolio && (
+          <a
+            href={siteConfig.links.portfolio}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='w-fit rounded-full p-1 pl-0 text-blue-700 underline underline-offset-4 outline-none transition-colors hover:text-blue-500 focus-visible:outline-2 focus-visible:outline-sky-500 dark:text-blue-300'
+          >
+            <div className='flex items-center gap-2'>
+              <ChevronRightIcon className='size-5' />
+              {t('about.portfolioLink')}
+            </div>
+          </a>
+        )}
       </div>
     </>
   )
