@@ -1,0 +1,23 @@
+export const twPaletteGenerator = {
+  baseColorSelection: 'ベースカラー選択',
+  colorCode: 'カラーコード',
+  adjustment: '調整',
+  hue: '色相',
+  lightness: '明度',
+  saturation: '彩度',
+  resetAdjustment: '調整をリセット',
+  generatedPalette: '生成されたパレット',
+  saveToHistory: 'ヒストリーに保存',
+  paletteHistory: 'パレットヒストリー',
+  deleteAllHistory: 'ヒストリーを全削除',
+  historyEmptyMessage: '作成したカラーパレットを履歴に追加することができます',
+  tailwindConfig: 'Tailwind Config',
+  copyConfig: 'Tailwind設定をコピー',
+  deleteFromHistory: '履歴から削除',
+  errors: {
+    colorCodeCopyFailed: 'コピーに失敗しました',
+    colorCodeCopied: 'カラーコードをコピーしました',
+    configCopied: 'Tailwind設定としてコピーしました',
+    addedToHistory: 'ヒストリーに追加しました',
+  },
+} as const

@@ -5,6 +5,8 @@ import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import { useTheme } from 'next-themes'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useTranslations } from '@/lib/i18n/client'
+
 function ThemePopoverContent ({
   isLight,
   theme,
@@ -16,14 +18,15 @@ function ThemePopoverContent ({
   systemTheme: string | undefined
   handleThemeChange: (newTheme: string) => void
 }) {
+  const t = useTranslations()
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   return (
     <>
       <PopoverButton
         ref={buttonRef}
-        className='flex items-center justify-center rounded-full p-2 outline-none transition-colors hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'
-        aria-label='Toggle theme'
+        className='flex items-center justify-center rounded-full p-2 outline-none transition-colors hover:bg-black/5 focus-visible:bg-black/5 dark:hover:bg-white/5 focus-visible:dark:bg-white/5'
+        aria-label={t('aria.toggleTheme')}
       >
         {isLight ? <SunIcon className='size-5' /> : <MoonIcon className='size-5' />}
       </PopoverButton>
@@ -41,28 +44,25 @@ function ThemePopoverContent ({
               onClick={() => {
                 handleThemeChange('light')
               }}
-              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'light' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
+              className={`w-full rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'light' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
             >
-              <SunIcon className='size-4' />
-              ライト
+              {t('common.themeLight')}
             </CloseButton>
             <CloseButton
               onClick={() => {
                 handleThemeChange('dark')
               }}
-              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'dark' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
+              className={`w-full rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'dark' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
             >
-              <MoonIcon className='size-4' />
-              ダーク
+              {t('common.themeDark')}
             </CloseButton>
             <CloseButton
               onClick={() => {
                 handleThemeChange('system')
               }}
-              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'system' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
+              className={`w-full rounded-lg px-3 py-2 text-left text-sm outline-none transition-colors ${theme === 'system' ? 'bg-sky-50 dark:bg-atom-one-dark-lighter' : 'hover:bg-gray-100 focus-visible:bg-gray-100 dark:hover:bg-atom-one-dark-lighter focus-visible:dark:bg-atom-one-dark-lighter'}`}
             >
-              {systemTheme === 'light' ? <SunIcon className='size-4' /> : <MoonIcon className='size-4' />}
-              システム
+              {t('common.themeSystem')}
             </CloseButton>
           </div>
         </PopoverPanel>

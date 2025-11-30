@@ -4,9 +4,9 @@
  * Using OKLCh color space for better perceptual uniformity
  */
 
-import { hexToOklch } from '../src/lib/color/color-utils'
-import type { TailwindColorName, TailwindShade } from '../src/lib/color/tailwind-colors'
-import { getShades, tailwindColors } from '../src/lib/color/tailwind-colors'
+import type { TailwindColorName, TailwindShade } from '../src/lib/constants/tailwind-colors'
+import { getShades, tailwindColors } from '../src/lib/constants/tailwind-colors'
+import { hexToOklch } from '../src/lib/utils/color'
 
 // 10 anchor colors for interpolation
 const ANCHOR_COLORS: TailwindColorName[] = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'cyan', 'blue', 'purple', 'pink']

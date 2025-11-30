@@ -2,12 +2,23 @@
  * カラー抽出API
  */
 
-import { handleApiFetchError } from '@/lib/api/api-error'
-import { loadImageFromFile, processImage } from '@/lib/image/image-processing'
+import { loadImageFromFile, processImage } from '@/lib/utils/image'
+
+import { handleApiFetchError } from './client'
 
 export type ExtractedColor = {
   hex: string
   percentage: number
+}
+
+/**
+ * Custom error class for network errors (Cloudflare blocks, API server down, etc.)
+ */
+export class NetworkError extends Error {
+  constructor (message: string = 'NETWORK_ERROR') {
+    super(message)
+    this.name = 'NetworkError'
+  }
 }
 
 // NEXT_PUBLIC_API_URL is enforced and normalized at build time in next.config.ts
@@ -33,20 +44,29 @@ export async function extractColorsFromImage (
     headers['x-vercel-protection-bypass'] = process.env.NEXT_PUBLIC_API_BYPASS_SECRET
   }
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/colors/extract?num_colors=${numColors}`,
-    {
-      method: 'POST',
-      body: formData,
-      headers
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/colors/extract?num_colors=${numColors}`,
+      {
+        method: 'POST',
+        body: formData,
+        headers
+      }
+    )
+
+    if (!response.ok) {
+      const errorMessage = await handleApiFetchError(response, '色の抽出に失敗しました')
+      throw new Error(errorMessage)
     }
-  )
 
-  if (!response.ok) {
-    const errorMessage = await handleApiFetchError(response, '色の抽出に失敗しました')
-    throw new Error(errorMessage)
+    const data = await response.json()
+    return data.colors as ExtractedColor[]
+  } catch (err) {
+    // Network errors (Cloudflare block, API server down, CORS, etc.)
+    if (err instanceof TypeError && err.message.includes('fetch')) {
+      throw new NetworkError()
+    }
+    // Re-throw other errors (API errors handled by handleApiFetchError)
+    throw err
   }
-
-  const data = await response.json()
-  return data.colors as ExtractedColor[]
 }

@@ -1,5 +1,4 @@
 import { createRequire } from 'module'
-import tseslint from '@typescript-eslint/eslint-plugin'
 import nextPlugin from '@next/eslint-plugin-next'
 import reactHooks from 'eslint-plugin-react-hooks'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
@@ -33,7 +32,6 @@ export default [
   {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
-      '@typescript-eslint': tseslint,
       '@next/next': nextPlugin,
       'react-hooks': reactHooks,
       'simple-import-sort': simpleImportSort,

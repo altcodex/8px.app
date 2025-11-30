@@ -1,14 +1,17 @@
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./frontend/Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ./package.json:/app/package.json
+      - ./packages:/app/packages
+      - ./frontend:/app/frontend
       - /app/node_modules
-      - /app/.next
+      - /app/frontend/node_modules
+      - /app/frontend/.next
     env_file:
       - ./frontend/.env
     environment:
@@ -18,6 +21,7 @@ services:
       - "localhost:host-gateway"
     depends_on:
       - backend
+    working_dir: /app/frontend
     command: npm run dev
 
   backend:

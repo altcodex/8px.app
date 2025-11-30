@@ -1,5 +1,5 @@
-import { generatePalette } from '../src/lib/color/palette-generator'
-import { tailwindColors } from '../src/lib/color/tailwind-colors'
+import { tailwindColors } from '../src/lib/constants/tailwind-colors'
+import { generatePalette } from '../src/lib/generators/palette'
 
 console.log('Comprehensive Test of 10-Anchor System')
 console.log('='.repeat(80))

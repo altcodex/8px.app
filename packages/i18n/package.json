@@ -1,0 +1,29 @@
+{
+  "name": "@8pxapp/i18n",
+  "version": "1.0.0",
+  "main": "./src/server.ts",
+  "types": "./src/types.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "exports": {
+    ".": "./src/index.tsx",
+    "./types": "./src/types.ts"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "next": "^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "neostandard": "^0.12.2",
+    "typescript": "^5.9.3"
+  }
+}

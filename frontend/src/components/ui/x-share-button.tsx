@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 
 import { XIcon } from '@/components/icons/x-icon'
+import { useTranslations } from '@/lib/i18n/client'
 
 export function XShareButton () {
+  const t = useTranslations()
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
 
@@ -20,10 +22,10 @@ export function XShareButton () {
       href={shareUrl}
       target='_blank'
       rel='noopener noreferrer'
-      className='inline-flex w-48 items-center justify-center gap-2 rounded-full bg-black py-3 font-medium text-white transition-colors hover:bg-black/70'
+      className='inline-flex w-40 items-center justify-center gap-2 rounded-full bg-gray-800 py-3 text-sm font-medium text-white outline-none transition-colors hover:bg-gray-800/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
     >
       <XIcon className='size-5' />
-      ポストする
+      {t('supportSection.shareOnX')}
     </a>
   )
 }

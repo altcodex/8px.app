@@ -2,14 +2,23 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
+# Copy workspace root package.json
 COPY package*.json ./
 
-# Install dependencies
+# Copy packages/i18n
+COPY packages ./packages
+
+# Copy frontend package.json
+COPY frontend/package*.json ./frontend/
+
+# Install all workspace dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy frontend source code
+COPY frontend ./frontend
+
+# Set working directory to frontend
+WORKDIR /app/frontend
 
 # Expose port
 EXPOSE 3000

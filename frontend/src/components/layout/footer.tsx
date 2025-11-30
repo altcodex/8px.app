@@ -1,11 +1,14 @@
-import Link from 'next/link'
-
 import { GitHubIcon } from '@/components/icons/github-icon'
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
+import type { Locale } from '@/lib/i18n'
+import { Link } from '@/lib/i18n/client'
+import { getMessages, getTranslations } from '@/lib/i18n/server'
 
-export function Footer () {
+export async function Footer ({ locale }: { locale: Locale }) {
+  const messages = await getMessages(locale)
+  const t = await getTranslations(locale)
   const githubRepoUrl = siteConfig.links.github
   const issuesUrl = githubRepoUrl ? `${githubRepoUrl}/issues` : ''
   const sponsorUrl = siteConfig.links.sponsor
@@ -18,10 +21,10 @@ export function Footer () {
           <div>
             <Link href='/' className='inline-flex items-center gap-2 transition-all hover:underline'>
               <LogoIcon className='size-6' />
-              <span className='font-logo text-xl font-semibold'>{siteConfig.name}</span>
+              <span className='font-logo text-xl font-semibold'>{messages.site.name}</span>
             </Link>
             <p className='mt-3 whitespace-pre-line text-sm text-gray-600 dark:text-gray-400'>
-              {siteConfig.description}
+              {t('site.description')}
             </p>
             {githubRepoUrl && (
               <a
@@ -31,7 +34,7 @@ export function Footer () {
                 className='mt-4 inline-flex items-center gap-2 text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
               >
                 <GitHubIcon className='size-5' />
-                GitHub
+                {t('footer.github')}
               </a>
             )}
           </div>
@@ -41,7 +44,7 @@ export function Footer () {
             {categories.map((category) => (
               <div key={category.id}>
                 <h3 className='mb-3 text-sm font-semibold uppercase tracking-wider'>
-                  {category.name}
+                  {t(`categories.${category.id}`)}
                 </h3>
                 <ul className='space-y-2'>
                   {category.tools.map((tool) => (
@@ -50,7 +53,7 @@ export function Footer () {
                         href={`/${tool.id}`}
                         className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                       >
-                        {tool.name}
+                        {t(`tools.${tool.id}.name`)}
                       </Link>
                     </li>
                   ))}
@@ -62,7 +65,7 @@ export function Footer () {
           {/* Right: Feedback Links */}
           <div>
             <h3 className='mb-3 text-sm font-semibold uppercase tracking-wider'>
-              Support
+              {t('footer.support')}
             </h3>
             <ul className='space-y-2'>
               {issuesUrl && (
@@ -73,7 +76,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    バグ報告
+                    {t('footer.bugReport')}
                   </a>
                 </li>
               )}
@@ -85,7 +88,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    問い合わせ等
+                    {t('footer.contact')}
                   </a>
                 </li>
               )}
@@ -97,7 +100,7 @@ export function Footer () {
                     rel='noopener noreferrer'
                     className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                   >
-                    寄付・支援
+                    {t('footer.donate')}
                   </a>
                 </li>
               )}
@@ -106,7 +109,7 @@ export function Footer () {
                   href='/privacy'
                   className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                 >
-                  プライバシーポリシー
+                  {t('footer.privacyPolicy')}
                 </Link>
               </li>
             </ul>
@@ -115,7 +118,7 @@ export function Footer () {
 
         {/* Copyright */}
         <div className='mt-8 text-sm text-gray-600 dark:text-gray-400'>
-          © {new Date().getFullYear()} {siteConfig.author}
+          © {new Date().getFullYear()} {messages.site.author}
         </div>
       </div>
     </footer>
