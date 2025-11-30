@@ -33,7 +33,7 @@ export function ShareButton () {
   return (
     <button
       onClick={handleClick}
-      className='inline-flex w-44 items-center justify-center gap-2 rounded-full bg-logo-dark py-3 font-medium text-white outline-none transition-colors hover:bg-logo-dark/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
+      className='inline-flex w-40 items-center justify-center gap-2 rounded-full bg-logo-dark py-3 text-sm font-medium text-white outline-none transition-colors hover:bg-logo-dark/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
     >
       <ShareIcon className='size-5' />
       {t('supportSection.share')}

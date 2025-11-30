@@ -36,12 +36,12 @@ export function AboutSection ({ title, description, portfolioLink, portfolioUrl 
   return (
     <div ref={ref} className='my-16 min-h-56 sm:my-24 sm:min-h-60'>
       <div
-        className={`ml-auto mr-[calc(50%-50vw)] flex h-56 w-full max-w-screen-sm flex-col justify-between rounded-l-full bg-gray-100 py-10 pl-20 pr-8 transition-[transform,opacity] duration-300 ease-out dark:bg-gray-800/50 sm:h-60 sm:py-12 sm:pl-24 ${
+        className={`ml-auto mr-[calc(50%-50vw)] flex h-56 w-[90%] max-w-screen-sm flex-col justify-between rounded-l-2xl bg-gray-100 p-12 pr-8 transition-[transform,opacity] duration-300 ease-out dark:bg-atom-one-dark-light sm:h-60 ${
           isVisible ? 'translate-x-0 opacity-100' : 'translate-x-1/2 opacity-0'
         }`}
       >
         <div className='space-y-2'>
-          <span className='text-lg font-semibold'>
+          <span className='text-xl font-semibold'>
             {title}
           </span>
           <p className='whitespace-pre-line break-keep text-sm text-gray-600 dark:text-gray-400 sm:text-base'>
