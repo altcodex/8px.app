@@ -36,7 +36,7 @@ export function AboutSection ({ title, description, portfolioLink, portfolioUrl 
   return (
     <div ref={ref} className='my-16 min-h-56 sm:my-24 sm:min-h-60'>
       <div
-        className={`ml-auto mr-[calc(50%-50vw)] flex h-56 w-[90%] max-w-screen-sm flex-col justify-between rounded-l-2xl bg-gray-100 p-12 pr-8 transition-[transform,opacity] duration-300 ease-out dark:bg-atom-one-dark-light sm:h-60 ${
+        className={`ml-auto mr-[calc(50%-50vw)] flex h-56 w-[90%] max-w-screen-sm flex-col justify-between rounded-l-full bg-gray-100 p-12 pr-8 transition-[transform,opacity] duration-300 ease-out dark:bg-atom-one-dark-light sm:h-60 ${
           isVisible ? 'translate-x-0 opacity-100' : 'translate-x-1/2 opacity-0'
         }`}
       >
