@@ -33,7 +33,7 @@ export default async function Home ({ params }: { params: Promise<{ locale: Loca
       <div className='relative -mt-6 mb-12 sm:mb-16'>
         {/* Wave Background - full width, extends to header and below */}
         <div className='absolute -bottom-10 -top-24 left-1/2 -z-10 w-screen -translate-x-1/2 overflow-hidden sm:-bottom-24 xl:-bottom-32'>
-          <div className='absolute inset-0 border-b border-transparent bg-gradient-to-b from-white via-logo-light/60 to-logo-medium/80 dark:from-atom-one-dark dark:via-[#999999]/20 dark:to-[#CFCFCF]/20' />
+          <div className='absolute inset-0 border-b border-transparent bg-gradient-to-b from-white/0 from-[3%] via-logo-light/60 to-logo-medium/80 dark:from-atom-one-dark/0 dark:from-[3%] dark:via-[#999999]/20 dark:to-[#CFCFCF]/20' />
           <svg
             xmlns='http://www.w3.org/2000/svg'
             viewBox='0 0 1440 320'

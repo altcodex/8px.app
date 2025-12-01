@@ -22,7 +22,7 @@ export function XShareButton () {
       href={shareUrl}
       target='_blank'
       rel='noopener noreferrer'
-      className='inline-flex w-40 items-center justify-center gap-2 rounded-full bg-gray-800 py-3 text-sm font-medium text-white outline-none transition-colors hover:bg-gray-800/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
+      className='inline-flex w-40 items-center justify-center gap-2 rounded-full bg-gray-900 py-3 text-sm font-medium text-white outline-none transition-colors hover:bg-gray-900/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500'
     >
       <XIcon className='size-5' />
       {t('supportSection.shareOnX')}
