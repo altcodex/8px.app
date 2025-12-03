@@ -1,5 +1,5 @@
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { getMessages } from '@/lib/i18n/server'
+import { getMessages } from '@/lib/i18n'
 
 function renderTextWithLinks (text: string) {
   const urlRegex = /(https:\/\/[^\s]+)/g

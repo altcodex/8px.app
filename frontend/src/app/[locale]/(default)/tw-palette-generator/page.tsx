@@ -14,7 +14,7 @@ import {
   generatePalette,
   getShadeLabels
 } from '@/lib/generators/palette'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 import { hexToOklch } from '@/lib/utils/color'
 
 import { HueSlider } from './_components/hue-slider'

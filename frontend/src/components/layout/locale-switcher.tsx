@@ -6,8 +6,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import type { Locale } from '@/lib/i18n'
-import { getLocalizedPath, locales } from '@/lib/i18n'
-import { useLocale } from '@/lib/i18n/client'
+import { getLocalizedPath, locales, useLocale } from '@/lib/i18n'
 
 const localeNames: Record<string, string> = {
   ja: '日本語',

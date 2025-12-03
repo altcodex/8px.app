@@ -4,7 +4,7 @@ import { DocumentPlusIcon } from '@heroicons/react/24/outline'
 import type { DragEvent, ReactNode } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 import { useToast } from './toast'
 

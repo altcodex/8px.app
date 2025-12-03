@@ -5,7 +5,7 @@ import { MoonIcon, SunIcon } from '@heroicons/react/24/solid'
 import { useTheme } from 'next-themes'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 function ThemePopoverContent ({
   isLight,

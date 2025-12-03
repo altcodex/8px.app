@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 
 import { Slider } from '@/components/ui/slider'
 import type { SvgoOptions } from '@/lib/generators/svgo'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 import { PLUGIN_DESCRIPTIONS, PLUGIN_GROUPS } from '../_lib/svgo-options'
 import type { PresetId } from '../_lib/svgo-presets'

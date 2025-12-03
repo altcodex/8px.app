@@ -6,7 +6,7 @@ import { useCallback, useState } from 'react'
 
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { categories } from '@/config/tools'
-import { Link, useMessages, useTranslations } from '@/lib/i18n/client'
+import { Link, useMessages, useTranslations } from '@/lib/i18n'
 
 export function MobileMenuButton () {
   const t = useTranslations()

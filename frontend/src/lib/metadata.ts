@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { siteConfig } from '@/config/site'
 import type { Locale } from '@/lib/i18n'
-import { getMessages } from '@/lib/i18n/server'
+import { getMessages } from '@/lib/i18n'
 
 /**
  * Generate metadata for tool pages with proper i18n support

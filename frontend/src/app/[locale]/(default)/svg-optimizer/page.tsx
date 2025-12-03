@@ -12,7 +12,7 @@ import { FullPageDropZone } from '@/components/ui/full-page-drop-zone'
 import { useToast } from '@/components/ui/toast'
 import type { SvgoOptions } from '@/lib/generators/svgo'
 import { optimizeSvg } from '@/lib/generators/svgo'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 import { validateSvgFile } from '@/lib/utils/file'
 
 import { SvgOptionsPanel } from './_components/svg-options-panel'

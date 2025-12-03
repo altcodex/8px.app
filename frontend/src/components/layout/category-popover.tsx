@@ -4,7 +4,7 @@ import { CloseButton, Popover, PopoverButton, PopoverPanel, Transition } from '@
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 
 import type { categories } from '@/config/tools'
-import { Link, useTranslations } from '@/lib/i18n/client'
+import { Link, useTranslations } from '@/lib/i18n'
 
 export function CategoryPopover ({ category }: { category: typeof categories[number] }) {
   const t = useTranslations() // 自動的にMessageKeys型

@@ -2,7 +2,7 @@ import { Slider } from '@/components/ui/slider'
 import { TogglePill } from '@/components/ui/toggle-pill'
 import type { FaviconSize } from '@/lib/generators/favicon'
 import { AVAILABLE_SIZES } from '@/lib/generators/favicon'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 import type { OutputSetId } from '../_lib/favicon-presets'
 import { DEFAULT_SIZES, OUTPUT_SETS } from '../_lib/favicon-presets'

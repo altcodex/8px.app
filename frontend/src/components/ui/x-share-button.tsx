@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { XIcon } from '@/components/icons/x-icon'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 export function XShareButton () {
   const t = useTranslations()

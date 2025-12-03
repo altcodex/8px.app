@@ -2,7 +2,7 @@
 
 import { OfuseIcon } from '@/components/icons/ofuse-icon'
 import { siteConfig } from '@/config/site'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 export function OfuseButton () {
   const t = useTranslations()

@@ -10,8 +10,7 @@ import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { siteConfig } from '@/config/site'
 import type { Locale } from '@/lib/i18n'
-import { Provider as I18nProvider } from '@/lib/i18n/client'
-import { getMessages } from '@/lib/i18n/server'
+import { getMessages, Provider as I18nProvider } from '@/lib/i18n'
 import { Providers } from '@/lib/providers'
 
 const locales: readonly Locale[] = ['ja', 'en']

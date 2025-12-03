@@ -2,7 +2,7 @@ import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
 import type { Locale } from '@/lib/i18n'
-import { getMessages, getTranslations } from '@/lib/i18n/server'
+import { getMessages, getTranslations } from '@/lib/i18n'
 
 import { AboutSection } from './_components/about-section'
 import { ToolCard } from './_components/tool-card'

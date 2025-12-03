@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/toast'
 import { TogglePill } from '@/components/ui/toggle-pill'
 import type { PasswordOptions } from '@/lib/generators/password'
 import { generatePassword } from '@/lib/generators/password'
-import { useTranslations } from '@/lib/i18n/client'
+import { useTranslations } from '@/lib/i18n'
 
 export default function PasswordGeneratorPage () {
   const t = useTranslations()
