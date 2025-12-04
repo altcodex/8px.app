@@ -3,8 +3,7 @@ import { LogoIcon } from '@/components/icons/logo-icon'
 import { siteConfig } from '@/config/site'
 import { categories } from '@/config/tools'
 import type { Locale } from '@/lib/i18n'
-import { Link } from '@/lib/i18n'
-import { getMessages, getTranslations } from '@/lib/i18n'
+import { getMessages, getTranslations, Link } from '@/lib/i18n'
 
 export async function Footer ({ locale }: { locale: Locale }) {
   const messages = await getMessages(locale)

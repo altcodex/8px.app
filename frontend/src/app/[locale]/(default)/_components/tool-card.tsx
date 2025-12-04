@@ -2,8 +2,7 @@ import Image from 'next/image'
 
 import type { Tool } from '@/config/tools'
 import type { Locale } from '@/lib/i18n'
-import { Link } from '@/lib/i18n'
-import { getTranslations } from '@/lib/i18n'
+import { getTranslations, Link } from '@/lib/i18n'
 
 type ToolCardProps = {
   tool: Tool

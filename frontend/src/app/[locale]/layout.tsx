@@ -10,7 +10,7 @@ import { Footer } from '@/components/layout/footer'
 import { Header } from '@/components/layout/header'
 import { siteConfig } from '@/config/site'
 import type { Locale } from '@/lib/i18n'
-import { getMessages, Provider as I18nProvider } from '@/lib/i18n'
+import { getMessages } from '@/lib/i18n'
 import { Providers } from '@/lib/providers'
 
 const locales: readonly Locale[] = ['ja', 'en']
@@ -143,20 +143,18 @@ export default async function LocaleLayout ({
       <body
         className='bg-white text-gray-700 antialiased dark:bg-atom-one-dark dark:text-gray-300'
       >
-        <I18nProvider
+        <Providers
           locale={locale as Locale}
           messages={currentMessages}
         >
-          <Providers>
-            <div className='flex min-h-screen flex-col overflow-x-hidden'>
-              <Header locale={locale as Locale} />
-              <main className='mx-auto w-full max-w-screen-xl flex-1 px-4 pb-12 pt-8 sm:px-6 lg:px-8'>
-                {children}
-              </main>
-              <Footer locale={locale as Locale} />
-            </div>
-          </Providers>
-        </I18nProvider>
+          <div className='flex min-h-screen flex-col overflow-x-hidden'>
+            <Header locale={locale as Locale} />
+            <main className='mx-auto w-full max-w-screen-xl flex-1 px-4 pb-12 pt-8 sm:px-6 lg:px-8'>
+              {children}
+            </main>
+            <Footer locale={locale as Locale} />
+          </div>
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>

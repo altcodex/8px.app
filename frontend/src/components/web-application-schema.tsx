@@ -1,8 +1,7 @@
 import { siteConfig } from '@/config/site'
 import type { ToolId } from '@/config/tools'
 import type { Locale } from '@/lib/i18n'
-import { defaultLocale } from '@/lib/i18n'
-import { getMessages } from '@/lib/i18n'
+import { defaultLocale, getMessages } from '@/lib/i18n'
 
 interface WebApplicationSchemaProps {
   toolId: ToolId

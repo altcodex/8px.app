@@ -1,8 +1,7 @@
 import { LogoIcon } from '@/components/icons/logo-icon'
 import { categories } from '@/config/tools'
 import type { Locale } from '@/lib/i18n'
-import { Link } from '@/lib/i18n'
-import { getMessages } from '@/lib/i18n'
+import { getMessages, Link } from '@/lib/i18n'
 
 import { CategoryPopover } from './category-popover'
 import { LocaleSwitcher } from './locale-switcher'
