@@ -56,7 +56,7 @@ export default async function Home ({ params }: { params: Promise<{ locale: Loca
             {messages.site.name}
           </h1>
           <p className='whitespace-pre-line font-medium'>
-            {t('site.heroDescription')}
+            {t('site.description')}
           </p>
         </div>
       </div>
