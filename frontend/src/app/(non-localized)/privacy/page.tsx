@@ -1,5 +1,7 @@
-import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { getMessages } from '@/lib/i18n'
+import { ChevronRightIcon } from '@heroicons/react/24/outline'
+import Link from 'next/link'
+
+import { privacyPolicy } from '@/config/privacy'
 
 function renderTextWithLinks (text: string) {
   const urlRegex = /(https:\/\/[^\s]+)/g
@@ -22,21 +24,22 @@ function renderTextWithLinks (text: string) {
   })
 }
 
-export default async function PrivacyPage ({ params }: { params: Promise<{ locale: 'ja' | 'en' }> }) {
-  const { locale } = await params
-  const messages = await getMessages(locale)
-
+export default function PrivacyPage () {
   return (
     <div className='mx-auto max-w-3xl'>
-      <Breadcrumb
-        items={[
-          { label: messages.common.home, href: '/' },
-          { label: messages.privacy.title }
-        ]}
-      />
+      {/* Simple breadcrumb without i18n */}
+      <nav className='mb-6 flex min-w-0 items-center gap-2 text-sm' aria-label='Breadcrumb'>
+        <Link href='/' className='truncate font-medium leading-none text-blue-600 outline-none transition-colors hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300'>
+          ホーム
+        </Link>
+        <ChevronRightIcon className='size-4 shrink-0 text-gray-600 dark:text-gray-400' aria-hidden='true' />
+        <span className='truncate font-medium leading-none text-gray-600 dark:text-gray-400' aria-current='page'>
+          {privacyPolicy.title}
+        </span>
+      </nav>
 
       <div className='space-y-8'>
-        {messages.privacy.sections.map(section => (
+        {privacyPolicy.sections.map(section => (
           <section key={section.id}>
             <h2 className='mb-4 text-xl font-semibold'>{section.title}</h2>
             {section.body && (
@@ -57,7 +60,7 @@ export default async function PrivacyPage ({ params }: { params: Promise<{ local
       </div>
 
       <div className='mt-12 border-t border-gray-300 pt-8 dark:border-gray-700'>
-        <p>{messages.privacy.lastUpdated}</p>
+        <p>{privacyPolicy.lastUpdated}</p>
       </div>
     </div>
   )

@@ -44,19 +44,12 @@ export default function sitemap (): MetadataRoute.Sitemap {
       }
     }
 
-    // Add privacy policy page
-    routes.push({
-      url: `${baseUrl}${localePrefix}/privacy`,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map(l => [
-            l,
-            `${baseUrl}${l === defaultLocale ? '' : `/${l}`}/privacy`
-          ])
-        )
-      }
-    })
   }
+
+  // Add privacy policy page (Japanese only, no locale prefix)
+  routes.push({
+    url: `${baseUrl}/privacy`
+  })
 
   return routes
 }

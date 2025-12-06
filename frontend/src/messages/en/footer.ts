@@ -6,6 +6,6 @@ export const footer: SameStructure<typeof jaFooter> = {
   bugReport: 'Report a Bug',
   contact: 'Contact Us',
   donate: 'Donate & Support',
-  privacyPolicy: 'Privacy Policy',
+  privacyPolicy: 'Privacy Policy (Japanese)',
   github: 'GitHub',
 } as const

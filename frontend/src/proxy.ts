@@ -9,5 +9,5 @@ export const proxy = create({
 })
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|privacy|.*\\..*).*)']
 }
