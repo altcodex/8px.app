@@ -1,4 +1,11 @@
-export const privacy = {
+/**
+ * Privacy Policy Configuration
+ *
+ * This privacy policy is provided in Japanese only to ensure legal accuracy.
+ * Automatic translation of legal documents may introduce risks and ambiguities.
+ */
+
+export const privacyPolicy = {
   title: 'プライバシーポリシー',
   description: '個人情報の取り扱いやデータ処理について説明します。',
   lastUpdated: '最終更新日: 2025年11月27日',
@@ -7,7 +14,7 @@ export const privacy = {
       id: 'introduction',
       title: '1. はじめに',
       body: `
-        8px.app（以下「本サイト」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。
+        8px app（以下「本サイト」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めます。
         本プライバシーポリシーでは、本サイトにおける情報の取り扱いについて説明します。
       `,
       children: null

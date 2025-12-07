@@ -1,14 +1,15 @@
 // i18n.ts
-import { define } from 'next-i18n-tiny'
+import { define } from '@i18n-tiny/next'
+import { Link } from '@i18n-tiny/next/router'
 
 import enMessages from '@/messages/en'
 import jaMessages from '@/messages/ja'
 
 export type Locale = 'ja' | 'en'
 export const locales: Locale[] = ['ja', 'en']
-export const defaultLocale: Locale = 'ja'
+export const defaultLocale: Locale = 'en'
 
-const { client, server, Link, Provider } = define({
+const { client, server, Provider } = define({
   locales,
   defaultLocale,
   messages: { ja: jaMessages, en: enMessages }

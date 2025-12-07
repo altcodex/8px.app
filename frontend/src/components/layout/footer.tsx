@@ -106,6 +106,7 @@ export async function Footer ({ locale }: { locale: Locale }) {
               <li>
                 <Link
                   href='/privacy'
+                  locale={false}
                   className='text-sm text-gray-600 transition-all hover:underline dark:text-gray-400'
                 >
                   {t('footer.privacyPolicy')}
