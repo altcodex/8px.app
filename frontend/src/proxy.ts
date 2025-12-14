@@ -4,8 +4,7 @@ import { defaultLocale, locales } from '@/lib/i18n'
 
 export const proxy = create({
   locales,
-  defaultLocale,
-  prefixDefault: true
+  defaultLocale
 })
 
 export const config = {

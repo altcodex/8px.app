@@ -55,6 +55,18 @@
       "source": "/(.*)",
       "headers": [
         {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://unlibra.com"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Url, Content-Type"
+        },
+        {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
         },
