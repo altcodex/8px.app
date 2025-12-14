@@ -6,8 +6,8 @@
       "has": [
         {
           "type": "header",
-          "key": "Accept-Language",
-          "value": "ja.*"
+          "key": "accept-language",
+          "value": "^ja.*"
         }
       ],
       "destination": "/lab/ja"
@@ -17,8 +17,8 @@
       "has": [
         {
           "type": "header",
-          "key": "Accept-Language",
-          "value": "ja.*"
+          "key": "accept-language",
+          "value": "^ja.*"
         }
       ],
       "destination": "/lab/ja/:path"
