@@ -1,10 +1,11 @@
 import { create } from '@i18n-tiny/next/proxy'
 
-import { defaultLocale, locales } from '@/lib/i18n'
+import { defaultLocale, fallbackLocale, locales } from '@/lib/i18n'
 
 export const proxy = create({
   locales,
-  defaultLocale
+  defaultLocale,
+  fallbackLocale
 })
 
 export const config = {
