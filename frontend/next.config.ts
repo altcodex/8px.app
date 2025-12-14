@@ -12,6 +12,34 @@ const nextConfig: NextConfig = {
   env: {
     // Ensure clients get a normalized value (no trailing slash)
     NEXT_PUBLIC_API_URL: normalizedApiUrl
+  },
+  async redirects () {
+    return [
+      {
+        source: '/:path+/',
+        destination: '/:path+',
+        permanent: true
+      },
+      {
+        source: '/',
+        destination: '/ja',
+        permanent: false,
+        locale: false,
+        has: [
+          {
+            type: 'header',
+            key: 'accept-language',
+            value: '^ja.*'
+          }
+        ]
+      },
+      {
+        source: '/',
+        destination: '/en',
+        permanent: false,
+        locale: false
+      }
+    ]
   }
 }
 
