@@ -112,7 +112,7 @@ export async function generateMetadata ({ params }: { params: Promise<{ locale: 
       ],
       apple: '/apple-touch-icon.png'
     },
-    manifest: '/manifest.json'
+    manifest: '/lab/manifest.json'
   }
 }
 
