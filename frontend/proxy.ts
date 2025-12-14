@@ -42,5 +42,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Match all paths except static files, api routes, and Next.js internals
-  matcher: ['/', '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)+']
+  // Note: Pattern adjusted for basePath - see https://github.com/vercel/next.js/issues/73786
+  matcher: ['((?!/api|/_next/static|/_next/image|/favicon.ico).*)', '/']
 }
