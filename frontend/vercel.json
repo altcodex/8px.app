@@ -27,11 +27,25 @@
   "redirects": [
     {
       "source": "/lab",
+      "missing": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^ja.*"
+        }
+      ],
       "destination": "/lab/en",
       "permanent": false
     },
     {
       "source": "/lab/:path((?!ja|en|_next|.*\\.).*)",
+      "missing": [
+        {
+          "type": "header",
+          "key": "accept-language",
+          "value": "^ja.*"
+        }
+      ],
       "destination": "/lab/en/:path",
       "permanent": false
     }
